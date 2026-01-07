@@ -1,0 +1,60 @@
+{
+  "name": "tuneflow",
+  "version": "1.0.0",
+  "description": "High-fidelity YouTube to Spotify bridge with smart source switching",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:extension\"",
+    "dev:backend": "cd tuneflow-backend && npm run dev",
+    "dev:extension": "cd tuneflow-extension && npm run dev",
+    "build": "npm run build:backend && npm run build:extension",
+    "build:backend": "cd tuneflow-backend && npm run build",
+    "build:extension": "cd tuneflow-extension && npm run build",
+    "install:all": "npm install && cd tuneflow-backend && npm install && cd ../tuneflow-extension && npm install",
+    "start": "cd tuneflow-backend && npm start",
+    "setup": "npm run setup:backend && npm run setup:extension",
+    "setup:backend": "cd tuneflow-backend && cp .env.example .env && echo \"Backend setup complete. Please edit .env with your Spotify credentials.\"",
+    "setup:extension": "cd tuneflow-extension && echo \"Extension setup complete.\"",
+    "test": "npm run test:backend && npm run test:extension",
+    "test:backend": "cd tuneflow-backend && npm test",
+    "test:extension": "cd tuneflow-extension && npm test",
+    "lint": "npm run lint:backend && npm run lint:extension",
+    "lint:backend": "cd tuneflow-backend && npm run lint",
+    "lint:extension": "cd tuneflow-extension && npm run lint",
+    "clean": "npm run clean:backend && npm run clean:extension",
+    "clean:backend": "cd tuneflow-backend && rm -rf node_modules package-lock.json",
+    "clean:extension": "cd tuneflow-extension && rm -rf node_modules package-lock.json dist .plasmoid"
+  },
+  "keywords": [
+    "youtube",
+    "spotify",
+    "music",
+    "downloader",
+    "extension",
+    "browser-extension",
+    "audio",
+    "playlist",
+    "high-fidelity"
+  ],
+  "author": "TuneFlow Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "workspaces": [
+    "tuneflow-backend",
+    "tuneflow-extension"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/tuneflow.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/tuneflow/issues"
+  },
+  "homepage": "https://github.com/your-username/tuneflow#readme"
+}
