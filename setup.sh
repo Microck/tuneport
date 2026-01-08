@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # TuneFlow Setup Script
-# This script helps set up both the extension and backend components
+# This script helps set up the extension for development
 
 set -e
 
@@ -35,39 +35,11 @@ fi
 echo "✅ npm detected"
 echo ""
 
-# Setup backend
-echo "🔧 Setting up TuneFlow Backend..."
-echo "=================================="
-
-cd tuneflow-backend
-
-# Install backend dependencies
-echo "📦 Installing backend dependencies..."
-npm install
-
-# Setup environment file
-if [ ! -f .env ]; then
-    echo "📝 Creating environment configuration..."
-    cp .env.example .env
-    echo ""
-    echo "⚠️  IMPORTANT: Please edit tuneflow-backend/.env with your Spotify credentials:"
-    echo "   - SPOTIFY_CLIENT_ID=your_spotify_client_id"
-    echo "   - SPOTIFY_CLIENT_SECRET=your_spotify_client_secret"
-    echo ""
-    echo "📖 Get your Spotify credentials at: https://developer.spotify.com/dashboard"
-fi
-
-# Create necessary directories
-mkdir -p downloads logs
-
-echo "✅ Backend setup complete"
-echo ""
-
 # Setup extension
 echo "🔧 Setting up TuneFlow Extension..."
 echo "=================================="
 
-cd ../tuneflow-extension
+cd tuneflow-extension
 
 # Install extension dependencies
 echo "📦 Installing extension dependencies..."
@@ -79,46 +51,32 @@ echo ""
 # Go back to root
 cd ..
 
-# Create sample files for testing
-mkdir -p sample-files
-
 echo "🎉 Setup Complete!"
 echo "=================="
 echo ""
 echo "📋 Next Steps:"
 echo ""
-echo "1. 🔑 Get Spotify credentials:"
-echo "   - Visit: https://developer.spotify.com/dashboard"
-echo "   - Create a new app"
-echo "   - Set redirect URI: http://localhost:3000/callback"
-echo "   - Edit: tuneflow-backend/.env"
-echo ""
-echo "2. 🚀 Start the backend:"
-echo "   cd tuneflow-backend"
-echo "   npm run dev"
-echo ""
-echo "3. 🧩 Build and install the extension:"
-echo "   cd tuneflow-extension"
+echo "1. 🧩 Build the extension:"
 echo "   npm run build"
+echo ""
+echo "2. 🚀 Install in Chrome:"
 echo "   - Open Chrome: chrome://extensions/"
-echo "   - Enable Developer mode"
-echo "   - Click 'Load unpacked' and select: tuneflow-extension/dist"
+echo "   - Enable Developer mode (top right)"
+echo "   - Click 'Load unpacked'"
+echo "   - Select: tuneflow-extension/dist"
 echo ""
-echo "4. ⚙️  Configure the extension:"
-echo "   - Click the TuneFlow icon in your browser"
-echo "   - Set backend URL: http://localhost:3001"
+echo "3. 🎵 Start using TuneFlow:"
+echo "   - Click TuneFlow icon in your browser"
 echo "   - Connect to Spotify"
-echo ""
-echo "5. 🎵 Start using TuneFlow:"
-echo "   - Go to any YouTube video"
-echo "   - Right-click → TuneFlow Download"
+echo "   - Open any YouTube video"
+echo "   - Right-click → Add to Spotify Playlist"
 echo "   - Select playlist and enjoy!"
 echo ""
-echo "📖 Full documentation: README.md"
-echo ""
 echo "🔧 Development Commands:"
-echo "   npm run dev              # Start both backend and extension dev servers"
-echo "   npm run build            # Build both components"
-echo "   npm test                 # Run all tests"
+echo "   npm run dev              # Start extension dev server"
+echo "   npm run build            # Build extension for production"
+echo "   npm run package          # Create .zip package for distribution"
+echo ""
+echo "📖 Full documentation: README.md"
 echo ""
 echo "Happy listening! 🎧✨"

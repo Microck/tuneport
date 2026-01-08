@@ -1,50 +1,29 @@
 {
   "name": "tuneflow",
-  "version": "1.0.0",
-  "description": "High-fidelity YouTube to Spotify bridge with smart source switching",
+  "version": "2.0.0",
+  "description": "Easily add YouTube videos to Spotify playlists with one click",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:extension\"",
-    "dev:backend": "cd tuneflow-backend && npm run dev",
-    "dev:extension": "cd tuneflow-extension && npm run dev",
-    "build": "npm run build:backend && npm run build:extension",
-    "build:backend": "cd tuneflow-backend && npm run build",
-    "build:extension": "cd tuneflow-extension && npm run build",
-    "install:all": "npm install && cd tuneflow-backend && npm install && cd ../tuneflow-extension && npm install",
-    "start": "cd tuneflow-backend && npm start",
-    "setup": "npm run setup:backend && npm run setup:extension",
-    "setup:backend": "cd tuneflow-backend && cp .env.example .env && echo \"Backend setup complete. Please edit .env with your Spotify credentials.\"",
-    "setup:extension": "cd tuneflow-extension && echo \"Extension setup complete.\"",
-    "test": "npm run test:backend && npm run test:extension",
-    "test:backend": "cd tuneflow-backend && npm test",
-    "test:extension": "cd tuneflow-extension && npm test",
-    "lint": "npm run lint:backend && npm run lint:extension",
-    "lint:backend": "cd tuneflow-backend && npm run lint",
-    "lint:extension": "cd tuneflow-extension && npm run lint",
-    "clean": "npm run clean:backend && npm run clean:extension",
-    "clean:backend": "cd tuneflow-backend && rm -rf node_modules package-lock.json",
-    "clean:extension": "cd tuneflow-extension && rm -rf node_modules package-lock.json dist .plasmoid"
+    "dev": "cd tuneflow-extension && npm run dev",
+    "build": "cd tuneflow-extension && npm run build",
+    "package": "cd tuneflow-extension && npm run package",
+    "install:extension": "cd tuneflow-extension && npm install",
+    "lint": "cd tuneflow-extension && npm run lint",
+    "lint:fix": "cd tuneflow-extension && npm run lint:fix",
+    "test": "cd tuneflow-extension && npm test",
+    "type-check": "cd tuneflow-extension && npm run type-check"
   },
   "keywords": [
     "youtube",
     "spotify",
     "music",
-    "downloader",
+    "playlist",
     "extension",
     "browser-extension",
-    "audio",
-    "playlist",
-    "high-fidelity"
+    "chrome-extension"
   ],
   "author": "TuneFlow Team",
   "license": "MIT",
-  "devDependencies": {
-    "concurrently": "^8.2.2"
-  },
-  "workspaces": [
-    "tuneflow-backend",
-    "tuneflow-extension"
-  ],
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"

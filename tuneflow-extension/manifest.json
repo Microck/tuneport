@@ -1,1 +1,46 @@
-{"manifest_version": 3, "name": "TuneFlow - YouTube to Spotify Bridge", "version": "1.0.0", "description": "High-fidelity YouTube to Spotify playlist synchronization with smart source switching", "permissions": ["contextMenus", "downloads", "identity", "storage", "activeTab", "scripting"], "host_permissions": ["https://youtube.com/*", "https://music.youtube.com/*", "https://api.spotify.com/*"], "background": {"service_worker": "src/background/index.js", "type": "module"}, "content_scripts": [{"matches": ["https://youtube.com/*", "https://music.youtube.com/*"], "js": ["src/content/index.js"], "run_at": "document_end"}], "action": {"default_popup": "src/popup/index.html", "default_title": "TuneFlow Settings"}, "icons": {"16": "assets/icon-16.png", "32": "assets/icon-32.png", "48": "assets/icon-48.png", "128": "assets/icon-128.png"}, "web_accessible_resources": [{"resources": ["src/popup/*", "src/components/*"], "matches": ["<all_urls>"]}]}
+{
+  "manifest_version": 3,
+  "name": "TuneFlow - YouTube to Spotify",
+  "version": "2.0.0",
+  "description": "Easily add YouTube videos to your Spotify playlists with one click",
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "activeTab",
+    "scripting",
+    "notifications"
+  ],
+  "host_permissions": [
+    "https://youtube.com/*",
+    "https://music.youtube.com/*",
+    "https://www.youtube.com/*",
+    "https://accounts.spotify.com/*",
+    "https://api.spotify.com/*"
+  ],
+  "background": {
+    "service_worker": "src/background/index.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "src/popup/index.html",
+    "default_title": "TuneFlow - Add to Spotify",
+    "default_icon": {
+      "16": "assets/icon-16.png",
+      "32": "assets/icon-32.png",
+      "48": "assets/icon-48.png",
+      "128": "assets/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "assets/icon-16.png",
+    "32": "assets/icon-32.png",
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["src/popup/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
