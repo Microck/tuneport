@@ -233,7 +233,8 @@ export class DownloadManager {
       const match = youtubeUrl.match(pattern);
       if (match) {
         return {
-          youtubeId: match[1],
+          videoId: match[1],
+          youtubeId: match[1], // Keep for backward compatibility
           youtubeUrl: youtubeUrl
         };
       }

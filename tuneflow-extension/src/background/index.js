@@ -54,8 +54,11 @@ class BackgroundService {
 
   private async loadStoredData() {
     try {
-      const result = await chrome.storage.local.get(['spotifyToken']);
-      if (result.spotifyToken) {
+      const result = await chrome.storage.local.get(['spotifyToken', 'spotify_access_token', 'spotify_token_expiry']);
+      if (result.spotify_access_token) {
+        this.spotifyToken = result.spotify_access_token;
+      } else if (result.spotifyToken) {
+        // Legacy support for old key name
         this.spotifyToken = result.spotifyToken;
       }
     } catch (error) {
@@ -654,8 +657,21 @@ class BackgroundService {
 
   private async getSpotifyToken(): Promise<string | null> {
     try {
-      const result = await chrome.storage.local.get(['spotifyToken']);
-      return result.spotifyToken || null;
+      // First check in-memory token
+      if (this.spotifyToken) {
+        return this.spotifyToken;
+      }
+      
+      const result = await chrome.storage.local.get(['spotify_access_token', 'spotifyToken']);
+      if (result.spotify_access_token) {
+        this.spotifyToken = result.spotify_access_token;
+        return this.spotifyToken;
+      } else if (result.spotifyToken) {
+        // Legacy support
+        this.spotifyToken = result.spotifyToken;
+        return this.spotifyToken;
+      }
+      return null;
     } catch (error) {
       console.error('Failed to get Spotify token:', error);
       return null;
@@ -663,9 +679,12 @@ class BackgroundService {
   }
 
   private showNotification(title: string, message: string, type: 'success' | 'error') {
+    // Use extension's default icon or fallback to a simple colored icon
+    const iconUrl = chrome.runtime.getURL('assets/icon.svg') || '/assets/icon-48.png';
+    
     chrome.notifications.create({
       type: 'basic',
-      iconUrl: '/assets/icon-48.png',
+      iconUrl: iconUrl,
       title,
       message
     });
