@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TuneFlow - Auth Callback</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      max-width: 400px;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    h1 {
+      color: #333;
+      margin: 0 0 10px;
+      font-size: 24px;
+    }
+    p {
+      color: #666;
+      margin: 0;
+    }
+    .error {
+      color: #e53e3e;
+      margin-top: 20px;
+      padding: 10px;
+      background: #fed7d7;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="loading">
+      <div class="spinner"></div>
+      <h1>Connecting...</h1>
+      <p>Please wait while we connect to Spotify</p>
+    </div>
+    <div id="success" style="display: none;">
+      <h1>✓ Connected!</h1>
+      <p>You can close this tab and return to TuneFlow</p>
+    </div>
+    <div id="error" class="error" style="display: none;"></div>
+  </div>
+
+  <script>
+    (async () => {
+      const loadingDiv = document.getElementById('loading');
+      const successDiv = document.getElementById('success');
+      const errorDiv = document.getElementById('error');
+
+      try {
+        // Get the authorization code from the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const state = urlParams.get('state');
+
+        if (!code || !state) {
+          throw new Error('Missing authorization code or state');
+        }
+
+        // Send message to background script to exchange code for token
+        const response = await chrome.runtime.sendMessage({
+          type: 'EXCHANGE_SPOTIFY_CODE',
+          code,
+          state
+        });
+
+        if (!response.success) {
+          throw new Error(response.error || 'Failed to authenticate');
+        }
+
+        // Show success message
+        loadingDiv.style.display = 'none';
+        successDiv.style.display = 'block';
+
+        // Close the tab after 2 seconds
+        setTimeout(() => {
+          window.close();
+        }, 2000);
+
+      } catch (error) {
+        loadingDiv.style.display = 'none';
+        errorDiv.style.display = 'block';
+        errorDiv.textContent = 'Error: ' + error.message;
+      }
+    })();
+  </script>
+</body>
+</html>
