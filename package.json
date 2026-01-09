@@ -1,17 +1,17 @@
 {
-  "name": "tuneflow",
+  "name": "tuneport",
   "version": "2.0.0",
-  "description": "Easily add YouTube videos to Spotify playlists with one click",
+  "description": "Add YouTube videos to Spotify playlists and download high-quality audio",
   "main": "index.js",
   "scripts": {
-    "dev": "cd tuneflow-extension && npm run dev",
-    "build": "cd tuneflow-extension && npm run build",
-    "package": "cd tuneflow-extension && npm run package",
-    "install:extension": "cd tuneflow-extension && npm install",
-    "lint": "cd tuneflow-extension && npm run lint",
-    "lint:fix": "cd tuneflow-extension && npm run lint:fix",
-    "test": "cd tuneflow-extension && npm test",
-    "type-check": "cd tuneflow-extension && npm run type-check"
+    "dev": "cd tuneport-extension && npm run dev",
+    "build": "cd tuneport-extension && npm run build",
+    "package": "cd tuneport-extension && npm run package",
+    "install:extension": "cd tuneport-extension && npm install",
+    "lint": "cd tuneport-extension && npm run lint",
+    "lint:fix": "cd tuneport-extension && npm run lint:fix",
+    "test": "cd tuneport-extension && npm test",
+    "type-check": "cd tuneport-extension && npm run type-check"
   },
   "keywords": [
     "youtube",
@@ -20,9 +20,12 @@
     "playlist",
     "extension",
     "browser-extension",
-    "chrome-extension"
+    "chrome-extension",
+    "audio-download",
+    "flac",
+    "lossless"
   ],
-  "author": "TuneFlow Team",
+  "author": "TunePort Team",
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0",
@@ -30,10 +33,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/tuneflow.git"
+    "url": "https://github.com/your-username/tuneport.git"
   },
   "bugs": {
-    "url": "https://github.com/your-username/tuneflow/issues"
+    "url": "https://github.com/your-username/tuneport/issues"
   },
-  "homepage": "https://github.com/your-username/tuneflow#readme"
+  "homepage": "https://github.com/your-username/tuneport#readme"
 }

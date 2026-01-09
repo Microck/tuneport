@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TunePort - Connected</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Instrument+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --tf-emerald: #10b981;
+      --tf-emerald-dark: #059669;
+      --tf-slate: #1e293b;
+      --tf-slate-muted: #64748b;
+      --tf-gray: #f1f5f9;
+      --tf-white: #fafafa;
+    }
+    
+    body {
+      font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: var(--tf-white);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .bg-blur {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.3;
+    }
+    
+    .bg-blur-1 {
+      top: -100px;
+      right: -100px;
+      background: var(--tf-emerald);
+    }
+    
+    .bg-blur-2 {
+      bottom: -100px;
+      left: -100px;
+      background: var(--tf-emerald-dark);
+    }
+    
+    .container {
+      text-align: center;
+      padding: 60px 40px;
+      position: relative;
+      z-index: 10;
+      max-width: 400px;
+    }
+    
+    .logo-wrap {
+      margin-bottom: 24px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .logo-glow {
+      position: absolute;
+      inset: -20px;
+      background: var(--tf-emerald);
+      opacity: 0.2;
+      border-radius: 50%;
+      filter: blur(30px);
+    }
+    
+    .logo {
+      width: 72px;
+      height: 72px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .checkmark-wrap {
+      margin-bottom: 24px;
+    }
+    
+    .checkmark {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, var(--tf-emerald), var(--tf-emerald-dark));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
+      animation: pop 0.4s ease-out;
+    }
+    
+    @keyframes pop {
+      0% { transform: scale(0); }
+      70% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    .checkmark svg {
+      width: 32px;
+      height: 32px;
+      stroke: white;
+      stroke-width: 3;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    
+    h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 32px;
+      font-weight: 700;
+      font-style: italic;
+      color: var(--tf-slate);
+      margin-bottom: 8px;
+    }
+    
+    .user-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--tf-emerald-dark);
+      margin-bottom: 16px;
+    }
+    
+    p {
+      font-size: 14px;
+      color: var(--tf-slate-muted);
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    
+    .countdown {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--tf-slate-muted);
+      margin-top: 32px;
+      padding: 12px 24px;
+      background: var(--tf-gray);
+      border-radius: 12px;
+      display: inline-block;
+    }
+    
+    .countdown span {
+      color: var(--tf-emerald);
+    }
+    
+    .card {
+      background: white;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 20px;
+      padding: 32px;
+      margin-top: 24px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+    }
+    
+    .status-badge {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--tf-emerald);
+      background: rgba(16, 185, 129, 0.1);
+      padding: 6px 12px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-blur bg-blur-1"></div>
+  <div class="bg-blur bg-blur-2"></div>
+  
+  <div class="container">
+    <div class="logo-wrap">
+      <div class="logo-glow"></div>
+      <img class="logo" id="logo" alt="TunePort">
+    </div>
+    
+    <div class="card">
+      <div class="status-badge">Connection Successful</div>
+      
+      <div class="checkmark-wrap">
+        <div class="checkmark">
+          <svg viewBox="0 0 24 24">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+      </div>
+      
+      <h1>Connected!</h1>
+      <p id="user-info">You're now linked to Spotify</p>
+      
+      <p style="margin-top: 16px;">You can close this tab and return to TunePort.</p>
+    </div>
+    
+    <div class="countdown">
+      Closing in <span id="timer">5</span> seconds
+    </div>
+  </div>
+  
+  <script>
+    document.getElementById('logo').src = chrome.runtime.getURL('assets/logo.png');
+    
+    const params = new URLSearchParams(window.location.search);
+    const userName = params.get('user');
+    if (userName) {
+      document.getElementById('user-info').textContent = `Welcome, ${decodeURIComponent(userName)}`;
+    }
+    
+    let seconds = 5;
+    const timerEl = document.getElementById('timer');
+    const countdown = setInterval(() => {
+      seconds--;
+      timerEl.textContent = seconds;
+      if (seconds <= 0) {
+        clearInterval(countdown);
+        window.close();
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

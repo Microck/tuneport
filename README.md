@@ -1,154 +1,86 @@
-# TuneFlow - YouTube to Spotify
+<div align="center">
+  <img src="tuneflow-extension/assets/icon-128.png" width="100" alt="tuneport logo" />
 
-A simple browser extension that lets you add YouTube videos to your Spotify playlists with just one click.
+  a chrome extension that syncs youtube videos to spotify playlists and downloads audio.
 
-## 🎵 Features
+  [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+  [![node](https://img.shields.io/badge/node-18%2B-blue)](package.json)
 
-- **One-Click Adding**: Right-click any YouTube video to add it to your Spotify playlists
-- **Smart Matching**: Automatically finds the matching track on Spotify
-- **No Setup Required**: Just install and connect to Spotify
-- **100% Client-Side**: No backend, no configuration, no hassle
-- **Cross-Browser**: Works on Chrome, Firefox, and other Chromium-based browsers
+  <br/>
 
-## 🚀 Installation
+  <img src="https://placehold.co/800x400/1a1a1a/ffffff?text=tuneport+preview" width="800" alt="tuneport preview" />
+</div>
 
-### Option 1: Chrome Web Store (Coming Soon)
+---
 
-Search for "TuneFlow" in the Chrome Web Store and click "Add to Chrome"
+## quickstart
 
-### Option 2: Manual Installation (For Development)
+1. download the latest release from github.
+2. unzip the archive.
+3. open `chrome://extensions` and enable **developer mode**.
+4. click **load unpacked** and select the unzipped folder.
 
-1. Download the latest release
-2. Unzip the downloaded file
-3. Open Chrome and go to `chrome://extensions/`
-4. Enable "Developer mode" in the top right
-5. Click "Load unpacked" and select the extracted folder
-6. TuneFlow is now installed!
+## features
 
-## 📝 How to Use
+- **one-click sync**: adds youtube videos to spotify playlists via right-click context menu.
+- **dual action**: downloads audio locally while syncing to spotify.
+- **smart matching**: uses jaro-winkler similarity to match fuzzy titles.
+- **source fallback**: tries lossless sources (lucida) first, falls back to youtube (cobalt).
+- **client-side**: no backend server. authentication happens directly with spotify.
 
-1. **Install the extension** (see above)
-2. **Click the TuneFlow icon** in your browser toolbar
-3. **Click "Connect to Spotify"** to authorize the extension
-4. **Open any YouTube video** you want to add
-5. **Right-click** on the video and select "Add to Spotify Playlist"
-6. **Choose your playlist** from the menu
-7. **Done!** The track is now in your Spotify playlist
+## how it works
 
-Alternatively, you can:
-- Click the TuneFlow icon while on a YouTube video
-- Select a playlist from the popup
-- The track will be added automatically
-
-## ✨ What It Does
-
-TuneFlow makes it easy to build your Spotify playlists from YouTube content:
-
-1. **Extracts metadata** from YouTube videos (title, artist, etc.)
-2. **Searches Spotify** for the matching track
-3. **Adds the track** to your selected playlist
-
-**Note**: TuneFlow does NOT download audio files. It finds and adds the Spotify version of the track to your playlists. This ensures high-quality streaming and supports the artists directly.
-
-## 🔒 Privacy & Security
-
-- **No Data Collection**: We don't collect or store any user data
-- **Local Storage**: Your Spotify tokens are stored only in your browser
-- **Secure OAuth**: Uses Spotify's official OAuth 2.0 authentication
-- **No Backend**: All processing happens in your browser
-- **Open Source**: The code is publicly available for review
-
-## ⚙️ Troubleshooting
-
-### "Could not find matching track on Spotify"
-
-This happens when TuneFlow can't find a good match. Try:
-- Videos with clear artist and title information
-- Popular or well-known songs
-- Checking if the track exists on Spotify first
-
-### "Not authenticated with Spotify"
-
-Click the TuneFlow icon and connect to Spotify again. Your session may have expired.
-
-### Extension not working
-
-Try these steps:
-1. Refresh the YouTube page
-2. Disable and re-enable the extension
-3. Check that you have an active internet connection
-4. Make sure you're logged into Spotify
-
-## 🛠️ Development
-
-### Prerequisites
-
-- Node.js 18+
-- npm or yarn
-
-### Setup
-
-```bash
-# Clone the repository
-git clone <repository-url>
-cd tuneflow/tuneflow-extension
-
-# Install dependencies
-npm install
-
-# Start development mode
-npm run dev
-
-# Build for production
-npm run build
+```mermaid
+graph LR
+  A[user right-clicks] --> B{extract metadata}
+  B --> C[search spotify]
+  C -->|match found| D[add to playlist]
+  C -->|no match| E[notify user]
+  B --> F{download enabled?}
+  F -->|yes| G[fetch audio]
+  G --> H[save to disk]
 ```
 
-### Project Structure
+1. content script extracts video title and channel from the active tab.
+2. background service sanitizes the title (removes "official video", "lyrics", etc).
+3. searches spotify api with multi-query fallback.
+4. adds track to selected playlist if confidence score > 0.5.
+5. downloads audio via cobalt or lucida api if enabled in settings.
+
+## usage
+
+### configuration
+
+access settings via the popup gear icon.
+
+```json
+{
+  "default_playlist": "ask every time",
+  "quality": "mp3-320",
+  "naming": "artist - title",
+  "sources": ["cobalt", "lucida"]
+}
+```
+
+### commands
+
+- **right-click video**: opens context menu with playlist options.
+- **popup click**: allows manual sync of current tab.
+
+## project structure
 
 ```
 tuneflow-extension/
 ├── src/
-│   ├── background/       # Service worker (main logic)
-│   ├── popup/           # Extension popup UI
-│   ├── services/        # API and business logic
-│   └── types/          # TypeScript definitions
-├── assets/             # Icons and images
-└── manifest.json       # Extension manifest
+│   ├── background/    # service worker & api logic
+│   ├── content/       # youtube dom scraper
+│   ├── popup/         # react ui for extension
+│   ├── settings/      # options page
+│   └── services/      # spotify, cobalt, lucida integrations
+├── scripts/           # build & package tools
+└── assets/            # icons & static files
 ```
 
-## 🤝 Contributing
+## license
 
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## ⚠️ Legal Notice
-
-- This extension is for personal use only
-- Please respect copyright laws in your jurisdiction
-- Users are responsible for ensuring they have rights to use the content
-- This extension does NOT download or distribute copyrighted material
-- It helps you find and add tracks available on Spotify to your playlists
-
-## 🆘 Support
-
-- **Issues**: Report bugs via GitHub Issues
-- **Discussions**: Join our GitHub Discussions for community support
-- **Email**: support@tuneflow.dev (for critical issues only)
-
-## 🎉 Acknowledgments
-
-- **Spotify** for their comprehensive Web API
-- **Plasmo** for the excellent extension framework
-- The open-source community for inspiration and tools
-
----
-
-**Made with ❤️ for music lovers who want an easier way to build their playlists**
+mit.
