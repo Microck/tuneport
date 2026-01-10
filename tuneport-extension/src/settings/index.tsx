@@ -371,6 +371,12 @@ export const SettingsPage: React.FC = () => {
             </AnimatePresence>
           </div>
         </Section>
+
+        <div className="text-center pt-2 pb-4">
+          <p className="text-[10px] text-tf-slate-muted/60 font-mono">
+            TunePort v{chrome.runtime.getManifest().version}
+          </p>
+        </div>
       </div>
     </div>
   );
