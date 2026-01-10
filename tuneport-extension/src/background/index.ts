@@ -2,11 +2,10 @@
 import { MatchingService } from '../services/MatchingService';
 import { DownloadService } from '../services/DownloadService';
 import { LucidaService } from '../services/LucidaService';
-import { AudioFormat, AudioBitrate } from '../services/CobaltService';
+import { AudioFormat } from '../services/CobaltService';
 
 interface DownloadOptions {
   format: string;
-  bitrate: string;
 }
 
 interface AddTrackJob {
@@ -29,6 +28,8 @@ interface AddTrackJob {
   };
   error?: string;
   createdAt: string;
+  currentStep?: string;
+  startedAt?: number;
 }
 
 interface SpotifyPlaylist {
@@ -147,14 +148,16 @@ export class BackgroundService {
       chrome.contextMenus.create({
         id: 'tuneport-main',
         title: 'TunePort',
-        contexts: ['page', 'video', 'link']
+        contexts: ['page', 'video', 'link'],
+        documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
       });
 
       chrome.contextMenus.create({
         id: 'tuneport-settings',
         parentId: 'tuneport-main',
         title: 'Open Settings',
-        contexts: ['page', 'video', 'link']
+        contexts: ['page', 'video', 'link'],
+        documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
       });
 
       this.isContextMenuCreated = true;
@@ -198,7 +201,8 @@ export class BackgroundService {
         id: 'tuneport-separator',
         parentId: 'tuneport-main',
         type: 'separator',
-        contexts: ['video', 'link']
+        contexts: ['video', 'link'],
+        documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
       });
 
       for (const playlist of playlists.slice(0, 10)) {
@@ -206,7 +210,8 @@ export class BackgroundService {
           id: `tuneport-playlist-${playlist.id}`,
           parentId: 'tuneport-main',
           title: `Add to "${playlist.name}"`,
-          contexts: ['video', 'link']
+          contexts: ['video', 'link'],
+          documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
         });
 
         if (settings.enableDownload) {
@@ -214,7 +219,8 @@ export class BackgroundService {
             id: `tuneport-playlist-dl-${playlist.id}`,
             parentId: 'tuneport-main',
             title: `Add + Download to "${playlist.name}"`,
-            contexts: ['video', 'link']
+            contexts: ['video', 'link'],
+            documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
           });
         }
       }
@@ -225,20 +231,48 @@ export class BackgroundService {
     }
   }
 
-  private async getSettings(): Promise<{ enableDownload: boolean; defaultQuality: string }> {
+  private async getSettings(): Promise<{ enableDownload: boolean; defaultQuality: string; defaultPlaylist: string }> {
     try {
       const result = await chrome.storage.local.get(['tuneport_settings']);
-      return result.tuneport_settings || { enableDownload: false, defaultQuality: 'best' };
+      return result.tuneport_settings || { enableDownload: false, defaultQuality: 'best', defaultPlaylist: '' };
     } catch {
-      return { enableDownload: false, defaultQuality: 'best' };
+      return { enableDownload: false, defaultQuality: 'best', defaultPlaylist: '' };
     }
   }
 
   private async handleContextMenuClick(info: any) {
     console.log('Context menu clicked:', info.menuItemId);
+    const youtubeUrl = info.linkUrl || info.pageUrl;
 
     if (info.menuItemId === 'tuneport-settings') {
       chrome.runtime.openOptionsPage();
+      return;
+    }
+
+    if (info.menuItemId === 'tuneport-add-default' || info.menuItemId === 'tuneport-add-download') {
+      const withDownload = info.menuItemId === 'tuneport-add-download';
+      
+      if (youtubeUrl) {
+        try {
+          await chrome.action.openPopup();
+        } catch {}
+
+        const settings = await this.getSettings();
+        if (settings.defaultPlaylist) {
+          await this.addTrackToPlaylist(
+            youtubeUrl, 
+            settings.defaultPlaylist, 
+            withDownload,
+            withDownload ? { format: 'best' } : undefined
+          );
+        } else {
+          this.showNotification(
+            'Select Playlist',
+            'Open the popup and select a playlist first',
+            'error'
+          );
+        }
+      }
       return;
     }
 
@@ -246,16 +280,17 @@ export class BackgroundService {
     if (playlistMatch) {
       const withDownload = !!playlistMatch[1];
       const playlistId = playlistMatch[2];
-      const youtubeUrl = info.linkUrl || info.pageUrl;
 
       if (youtubeUrl) {
-        chrome.action.openPopup();
+        try {
+          await chrome.action.openPopup();
+        } catch {}
 
         await this.addTrackToPlaylist(
           youtubeUrl, 
           playlistId, 
           withDownload,
-          withDownload ? { format: 'mp3', bitrate: '320' } : undefined
+          withDownload ? { format: 'best' } : undefined
         );
       }
     }
@@ -340,7 +375,9 @@ export class BackgroundService {
       status: 'queued',
       progress: 0,
       downloadInfo: { enabled: enableDownload },
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      currentStep: 'Initializing...',
+      startedAt: Date.now()
     };
 
     this.activeJobs.set(jobId, job);
@@ -348,6 +385,8 @@ export class BackgroundService {
     try {
       job.status = 'searching';
       job.progress = 10;
+      job.currentStep = 'Fetching YouTube metadata...';
+      this.activeJobs.set(jobId, { ...job });
       
       const metadata = await this.extractYouTubeMetadata(youtubeUrl);
       
@@ -360,6 +399,7 @@ export class BackgroundService {
         artist: metadata.artist
       };
       
+      job.currentStep = 'Searching Spotify...';
       this.activeJobs.set(jobId, { 
         ...job, 
         trackInfo: { title: metadata.title, artist: metadata.artist }, 
@@ -379,21 +419,24 @@ export class BackgroundService {
 
       job.status = 'adding';
       job.progress = 60;
+      job.currentStep = 'Adding to playlist...';
+      this.activeJobs.set(jobId, { ...job });
 
       const result = await this.addToPlaylist(playlistId, searchResults.exactMatch.uri);
       job.progress = 70;
 
       if (enableDownload && downloadOptions) {
         job.status = 'downloading';
+        job.currentStep = 'Downloading audio...';
+        this.activeJobs.set(jobId, { ...job });
         
-        const format = (downloadOptions.format || 'mp3') as AudioFormat;
-        const bitrate = (downloadOptions.bitrate || '320') as AudioBitrate;
+        const format = (downloadOptions.format || 'best') as AudioFormat;
         
         const downloadResult = await DownloadService.downloadAudio(
           youtubeUrl,
           metadata.title,
           metadata.artist,
-          { format, bitrate, preferLossless: true }
+          { format, preferLossless: true }
         );
 
         if (downloadResult.success) {
@@ -418,6 +461,8 @@ export class BackgroundService {
 
       job.status = 'completed';
       job.progress = 100;
+      job.currentStep = undefined;
+      this.activeJobs.set(jobId, { ...job });
 
       if (result.duplicate) {
         this.showNotification(
@@ -439,6 +484,8 @@ export class BackgroundService {
     } catch (error) {
       job.status = 'failed';
       job.error = error instanceof Error ? error.message : 'Unknown error';
+      job.currentStep = undefined;
+      this.activeJobs.set(jobId, { ...job });
       
       this.showNotification(
         'Failed',
@@ -523,38 +570,45 @@ export class BackgroundService {
     const effectiveArtist = artist || parsed?.artist || '';
     const effectiveTitle = parsed?.title || sanitizedTitle;
     
-    const queries = this.buildQueryChain(effectiveTitle, effectiveArtist);
+    const primaryQuery = effectiveArtist 
+      ? `${effectiveArtist} ${effectiveTitle}`
+      : effectiveTitle;
     
-    let allTracks: any[] = [];
+    const response = await fetch(
+      `https://api.spotify.com/v1/search?q=${encodeURIComponent(primaryQuery)}&type=track&limit=20`,
+      { headers: { 'Authorization': `Bearer ${token}` } }
+    );
+
+    if (response.status === 429) {
+      const retryAfter = response.headers.get('Retry-After') || '1';
+      await this.delay(parseInt(retryAfter, 10) * 1000);
+      throw new Error('Rate limited, please try again');
+    }
+
+    if (!response.ok) {
+      throw new Error('Spotify search failed');
+    }
+
+    const data = await response.json();
+    const tracks = data.tracks?.items || [];
     
-    for (const query of queries) {
-      const response = await fetch(
-        `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=10`,
+    if (tracks.length === 0 && effectiveArtist) {
+      const fallbackResponse = await fetch(
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(effectiveTitle)}&type=track&limit=20`,
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
-
-      if (response.status === 429) {
-        const retryAfter = response.headers.get('Retry-After') || '1';
-        await this.delay(parseInt(retryAfter, 10) * 1000);
-        continue;
-      }
-
-      if (!response.ok) {
-        throw new Error('Spotify search failed');
-      }
-
-      const data = await response.json();
-      const tracks = data.tracks?.items || [];
       
-      if (tracks.length > 0) {
-        allTracks = tracks;
-        break;
+      if (fallbackResponse.ok) {
+        const fallbackData = await fallbackResponse.json();
+        const fallbackTracks = fallbackData.tracks?.items || [];
+        const exactMatch = this.findBestMatch(fallbackTracks, effectiveTitle, effectiveArtist, duration);
+        return { tracks: fallbackTracks, exactMatch };
       }
     }
 
-    const exactMatch = this.findBestMatch(allTracks, effectiveTitle, effectiveArtist, duration);
+    const exactMatch = this.findBestMatch(tracks, effectiveTitle, effectiveArtist, duration);
     
-    return { tracks: allTracks, exactMatch };
+    return { tracks, exactMatch };
   }
 
   private buildQueryChain(title: string, artist: string): string[] {
@@ -562,19 +616,13 @@ export class BackgroundService {
     const titleWithoutFeat = MatchingService.removeFeaturing(title);
     
     if (artist) {
-      queries.push(`track:${title} artist:${artist}`);
       queries.push(`${artist} ${title}`);
       if (titleWithoutFeat !== title) {
-        queries.push(`track:${titleWithoutFeat} artist:${artist}`);
+        queries.push(`${artist} ${titleWithoutFeat}`);
       }
     }
     
-    queries.push(`track:${title}`);
     queries.push(title);
-    
-    if (titleWithoutFeat !== title) {
-      queries.push(titleWithoutFeat);
-    }
 
     return queries;
   }
@@ -937,7 +985,7 @@ export class BackgroundService {
   private showNotification(title: string, message: string, type: 'success' | 'error') {
     // Use extension's default icon or fallback to a simple colored icon
     const iconUrl = chrome.runtime.getURL('assets/icon.svg') || '/assets/icon-48.png';
-    console.log(type); // Use type to avoid lint error
+    console.log(type);
     
     chrome.notifications.create({
       type: 'basic',
@@ -948,5 +996,50 @@ export class BackgroundService {
   }
 }
 
-// Initialize the background service
+chrome.runtime.onInstalled.addListener(() => {
+  console.log('[TunePort] Extension installed/updated, creating context menu');
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({
+      id: 'tuneport-main',
+      title: 'TunePort',
+      contexts: ['page', 'video', 'link'],
+      documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
+    });
+
+    chrome.contextMenus.create({
+      id: 'tuneport-add-default',
+      parentId: 'tuneport-main',
+      title: 'Add to Spotify',
+      contexts: ['page', 'video', 'link'],
+      documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
+    });
+
+    chrome.contextMenus.create({
+      id: 'tuneport-add-download',
+      parentId: 'tuneport-main',
+      title: 'Add to Spotify + Download',
+      contexts: ['page', 'video', 'link'],
+      documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
+    });
+
+    chrome.contextMenus.create({
+      id: 'tuneport-separator',
+      parentId: 'tuneport-main',
+      type: 'separator',
+      contexts: ['page', 'video', 'link'],
+      documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
+    });
+
+    chrome.contextMenus.create({
+      id: 'tuneport-settings',
+      parentId: 'tuneport-main',
+      title: 'Settings',
+      contexts: ['page', 'video', 'link'],
+      documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
+    });
+
+    console.log('[TunePort] Context menu created');
+  });
+});
+
 new BackgroundService();

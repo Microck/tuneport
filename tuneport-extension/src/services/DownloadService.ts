@@ -1,4 +1,4 @@
-import { CobaltService, AudioFormat, AudioBitrate } from './CobaltService';
+import { CobaltService, AudioFormat } from './CobaltService';
 import { LucidaService, LucidaOptions } from './LucidaService';
 
 export type DownloadSource = 'lucida' | 'cobalt';
@@ -16,7 +16,6 @@ export interface DownloadResult {
 
 export interface DownloadOptions {
   format?: AudioFormat;
-  bitrate?: AudioBitrate;
   preferLossless?: boolean;
   lucidaOptions?: LucidaOptions;
 }
@@ -28,7 +27,7 @@ export class DownloadService {
     artist: string,
     options: DownloadOptions = {}
   ): Promise<DownloadResult> {
-    const { preferLossless = true, format = 'mp3', bitrate = '320' } = options;
+    const { preferLossless = true, format = 'best' } = options;
 
     if (preferLossless && LucidaService.isEnabled()) {
       const lucidaResult = await LucidaService.getDownloadUrl(
@@ -51,8 +50,7 @@ export class DownloadService {
     }
 
     const cobaltResult = await CobaltService.getDownloadUrl(youtubeUrl, {
-      format,
-      bitrate
+      format
     });
 
     if (cobaltResult.success && cobaltResult.url) {
@@ -69,7 +67,7 @@ export class DownloadService {
     return {
       success: false,
       source: 'cobalt',
-      quality: `${format} ${bitrate}kbps`,
+      quality: CobaltService.getQualityLabel(format),
       isLossless: false,
       error: cobaltResult.error || 'Download failed'
     };
@@ -119,7 +117,8 @@ export class DownloadService {
 
   private static generateFilename(title: string, artist: string, quality: string): string {
     const sanitize = (str: string) => str.replace(/[<>:"/\\|?*]/g, '').trim();
-    const ext = quality.toLowerCase().includes('flac') ? 'flac' : 'mp3';
+    const ext = quality.toLowerCase().includes('flac') ? 'flac' : 
+                quality.toLowerCase().includes('opus') ? 'opus' : 'mp3';
     
     if (artist) {
       return `${sanitize(artist)} - ${sanitize(title)}.${ext}`;
@@ -136,6 +135,6 @@ export class DownloadService {
       return '';
     }
 
-    return `Lossless source not available. Downloaded from YouTube (${result.quality}). YouTube audio is limited to ~256kbps.`;
+    return 'From YouTube (Opus ~128k). Enable Lucida for lossless.';
   }
 }

@@ -29,7 +29,7 @@ unlike other sync tools, tuneport also offers **simultaneous downloads**. it che
 -   **instant sync**: right-click any video -> "add to playlist".
 -   **smart matching**: uses jaro-winkler fuzzy matching to handle "official video", "lyrics", and "ft." noise.
 -   **dual pipeline**: adds to spotify + downloads to disk in parallel.
--   **lossless first**: prioritizes flac/320kbps from studio sources; falls back to cobalt (youtube) if unavailable.
+-   **lossless first**: prioritizes flac from lucida (qobuz/tidal/deezer); falls back to youtube's native opus stream (~128kbps, perceptually equivalent to mp3 320kbps).
 -   **duplicate guard**: checks destination playlist before adding to prevent clutter.
 -   **privacy**: runs entirely in the browser. no backend server. no data collection.
 
@@ -48,8 +48,8 @@ unlike other sync tools, tuneport also offers **simultaneous downloads**. it che
 click the extension icon or access settings via the right-click menu.
 
 -   **default playlist**: set a target to skip the selection menu.
--   **download quality**: choose between `best` (auto), `mp3-320`, or `flac`.
--   **lossless sources**: enable "lucida" in advanced settings for high-fidelity downloads.
+-   **download format**: opus (best quality from youtube), mp3, ogg, or wav. note: youtube serves ~128kbps opus which is perceptually equivalent to mp3 320kbps.
+-   **lossless sources**: enable "lucida" in advanced settings for true lossless (flac) from qobuz/tidal/deezer.
 
 ## development
 
@@ -114,10 +114,14 @@ graph TD
 click the tuneport icon in the toolbar and hit "connect spotify". the token refreshes automatically.
 
 **"download failed"**
-ensure the cobalt instance URL in settings is reachable. default: `https://api.cobalt.tools`.
+ensure the cobalt instance URL in settings is reachable. default: `https://cobalt-api.meowing.de`. alternative instances: `https://cobalt-backend.canine.tools`, `https://kityune.imput.net`.
 
 **"track not found"**
 the matching algorithm requires a clean title format (e.g., "Artist - Title"). heavy remix/mashup titles may fail confidence checks.
+
+## technical documentation
+
+for details on youtube's audio infrastructure, codec choices, and why opus ~128kbps rivals mp3 320kbps, see [`docs/report.tex`](docs/report.tex).
 
 ## license
 

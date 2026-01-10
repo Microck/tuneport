@@ -44,7 +44,7 @@ const DEFAULT_SETTINGS: SettingsState = {
   enableLosslessSources: false,
   showQualityWarnings: true,
   showNotFoundWarnings: true,
-  cobaltInstance: 'https://api.cobalt.tools',
+  cobaltInstance: 'https://cobalt-api.meowing.de',
   lucidaEnabled: false
 };
 
