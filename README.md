@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://github.com/Microck/tuneflow">
+  <a href="https://github.com/Microck/tuneport">
     <img src="tuneport-extension/assets/icon-128.png" alt="logo" width="200">
   </a>
 </p>
@@ -37,7 +37,7 @@ unlike other sync tools, tuneport also offers **simultaneous downloads**. it che
 
 ### manual installation
 
-1.  download the latest `tuneport-github-v*.zip` from [releases](https://github.com/Microck/tuneflow/releases).
+1.  download the latest `tuneport-github-v*.zip` from [releases](https://github.com/Microck/tuneport/releases).
 2.  unzip the archive.
 3.  navigate to `chrome://extensions`.
 4.  enable **developer mode** (top right toggle).
@@ -62,8 +62,8 @@ click the extension icon or access settings via the right-click menu.
 
 ```bash
 # clone repository
-git clone https://github.com/Microck/tuneflow.git
-cd tuneflow
+git clone https://github.com/Microck/tuneport.git
+cd tuneport
 
 # install dependencies
 npm install
