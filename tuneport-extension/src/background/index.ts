@@ -744,7 +744,7 @@ export class BackgroundService {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: new URLSearchParams({
-          client_id: 'd4f5e8d4e4f5487594f7b4b5b2b5c1e1',
+          client_id: '4aa180089db445ce8d6f762329a76f7e',
           grant_type: 'authorization_code',
           code: code,
           redirect_uri: redirectUri
@@ -806,7 +806,7 @@ export class BackgroundService {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: new URLSearchParams({
-          client_id: 'd4f5e8d4e4f5487594f7b4b5b2b5c1e1',
+          client_id: '4aa180089db445ce8d6f762329a76f7e',
           grant_type: 'authorization_code',
           code: code,
           redirect_uri: redirectUri,
