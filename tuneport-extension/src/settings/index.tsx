@@ -1,22 +1,18 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   User,
-  Music,
-  Settings as SettingsIcon,
-  Info,
+  Music2,
+  Download,
+  Shield,
   LogOut,
   Save,
-  Check,
   AlertTriangle,
-  FolderOpen,
-  Wifi,
-  Zap,
-  Volume2,
-  FileAudio,
-  ChevronRight,
-  ExternalLink
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Settings as SettingsIcon
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { SpotifyAuthService } from '../services/SpotifyAuthService';
@@ -26,7 +22,6 @@ interface SpotifyUser {
   display_name: string;
   email: string;
   images: Array<{ url: string }>;
-  product?: string;
 }
 
 interface SettingsState {
@@ -54,113 +49,76 @@ const DEFAULT_SETTINGS: SettingsState = {
 };
 
 const QUALITY_OPTIONS = [
-  { id: 'best', label: 'Best Available (Auto)', desc: 'Highest quality found (up to FLAC)' },
-  { id: 'mp3-320', label: 'MP3 320kbps', desc: 'High quality, compatible' },
-  { id: 'mp3-256', label: 'MP3 256kbps', desc: 'Balanced' },
-  { id: 'mp3-128', label: 'MP3 128kbps', desc: 'Low size' }
+  { id: 'best', label: 'Best Quality (Auto)' },
+  { id: 'mp3-320', label: 'MP3 320kbps' },
+  { id: 'mp3-256', label: 'MP3 256kbps' },
+  { id: 'mp3-128', label: 'MP3 128kbps' }
 ];
 
 const FILE_NAMING_OPTIONS = [
-  { id: 'artist-title', label: 'Artist - Title', example: 'The Weeknd - Blinding Lights.mp3' },
-  { id: 'title-artist', label: 'Title - Artist', example: 'Blinding Lights - The Weeknd.mp3' },
-  { id: 'title', label: 'Title only', example: 'Blinding Lights.mp3' }
+  { id: 'artist-title', label: 'Artist - Title' },
+  { id: 'title-artist', label: 'Title - Artist' },
+  { id: 'title', label: 'Title only' }
 ];
 
-const SidebarItem: React.FC<{
-  icon: React.ElementType;
-  label: string;
-  isActive: boolean;
-  onClick: () => void;
-}> = ({ icon: Icon, label, isActive, onClick }) => (
-  <button
-    onClick={onClick}
-    className={cn(
-      "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
-      isActive 
-        ? "bg-slate-800 text-white shadow-sm border border-slate-700/50" 
-        : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
-    )}
-  >
-    <Icon className={cn("w-4 h-4", isActive ? "text-emerald-400" : "text-slate-500")} />
-    {label}
-    {isActive && (
-      <motion.div 
-        layoutId="active-pill"
-        className="absolute left-0 w-1 h-6 bg-emerald-500 rounded-r-full" 
-      />
-    )}
-  </button>
-);
-
-const SectionHeader: React.FC<{ title: string; description: string }> = ({ title, description }) => (
-  <div className="mb-8">
-    <h2 className="text-2xl font-bold text-white tracking-tight">{title}</h2>
-    <p className="text-slate-400 text-sm mt-1">{description}</p>
-  </div>
-);
-
-const SettingCard: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
-  <div className={cn("bg-slate-900 border border-slate-800 rounded-xl p-5", className)}>
-    {children}
-  </div>
-);
-
 export const SettingsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'general' | 'conversion' | 'spotify' | 'about'>('general');
   const [isConnected, setIsConnected] = useState(false);
   const [user, setUser] = useState<SpotifyUser | null>(null);
   const [playlists, setPlaylists] = useState<any[]>([]);
   const [settings, setSettings] = useState<SettingsState>(DEFAULT_SETTINGS);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
 
   const logoUrl = useMemo(() => chrome.runtime.getURL('assets/logo.png'), []);
-
-  const loadSettings = useCallback(async () => {
-    try {
-      const result = await chrome.storage.local.get(['tuneport_settings', 'lucida_enabled']);
-      if (result.tuneport_settings) setSettings({ ...DEFAULT_SETTINGS, ...result.tuneport_settings });
-      if (result.lucida_enabled !== undefined) setSettings(prev => ({ ...prev, lucidaEnabled: result.lucida_enabled }));
-    } catch (error) {
-      console.error('Failed to load settings:', error);
-    }
-  }, []);
-
-  const checkConnection = useCallback(async () => {
-    try {
-      const response = await SpotifyAuthService.checkConnection();
-      setIsConnected(response.connected);
-      setUser(response.user || null);
-      if (response.connected) {
-        const plResponse = await ChromeMessageService.sendMessage({ type: 'GET_SPOTIFY_PLAYLISTS' });
-        if (plResponse.success) setPlaylists(plResponse.playlists);
-      }
-    } catch (error) {
-      console.error('Failed to check connection:', error);
-    }
-  }, []);
 
   useEffect(() => {
     loadSettings();
     checkConnection();
-  }, [loadSettings, checkConnection]);
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      const result = await chrome.storage.local.get([
+        'tuneport_settings',
+        'lucida_enabled'
+      ]);
+      
+      if (result.tuneport_settings) {
+        setSettings({ ...DEFAULT_SETTINGS, ...result.tuneport_settings });
+      }
+      
+      if (result.lucida_enabled !== undefined) {
+        setSettings(prev => ({ ...prev, lucidaEnabled: result.lucida_enabled }));
+      }
+    } catch (error) {
+      console.error('Failed to load settings:', error);
+    }
+  };
 
   const saveSettings = async () => {
-    setSaveStatus('saving');
+    setIsSaving(true);
     try {
       await chrome.storage.local.set({
         tuneport_settings: settings,
         lucida_enabled: settings.lucidaEnabled
       });
-      await ChromeMessageService.sendMessage({ type: 'SETTINGS_UPDATED', settings });
-      setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 2000);
+
+      await ChromeMessageService.sendMessage({
+        type: 'SETTINGS_UPDATED',
+        settings
+      });
+      
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 2000);
     } catch (error) {
-      console.error('Failed to save:', error);
-      setSaveStatus('idle');
+      console.error('Failed to save settings:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
+  // Auto-save when settings change (debounced)
   useEffect(() => {
     if (JSON.stringify(settings) !== JSON.stringify(DEFAULT_SETTINGS)) {
       const timer = setTimeout(saveSettings, 1000);
@@ -168,332 +126,299 @@ export const SettingsPage: React.FC = () => {
     }
   }, [settings]);
 
+  const checkConnection = async () => {
+    try {
+      const response = await SpotifyAuthService.checkConnection();
+      setIsConnected(response.connected);
+      setUser(response.user || null);
+      if (response.connected) {
+        loadPlaylists();
+      }
+    } catch (error) {
+      console.error('Failed to check connection:', error);
+    }
+  };
+
+  const loadPlaylists = async () => {
+    try {
+      const response = await ChromeMessageService.sendMessage({ type: 'GET_SPOTIFY_PLAYLISTS' });
+      if (response.success) {
+        setPlaylists(response.playlists);
+      }
+    } catch (error) {
+      console.error('Failed to load playlists:', error);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    await SpotifyAuthService.disconnect();
+    setIsConnected(false);
+    setUser(null);
+  };
+
   const updateSetting = <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-emerald-500/30 selection:text-emerald-200 flex">
+    <div className="min-h-[600px] w-full bg-tf-white font-sans text-tf-slate">
       
-      <div className="w-64 border-r border-slate-800 bg-slate-950 flex flex-col fixed inset-y-0 left-0 z-10">
-        <div className="p-6 flex items-center gap-3">
-          <img src={logoUrl} alt="TunePort" className="w-8 h-8 rounded-lg shadow-lg shadow-emerald-900/20" />
+      <div className="p-5 flex items-center justify-between bg-white border-b border-tf-border sticky top-0 z-20">
+        <div className="flex items-center gap-3">
+          <img src={logoUrl} alt="TunePort" className="w-8 h-8 drop-shadow-md" />
           <div>
-            <h1 className="font-bold text-white tracking-tight">TunePort</h1>
-            <p className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">Converter Pro</p>
+            <h1 className="text-lg font-bold serif italic text-tf-slate">Settings</h1>
           </div>
         </div>
-
-        <nav className="flex-1 px-3 space-y-1">
-          <SidebarItem icon={SettingsIcon} label="General" isActive={activeTab === 'general'} onClick={() => setActiveTab('general')} />
-          <SidebarItem icon={Music} label="Conversion" isActive={activeTab === 'conversion'} onClick={() => setActiveTab('conversion')} />
-          <SidebarItem icon={User} label="Spotify Account" isActive={activeTab === 'spotify'} onClick={() => setActiveTab('spotify')} />
-          <SidebarItem icon={Info} label="About" isActive={activeTab === 'about'} onClick={() => setActiveTab('about')} />
-        </nav>
-
-        <div className="p-4 border-t border-slate-800">
-          <div className="bg-slate-900 rounded-lg p-3 flex items-center gap-3 border border-slate-800">
-            <div className={cn("w-2 h-2 rounded-full animate-pulse", isConnected ? "bg-emerald-500" : "bg-rose-500")} />
-            <p className="text-xs font-medium text-slate-400">
-              {isConnected ? "System Online" : "System Offline"}
-            </p>
-          </div>
-        </div>
+        {savedSuccess && (
+          <motion.div 
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0 }}
+            className="text-xs font-bold text-tf-emerald flex items-center gap-1"
+          >
+            <Check className="w-3 h-3" /> Saved
+          </motion.div>
+        )}
       </div>
 
-      <div className="flex-1 ml-64 p-10 max-w-4xl">
-        <AnimatePresence mode="wait">
-          
-          {activeTab === 'general' && (
-            <motion.div 
-              key="general"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <SectionHeader title="General Settings" description="Configure global application behavior." />
-              
-              <div className="space-y-6">
-                <SettingCard>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-semibold text-white flex items-center gap-2">
-                        <FolderOpen className="w-4 h-4 text-emerald-400" />
-                        Default Playlist
-                      </h3>
-                      <p className="text-sm text-slate-400 mt-1">Target destination for converted tracks.</p>
-                    </div>
-                    <select 
-                      value={settings.defaultPlaylist}
-                      onChange={(e) => updateSetting('defaultPlaylist', e.target.value)}
-                      className="bg-slate-800 border border-slate-700 text-white text-sm rounded-lg px-3 py-2 w-48 focus:ring-2 focus:ring-emerald-500/50 outline-none"
-                    >
-                      <option value="">Always Ask</option>
-                      {playlists.map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                </SettingCard>
-
-                <SettingCard>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-semibold text-white flex items-center gap-2">
-                        <AlertTriangle className="w-4 h-4 text-amber-400" />
-                        Notifications
-                      </h3>
-                      <p className="text-sm text-slate-400 mt-1">Manage system alerts and warnings.</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 space-y-3">
-                    <label className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer group">
-                      <span className="text-sm text-slate-300">Warn on Low Quality</span>
-                      <input 
-                        type="checkbox" 
-                        checked={settings.showQualityWarnings}
-                        onChange={(e) => updateSetting('showQualityWarnings', e.target.checked)}
-                        className="accent-emerald-500 w-4 h-4 rounded border-slate-600 bg-slate-700"
-                      />
-                    </label>
-                    <label className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer group">
-                      <span className="text-sm text-slate-300">Warn if Not Found</span>
-                      <input 
-                        type="checkbox" 
-                        checked={settings.showNotFoundWarnings}
-                        onChange={(e) => updateSetting('showNotFoundWarnings', e.target.checked)}
-                        className="accent-emerald-500 w-4 h-4 rounded border-slate-600 bg-slate-700"
-                      />
-                    </label>
-                  </div>
-                </SettingCard>
-              </div>
-            </motion.div>
-          )}
-
-          {activeTab === 'conversion' && (
-            <motion.div
-              key="conversion"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <SectionHeader title="Conversion Engine" description="Manage audio processing, bitrate, and formats." />
-
-              <div className="space-y-6">
-                <SettingCard>
-                  <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
-                    <FileAudio className="w-4 h-4 text-emerald-400" />
-                    Audio Output
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Target Quality</label>
-                      <div className="space-y-2">
-                        {QUALITY_OPTIONS.map((opt) => (
-                          <button
-                            key={opt.id}
-                            onClick={() => updateSetting('defaultQuality', opt.id)}
-                            className={cn(
-                              "w-full text-left p-3 rounded-lg border transition-all relative overflow-hidden",
-                              settings.defaultQuality === opt.id 
-                                ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-100" 
-                                : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600"
-                            )}
-                          >
-                            <div className="font-medium text-sm">{opt.label}</div>
-                            <div className="text-xs opacity-70">{opt.desc}</div>
-                            {settings.defaultQuality === opt.id && (
-                              <Check className="absolute top-3 right-3 w-4 h-4 text-emerald-400" />
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Naming Pattern</label>
-                      <div className="space-y-2">
-                        {FILE_NAMING_OPTIONS.map((opt) => (
-                          <button
-                            key={opt.id}
-                            onClick={() => updateSetting('fileNamingFormat', opt.id)}
-                            className={cn(
-                              "w-full text-left p-3 rounded-lg border transition-all",
-                              settings.fileNamingFormat === opt.id 
-                                ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-100" 
-                                : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600"
-                            )}
-                          >
-                            <div className="font-medium text-sm">{opt.label}</div>
-                            <div className="text-xs opacity-70 font-mono mt-1">{opt.example}</div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </SettingCard>
-
-                <SettingCard className="border-amber-900/30 bg-gradient-to-br from-slate-900 to-amber-950/10">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-white flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-amber-400" />
-                      Lossless Engine (Beta)
-                    </h3>
-                    <div className="px-2 py-1 bg-amber-500/20 text-amber-300 text-[10px] font-bold uppercase rounded border border-amber-500/30">
-                      Experimental
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        checked={settings.lucidaEnabled}
-                        onChange={(e) => updateSetting('lucidaEnabled', e.target.checked)}
-                        className="sr-only peer" 
-                      />
-                      <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
-                    </label>
-                    <div className="text-sm text-slate-400">
-                      Enable high-fidelity sources (Tidal/Qobuz/Deezer). <br/>
-                      <span className="text-xs text-amber-500/80">May increase conversion time significantly.</span>
-                    </div>
-                  </div>
-                </SettingCard>
-              </div>
-            </motion.div>
-          )}
-
-          {activeTab === 'spotify' && (
-            <motion.div
-              key="spotify"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <SectionHeader title="Spotify Integration" description="Manage your connected account and local files." />
-
-              <div className="space-y-6">
-                <SettingCard>
-                  <h3 className="font-semibold text-white mb-4">Account Status</h3>
-                  {isConnected ? (
-                    <div className="flex items-center justify-between bg-emerald-500/5 border border-emerald-500/20 p-4 rounded-lg">
-                      <div className="flex items-center gap-4">
-                        {user?.images?.[0]?.url ? (
-                          <img src={user.images[0].url} alt="" className="w-12 h-12 rounded-full border-2 border-emerald-500/30" />
-                        ) : (
-                          <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                            <User className="w-6 h-6 text-emerald-400" />
-                          </div>
-                        )}
-                        <div>
-                          <div className="text-white font-bold text-lg">{user?.display_name}</div>
-                          <div className="text-emerald-400/80 text-sm font-medium flex items-center gap-1">
-                            <Wifi className="w-3 h-3" /> Connected • {user?.product === 'premium' ? 'Premium' : 'Free'}
-                          </div>
-                        </div>
-                      </div>
-                      <button 
-                        onClick={async () => {
-                          await SpotifyAuthService.disconnect();
-                          setIsConnected(false);
-                          setUser(null);
-                        }}
-                        className="px-4 py-2 bg-slate-800 hover:bg-rose-900/20 hover:text-rose-400 text-slate-300 rounded-lg text-sm font-medium transition-colors border border-slate-700 hover:border-rose-800"
-                      >
-                        Disconnect
-                      </button>
-                    </div>
+      <div className="p-5 space-y-6 pb-20">
+        {/* Spotify Account Section */}
+        <Section icon={User} title="Spotify Account">
+          {isConnected ? (
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-tf-gray/50 to-white rounded-xl border border-tf-border/50">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  {user?.images?.[0]?.url ? (
+                    <img src={user.images[0].url} alt="" className="w-10 h-10 rounded-full ring-2 ring-white shadow-sm" />
                   ) : (
-                    <div className="text-center p-8 border-2 border-dashed border-slate-800 rounded-lg bg-slate-900/50">
-                      <p className="text-slate-400 mb-4">No account connected.</p>
-                      <button 
-                        onClick={() => chrome.tabs.create({ url: chrome.runtime.getURL('popup/index.html') })}
-                        className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-colors shadow-lg shadow-emerald-900/20"
-                      >
-                        Connect Spotify
-                      </button>
+                    <div className="w-10 h-10 rounded-full bg-tf-emerald/10 flex items-center justify-center ring-2 ring-white">
+                      <User className="w-5 h-5 text-tf-emerald" />
                     </div>
                   )}
-                </SettingCard>
-
-                <SettingCard className="bg-slate-900/80">
-                  <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
-                    <FolderOpen className="w-4 h-4 text-emerald-400" />
-                    Local Files Setup
-                  </h3>
-                  <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 text-sm text-slate-400 space-y-3">
-                    <p>To play converted tracks in Spotify, you must enable Local Files:</p>
-                    <ol className="list-decimal pl-5 space-y-2 text-slate-300">
-                      <li>Open Spotify Settings.</li>
-                      <li>Toggle <strong>"Show Local Files"</strong> to ON.</li>
-                      <li>Add your browser's <strong>Downloads</strong> folder to the source list.</li>
-                    </ol>
-                    <div className="mt-2 pt-2 border-t border-slate-800 flex items-center gap-2 text-xs text-slate-500">
-                      <Info className="w-3 h-3" />
-                      Tracks converted by TunePort will appear in "Local Files" automatically.
-                    </div>
-                  </div>
-                </SettingCard>
+                  <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-tf-emerald border-2 border-white rounded-full" />
+                </div>
+                <div>
+                  <p className="font-bold text-tf-slate text-sm">{user?.display_name}</p>
+                  <p className="text-[10px] text-tf-slate-muted font-medium">{user?.email}</p>
+                </div>
               </div>
-            </motion.div>
+              <button
+                onClick={handleDisconnect}
+                className="p-2 text-tf-rose hover:bg-tf-rose/5 rounded-lg transition-all"
+                title="Disconnect"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="text-center py-6 bg-tf-gray/30 rounded-xl border border-dashed border-tf-slate-muted/30">
+              <p className="text-tf-slate-muted font-medium mb-3 text-xs">Not connected</p>
+              <button 
+                onClick={() => chrome.tabs.create({ url: chrome.runtime.getURL('popup/index.html') })}
+                className="px-4 py-2 bg-tf-emerald text-white font-bold rounded-lg hover:bg-tf-emerald-dark transition-colors shadow-lg shadow-tf-emerald/20 text-xs"
+              >
+                Connect Now
+              </button>
+            </div>
           )}
+        </Section>
 
-          {activeTab === 'about' && (
-            <motion.div
-              key="about"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
+        {/* Default Options Section */}
+        <Section icon={Music2} title="Preferences">
+          <div className="space-y-4">
+            <SelectField
+              label="Default Playlist"
+              value={settings.defaultPlaylist}
+              onChange={(v) => updateSetting('defaultPlaylist', v)}
+              options={[
+                { id: '', label: 'Ask every time' },
+                ...playlists.map(p => ({ id: p.id, label: p.name }))
+              ]}
+            />
+            <SelectField
+              label="Default Quality"
+              value={settings.defaultQuality}
+              onChange={(v) => updateSetting('defaultQuality', v)}
+              options={QUALITY_OPTIONS}
+            />
+            <SelectField
+              label="File Naming Format"
+              value={settings.fileNamingFormat}
+              onChange={(v) => updateSetting('fileNamingFormat', v)}
+              options={FILE_NAMING_OPTIONS}
+            />
+          </div>
+        </Section>
+
+        {/* Download Settings Section */}
+        <Section icon={Download} title="Download & Sync">
+          <div className="space-y-4 divide-y divide-tf-border/50">
+            <ToggleField
+              label="Auto-Download"
+              description="Download audio when adding to playlist"
+              value={settings.enableDownload}
+              onChange={(v) => updateSetting('enableDownload', v)}
+            />
+            <ToggleField
+              label="Quality Warnings"
+              description="Warn if requested quality unavailable"
+              value={settings.showQualityWarnings}
+              onChange={(v) => updateSetting('showQualityWarnings', v)}
+              className="pt-4"
+            />
+            <ToggleField
+              label="'Not Found' Alerts"
+              description="Warn if track not found on Spotify"
+              value={settings.showNotFoundWarnings}
+              onChange={(v) => updateSetting('showNotFoundWarnings', v)}
+              className="pt-4"
+            />
+          </div>
+        </Section>
+
+        {/* Advanced Section */}
+        <Section icon={Shield} title="Advanced">
+          <div className="space-y-4">
+            <button
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="w-full flex items-center justify-between p-3 bg-tf-gray/30 hover:bg-tf-gray/50 rounded-lg transition-colors group"
             >
-              <SectionHeader title="About TunePort" description="Version information and credits." />
-              <div className="space-y-6">
-                <SettingCard>
-                  <div className="flex flex-col items-center py-8">
-                    <img src={logoUrl} alt="TunePort" className="w-20 h-20 mb-4 drop-shadow-2xl" />
-                    <h2 className="text-2xl font-bold text-white">TunePort</h2>
-                    <p className="text-slate-500 mt-1 mb-6">v2.0.1 • Professional Edition</p>
-                    
-                    <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
-                      <a href="https://github.com/Microck/tuneport" target="_blank" rel="noopener noreferrer" 
-                         className="flex items-center justify-center gap-2 p-3 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 transition-colors">
-                        <ExternalLink className="w-4 h-4" /> GitHub
-                      </a>
-                      <a href="https://cobalt.tools" target="_blank" rel="noopener noreferrer" 
-                         className="flex items-center justify-center gap-2 p-3 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 transition-colors">
-                        <Zap className="w-4 h-4" /> Cobalt
-                      </a>
+              <span className="text-xs font-bold text-tf-slate group-hover:text-tf-emerald transition-colors">
+                {showAdvanced ? 'Hide Advanced Settings' : 'Show Advanced Settings'}
+              </span>
+              {showAdvanced ? (
+                <ChevronUp className="w-3 h-3 text-tf-slate-muted" />
+              ) : (
+                <ChevronDown className="w-3 h-3 text-tf-slate-muted" />
+              )}
+            </button>
+
+            <AnimatePresence>
+              {showAdvanced && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="space-y-4 pt-2 pb-2">
+                    <div className="bg-amber-50/50 border border-amber-200/50 rounded-xl p-3">
+                      <ToggleField
+                        label="Enable Lossless Sources"
+                        description="Search Qobuz/Tidal/Deezer (Experimental)"
+                        value={settings.lucidaEnabled}
+                        onChange={(v) => updateSetting('lucidaEnabled', v)}
+                      />
                     </div>
+
+                    <TextField
+                      label="Cobalt Instance URL"
+                      value={settings.cobaltInstance}
+                      onChange={(v) => updateSetting('cobaltInstance', v)}
+                      placeholder="https://api.cobalt.tools"
+                    />
                   </div>
-                </SettingCard>
-              </div>
-            </motion.div>
-          )}
-
-        </AnimatePresence>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </Section>
       </div>
-
-      <motion.div 
-        initial={{ y: 50 }}
-        animate={{ y: saveStatus === 'idle' ? 50 : 0 }}
-        className="fixed bottom-6 right-6 bg-emerald-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm font-medium z-50"
-      >
-        {saveStatus === 'saving' ? (
-          <>Saving changes...</>
-        ) : (
-          <><Check className="w-4 h-4" /> Settings Saved</>
-        )}
-      </motion.div>
-
     </div>
   );
 };
+
+const Section: React.FC<{
+  icon: React.ElementType;
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}> = ({ icon: Icon, title, children, className }) => (
+  <div className={cn(
+    "bg-white rounded-2xl border border-tf-border p-5 shadow-sm",
+    className
+  )}>
+    <div className="flex items-center gap-3 mb-4">
+      <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
+        <Icon className="w-4 h-4" />
+      </div>
+      <h2 className="text-base font-bold text-tf-slate">{title}</h2>
+    </div>
+    {children}
+  </div>
+);
+
+const SelectField: React.FC<{
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ id: string; label: string }>;
+  className?: string;
+}> = ({ label, value, onChange, options, className }) => (
+  <div className={className}>
+    <label className="block text-xs font-bold text-tf-slate mb-2 ml-1">{label}</label>
+    <div className="relative">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full px-3 py-2.5 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald focus:ring-2 focus:ring-tf-emerald/5 transition-all appearance-none cursor-pointer hover:bg-tf-gray/50"
+      >
+        {options.map((opt) => (
+          <option key={opt.id} value={opt.id}>{opt.label}</option>
+        ))}
+      </select>
+      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-tf-slate-muted pointer-events-none" />
+    </div>
+  </div>
+);
+
+const ToggleField: React.FC<{
+  label: string;
+  description?: string;
+  value: boolean;
+  onChange: (value: boolean) => void;
+  className?: string;
+}> = ({ label, description, value, onChange, className }) => (
+  <div className={cn("flex items-center justify-between gap-4", className)}>
+    <div className="flex-1">
+      <p className="text-xs font-bold text-tf-slate">{label}</p>
+      {description && <p className="text-[10px] text-tf-slate-muted mt-0.5">{description}</p>}
+    </div>
+    <button
+      onClick={() => onChange(!value)}
+      className={cn(
+        "w-9 h-5 rounded-full transition-all relative flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-tf-emerald/10",
+        value ? "bg-tf-emerald" : "bg-tf-border"
+      )}
+    >
+      <div className={cn(
+        "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300",
+        value ? "left-4.5" : "left-0.5"
+      )} />
+    </button>
+  </div>
+);
+
+const TextField: React.FC<{
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  description?: string;
+}> = ({ label, value, onChange, placeholder, description }) => (
+  <div>
+    <label className="block text-xs font-bold text-tf-slate mb-2 ml-1">{label}</label>
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="w-full px-3 py-2.5 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald focus:ring-2 focus:ring-tf-emerald/5 transition-all placeholder:text-tf-slate-muted/50"
+    />
+    {description && <p className="text-[10px] text-tf-slate-muted mt-1 ml-1">{description}</p>}
+  </div>
+);
 
 const container = document.getElementById('app');
 if (container) {
