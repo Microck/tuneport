@@ -9,7 +9,7 @@
 <p align="center">
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-green.svg" /></a>
   <a href="package.json"><img alt="node" src="https://img.shields.io/badge/node-18%2B-blue.svg" /></a>
-  <a href="tuneport-extension/src/manifest.json"><img alt="platform" src="https://img.shields.io/badge/platform-chrome-grey.svg" /></a>
+  <a href="tuneport-extension/src/manifest.json"><img alt="platform" src="https://img.shields.io/badge/platform-browser-orange.svg" /></a>
 </p>
 
 <p align="center">
