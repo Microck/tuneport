@@ -170,7 +170,7 @@ export const TunePortPopup: React.FC = () => {
   const [currentUrl, setCurrentUrl] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'sync' | 'activity'>('sync');
   const [selectedQuality, setSelectedQuality] = useState<string>('best');
-  const [enableDownload, setEnableDownload] = useState(false);
+  const [enableDownload, setEnableDownload] = useState(true);
   const [showQualityDropdown, setShowQualityDropdown] = useState(false);
 
   const logoUrl = useMemo(() => chrome.runtime.getURL('assets/logo.png'), []);
@@ -383,18 +383,18 @@ export const TunePortPopup: React.FC = () => {
                       </div>
                     </div>
                     <div className="space-y-3">
-                      <p className="text-[11px] text-tf-slate-muted font-medium mb-2">Select a playlist to instantly sync this track:</p>
+                        <p className="text-[11px] text-tf-slate-muted font-medium mb-2">Select a playlist to convert this track to:</p>
                       
                       <div className="flex items-center justify-between p-3 rounded-2xl bg-tf-gray/50 mb-3">
                         <div className="flex items-center gap-2">
-                          <Download className="w-4 h-4 text-tf-slate-muted" />
-                          <span className="text-[11px] font-semibold text-tf-slate">Also download audio</span>
+                          <Download className="w-4 h-4 text-tf-emerald" />
+                          <span className="text-[11px] font-bold text-tf-slate uppercase tracking-wide">Converter Mode</span>
                         </div>
                         <button
                           onClick={() => setEnableDownload(!enableDownload)}
                           className={cn(
                             "w-10 h-5 rounded-full transition-all relative",
-                            enableDownload ? "bg-tf-emerald" : "bg-tf-border"
+                            enableDownload ? "bg-tf-emerald" : "bg-tf-gray-dark border border-tf-border"
                           )}
                         >
                           <div className={cn(
@@ -402,6 +402,13 @@ export const TunePortPopup: React.FC = () => {
                             enableDownload ? "left-5" : "left-0.5"
                           )} />
                         </button>
+                      </div>
+
+                      <div className="bg-tf-gray/30 p-3 rounded-2xl border border-tf-border mb-3">
+                        <p className="text-[10px] text-tf-slate-muted font-medium mb-2 flex items-center gap-1">
+                          <Zap className="w-3 h-3 text-tf-emerald" />
+                          Action: {enableDownload ? 'Download & Add to Playlist' : 'Add to Playlist Only'}
+                        </p>
                       </div>
 
                       {enableDownload && (
