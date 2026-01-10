@@ -20,6 +20,7 @@ interface AddTrackJob {
     artist: string;
     spotifyTrack?: any;
   };
+  thumbnail?: string;
   downloadInfo?: {
     enabled: boolean;
     quality?: string;
@@ -146,13 +147,6 @@ export class BackgroundService {
       chrome.contextMenus.create({
         id: 'tuneport-main',
         title: 'TunePort',
-        contexts: ['page', 'video', 'link']
-      });
-
-      chrome.contextMenus.create({
-        id: 'tuneport-settings',
-        parentId: 'tuneport-main',
-        title: 'Open Settings',
         contexts: ['page', 'video', 'link']
       });
 
@@ -365,6 +359,13 @@ export class BackgroundService {
         title: metadata.title,
         artist: metadata.artist
       };
+      
+      this.activeJobs.set(jobId, { 
+        ...job, 
+        trackInfo: { title: metadata.title, artist: metadata.artist }, 
+        thumbnail: metadata.thumbnail 
+      });
+      
       job.progress = 30;
 
       const searchResults = await this.searchOnSpotify(metadata.title, metadata.artist, metadata.duration);

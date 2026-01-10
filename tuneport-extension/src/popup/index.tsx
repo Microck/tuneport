@@ -138,6 +138,7 @@ interface Job {
     title: string;
     artist: string;
   };
+  thumbnail?: string;
   error?: string;
   downloadInfo?: {
     enabled: boolean;
@@ -443,8 +444,17 @@ export const TunePortPopup: React.FC = () => {
                             onClick={() => handleSync(pl.id)}
                             className="flex items-center justify-between p-3 rounded-2xl border border-tf-border hover:border-tf-emerald hover:bg-tf-emerald/5 transition-all text-left group/pl"
                           >
-                            <span className="text-xs font-bold text-tf-slate truncate pr-4">{pl.name}</span>
-                            <Plus className="w-4 h-4 text-tf-slate-muted group-hover/pl:text-tf-emerald transition-colors" />
+                            <div className="flex items-center gap-3 overflow-hidden">
+                              {pl.images?.[0]?.url ? (
+                                <img src={pl.images[0].url} alt="" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
+                              ) : (
+                                <div className="w-8 h-8 rounded-lg bg-tf-emerald/10 flex items-center justify-center flex-shrink-0">
+                                  <Music2 className="w-4 h-4 text-tf-emerald" />
+                                </div>
+                              )}
+                              <span className="text-xs font-bold text-tf-slate truncate">{pl.name}</span>
+                            </div>
+                            <Plus className="w-4 h-4 text-tf-slate-muted group-hover/pl:text-tf-emerald transition-colors flex-shrink-0" />
                           </button>
                         ))}
                       </div>
@@ -489,6 +499,9 @@ export const TunePortPopup: React.FC = () => {
                         <h4 className="text-xs font-bold text-tf-slate truncate">{job.trackInfo?.title || 'Processing...'}</h4>
                         <p className="text-[10px] text-tf-slate-muted font-semibold">{job.trackInfo?.artist || ''}</p>
                       </div>
+                      {job.thumbnail && (
+                        <img src={job.thumbnail} alt="" className="w-10 h-10 rounded-lg object-cover ml-2 border border-tf-border" />
+                      )}
                       {job.status === 'completed' ? (
                         <CheckCircle2 className="w-5 h-5 text-tf-emerald" />
                       ) : job.status === 'failed' ? (
