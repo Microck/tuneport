@@ -1,10 +1,10 @@
 <p align="center">
   <a href="https://github.com/Microck/tuneport">
-    <img src="tuneport-extension/assets/icon-128.png" alt="logo" width="200">
+    <img src="https://github.com/user-attachments/assets/9cbf4362-6d00-4347-8bfa-88d779a22faf" alt="logo" width="172">
   </a>
 </p>
 
-<p align="center">sync youtube to spotify. download lossless audio. zero friction.</p>
+<p align="center">a browser extension that syncs youtube videos to spotify playlists with zero friction.</p>
 
 <p align="center">
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-green.svg" /></a>
