@@ -1,18 +1,20 @@
-<div align="center">
-  <img src="tuneport-extension/assets/icon-128.png" width="100" alt="tuneport logo" />
+<p align="center">
+  <a href="https://github.com/Microck/tuneflow">
+    <img src="tuneport-extension/assets/icon-128.png" alt="logo" width="200">
+  </a>
+</p>
 
-  **tuneport**
+<p align="center">sync youtube to spotify. download lossless audio. zero friction.</p>
 
-  sync youtube to spotify. download lossless audio. zero friction.
+<p align="center">
+  <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-green.svg" /></a>
+  <a href="package.json"><img alt="node" src="https://img.shields.io/badge/node-18%2B-blue.svg" /></a>
+  <a href="tuneport-extension/src/manifest.json"><img alt="platform" src="https://img.shields.io/badge/platform-chrome-grey.svg" /></a>
+</p>
 
-  [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-  [![node](https://img.shields.io/badge/node-18%2B-blue)](package.json)
-  [![platform](https://img.shields.io/badge/platform-chrome-grey)](manifest.json)
-
-  <br/>
-
+<p align="center">
   <img src="https://placehold.co/800x400/1a1a1a/ffffff?text=tuneport+preview" width="800" alt="tuneport preview" />
-</div>
+</p>
 
 ---
 
