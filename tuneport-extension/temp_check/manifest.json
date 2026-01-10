@@ -1,0 +1,66 @@
+{
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuWVF76czLSte06p4n6f9liTcouZNmGsz/Qld4a9bynRqToO7IAs8X1CLv2N9EdsU77ApL+ZRtvRrtzRtNMVMpkzNVw5LLv6RCbsGWSF2Au5rKM9GpyrxpVZ0bqt/eWcBwEBV7qkXjb/AhXmd2cmLuF5WYl8OB0U+LHcvIRlcijZg20ce+Trzt/B6KDwYEiiSi89oP4wVusKVEyF8ylWA5PMPiZ5MFo0ByCF4c+/TAikM2jRKPhQn86IJsq5rHdDizNICAfP/sNqsKIo7yw3G7YZf9rGwX3J+NEkGhg3bjOE+bC96ol7UYcKDfWYYCEGsVNLv6tpxKgXAUzsQ6iXseQIDAQAB",
+  "manifest_version": 3,
+  "name": "TunePort - YouTube to Spotify (Full)",
+  "version": "2.2.0",
+  "description": "Add YouTube videos to Spotify playlists and download high-quality audio with lossless source support",
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "activeTab",
+    "tabs",
+    "scripting",
+    "notifications",
+    "downloads",
+    "identity"
+  ],
+  "host_permissions": [
+    "https://youtube.com/*",
+    "https://music.youtube.com/*",
+    "https://www.youtube.com/*",
+    "https://accounts.spotify.com/*",
+    "https://api.spotify.com/*",
+    "https://cobalt.tools/*",
+    "https://*.cobalt.tools/*",
+    "https://cobalt-api.meowing.de/*",
+    "https://cobalt-backend.canine.tools/*",
+    "https://kityune.imput.net/*",
+    "https://blossom.imput.net/*",
+    "https://lucida.to/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup/index.html",
+    "default_title": "TunePort - Add to Spotify",
+    "default_icon": {
+      "16": "assets/icon-16.png",
+      "32": "assets/icon-32.png",
+      "48": "assets/icon-48.png",
+      "128": "assets/icon-128.png"
+    }
+  },
+  "options_ui": {
+    "page": "settings/index.html",
+    "open_in_tab": false
+  },
+  "icons": {
+    "16": "assets/icon-16.png",
+    "32": "assets/icon-32.png",
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "popup/auth-callback.html",
+        "popup/auth-success.html",
+        "assets/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}
