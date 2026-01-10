@@ -39,6 +39,48 @@ function modifyManifest() {
     manifest.host_permissions = manifest.host_permissions.filter(
       h => !h.includes('lucida.to')
     );
+  } else if (BUILD_TYPE === 'firefox') {
+    manifest.name = 'TunePort - YouTube to Spotify (Full)';
+    manifest.description = 'Add YouTube videos to Spotify playlists and download high-quality audio with lossless source support';
+    
+    // Firefox requires manifest v2 format for some APIs
+    manifest.manifest_version = 2;
+    
+    // Convert MV3 to MV2 format
+    delete manifest.key;
+    
+    // background service_worker -> scripts
+    if (manifest.background?.service_worker) {
+      manifest.background = {
+        scripts: [manifest.background.service_worker]
+      };
+    }
+    
+    // action -> browser_action
+    if (manifest.action) {
+      manifest.browser_action = manifest.action;
+      delete manifest.action;
+    }
+    
+    // host_permissions merge into permissions
+    if (manifest.host_permissions) {
+      manifest.permissions = [...(manifest.permissions || []), ...manifest.host_permissions];
+      delete manifest.host_permissions;
+    }
+    
+    // web_accessible_resources MV2 format
+    if (manifest.web_accessible_resources) {
+      manifest.web_accessible_resources = manifest.web_accessible_resources
+        .flatMap(r => r.resources || []);
+    }
+    
+    // Add Firefox-specific keys
+    manifest.browser_specific_settings = {
+      gecko: {
+        id: "tuneport@microck.dev",
+        strict_min_version: "109.0"
+      }
+    };
   } else {
     manifest.name = 'TunePort - YouTube to Spotify (Full)';
     manifest.description = 'Add YouTube videos to Spotify playlists and download high-quality audio with lossless source support';
