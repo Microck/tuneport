@@ -3,6 +3,7 @@ import { MatchingService } from '../services/MatchingService';
 import { DownloadService } from '../services/DownloadService';
 import { LucidaService } from '../services/LucidaService';
 import { AudioFormat } from '../services/CobaltService';
+import { YouTubeMetadataService, YouTubeMusicMetadata } from '../services/YouTubeMetadataService';
 
 interface DownloadOptions {
   format: string;
@@ -12,7 +13,7 @@ interface AddTrackJob {
   jobId: string;
   youtubeUrl: string;
   playlistId: string;
-  status: 'queued' | 'searching' | 'adding' | 'downloading' | 'completed' | 'failed';
+  status: 'queued' | 'searching' | 'adding' | 'downloading' | 'completed' | 'failed' | 'awaiting_fallback';
   progress: number;
   trackInfo?: {
     title: string;
@@ -30,6 +31,7 @@ interface AddTrackJob {
   createdAt: string;
   currentStep?: string;
   startedAt?: number;
+  fallbackMetadata?: YouTubeMusicMetadata;
 }
 
 interface SpotifyPlaylist {
@@ -231,12 +233,23 @@ export class BackgroundService {
     }
   }
 
-  private async getSettings(): Promise<{ enableDownload: boolean; defaultQuality: string; defaultPlaylist: string }> {
+  private async getSettings(): Promise<{ 
+    enableDownload: boolean; 
+    defaultQuality: string; 
+    defaultPlaylist: string;
+    spotifyFallbackMode: 'auto' | 'ask' | 'never';
+  }> {
     try {
       const result = await chrome.storage.local.get(['tuneport_settings']);
-      return result.tuneport_settings || { enableDownload: false, defaultQuality: 'best', defaultPlaylist: '' };
+      const defaults = { 
+        enableDownload: false, 
+        defaultQuality: 'best', 
+        defaultPlaylist: '',
+        spotifyFallbackMode: 'auto' as const
+      };
+      return { ...defaults, ...result.tuneport_settings };
     } catch {
-      return { enableDownload: false, defaultQuality: 'best', defaultPlaylist: '' };
+      return { enableDownload: false, defaultQuality: 'best', defaultPlaylist: '', spotifyFallbackMode: 'auto' };
     }
   }
 
@@ -326,6 +339,12 @@ export class BackgroundService {
       case 'GET_JOB_STATUS':
         this.handleGetJobStatus(message.jobId, sendResponse);
         break;
+      case 'CONFIRM_FALLBACK':
+        this.handleConfirmFallback(message.jobId, sendResponse);
+        break;
+      case 'REJECT_FALLBACK':
+        this.handleRejectFallback(message.jobId, sendResponse);
+        break;
       case 'EXCHANGE_SPOTIFY_CODE_DIRECT':
         this.handleExchangeSpotifyCodeDirect(message, sendResponse);
         break;
@@ -412,7 +431,60 @@ export class BackgroundService {
       job.progress = 50;
 
       if (!searchResults.exactMatch) {
-        throw new Error('Could not find matching track on Spotify');
+        // Try YouTube Music fallback
+        const settings = await this.getSettings();
+        const fallbackMode = settings.spotifyFallbackMode || 'auto';
+        
+        if (fallbackMode === 'never') {
+          throw new Error('Could not find matching track on Spotify');
+        }
+        
+        const videoId = this.extractVideoId(youtubeUrl);
+        if (!videoId) {
+          throw new Error('Could not find matching track on Spotify');
+        }
+        
+        job.currentStep = 'Trying YouTube Music metadata...';
+        this.activeJobs.set(jobId, { ...job });
+        
+        const musicMetadata = await YouTubeMetadataService.fetchMusicMetadata(videoId);
+        
+        if (!musicMetadata) {
+          throw new Error('Could not find matching track on Spotify');
+        }
+        
+        console.log('[TunePort BG] Found YouTube Music metadata:', musicMetadata);
+        
+        if (fallbackMode === 'ask') {
+          // Set job to awaiting_fallback and wait for user confirmation
+          job.status = 'awaiting_fallback';
+          job.fallbackMetadata = musicMetadata;
+          job.currentStep = 'Waiting for confirmation...';
+          this.activeJobs.set(jobId, { ...job });
+          return job; // Return early, user will confirm/reject via message
+        }
+        
+        // Auto mode - try searching with new metadata
+        job.currentStep = 'Searching Spotify with new metadata...';
+        this.activeJobs.set(jobId, { ...job });
+        
+        const fallbackResults = await this.searchOnSpotify(
+          musicMetadata.title,
+          musicMetadata.artist,
+          metadata.duration
+        );
+        
+        if (!fallbackResults.exactMatch) {
+          throw new Error('Could not find matching track on Spotify (tried YouTube Music fallback)');
+        }
+        
+        // Use the fallback match
+        searchResults.exactMatch = fallbackResults.exactMatch;
+        job.trackInfo = {
+          title: musicMetadata.title,
+          artist: musicMetadata.artist,
+          spotifyTrack: fallbackResults.exactMatch
+        };
       }
 
       job.trackInfo.spotifyTrack = searchResults.exactMatch;
@@ -957,6 +1029,101 @@ export class BackgroundService {
     } else {
       sendResponse({ error: 'Job not found' });
     }
+  }
+
+  private async handleConfirmFallback(jobId: string, sendResponse: (response?: any) => void) {
+    const job = this.activeJobs.get(jobId);
+    if (!job || job.status !== 'awaiting_fallback' || !job.fallbackMetadata) {
+      sendResponse({ error: 'Invalid job state' });
+      return;
+    }
+
+    try {
+      job.status = 'searching';
+      job.currentStep = 'Searching Spotify with confirmed metadata...';
+      this.activeJobs.set(jobId, { ...job });
+
+      const searchResults = await this.searchOnSpotify(
+        job.fallbackMetadata.title,
+        job.fallbackMetadata.artist,
+        0
+      );
+
+      if (!searchResults.exactMatch) {
+        job.status = 'failed';
+        job.error = 'Could not find matching track on Spotify with confirmed metadata';
+        job.currentStep = undefined;
+        this.activeJobs.set(jobId, { ...job });
+        sendResponse({ success: false, error: job.error });
+        return;
+      }
+
+      job.trackInfo = {
+        title: job.fallbackMetadata.title,
+        artist: job.fallbackMetadata.artist,
+        spotifyTrack: searchResults.exactMatch
+      };
+
+      job.status = 'adding';
+      job.progress = 60;
+      job.currentStep = 'Adding to playlist...';
+      this.activeJobs.set(jobId, { ...job });
+
+      const result = await this.addToPlaylist(job.playlistId, searchResults.exactMatch.uri);
+      job.progress = 70;
+
+      if (job.downloadInfo?.enabled) {
+        job.status = 'downloading';
+        job.currentStep = 'Downloading audio...';
+        this.activeJobs.set(jobId, { ...job });
+
+        const downloadResult = await DownloadService.downloadAudio(
+          job.youtubeUrl,
+          job.fallbackMetadata.title,
+          job.fallbackMetadata.artist,
+          { format: 'best' as AudioFormat, preferLossless: true }
+        );
+
+        if (downloadResult.success) {
+          job.downloadInfo = {
+            enabled: true,
+            quality: downloadResult.quality,
+            source: downloadResult.source,
+            filename: downloadResult.filename
+          };
+        }
+      }
+
+      job.status = 'completed';
+      job.progress = 100;
+      job.currentStep = undefined;
+      this.activeJobs.set(jobId, { ...job });
+
+      const successMsg = result.duplicate ? 'Already in Playlist' : 'Added to Spotify';
+      this.showNotification(successMsg, `"${job.fallbackMetadata.title}" by ${job.fallbackMetadata.artist}`, 'success');
+      sendResponse({ success: true });
+
+    } catch (error) {
+      job.status = 'failed';
+      job.error = error instanceof Error ? error.message : 'Unknown error';
+      job.currentStep = undefined;
+      this.activeJobs.set(jobId, { ...job });
+      sendResponse({ success: false, error: job.error });
+    }
+  }
+
+  private handleRejectFallback(jobId: string, sendResponse: (response?: any) => void) {
+    const job = this.activeJobs.get(jobId);
+    if (!job) {
+      sendResponse({ error: 'Job not found' });
+      return;
+    }
+
+    job.status = 'failed';
+    job.error = 'Fallback rejected by user';
+    job.currentStep = undefined;
+    this.activeJobs.set(jobId, { ...job });
+    sendResponse({ success: true });
   }
 
   private async getSpotifyToken(): Promise<string | null> {

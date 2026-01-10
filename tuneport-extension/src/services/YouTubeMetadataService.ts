@@ -9,6 +9,13 @@ interface YouTubeMetadata {
   url: string;
 }
 
+export interface YouTubeMusicMetadata {
+  title: string;
+  artist: string;
+  source: 'youtube_music' | 'description_parse' | 'title_parse';
+  confidence: 'high' | 'medium' | 'low';
+}
+
 export class YouTubeMetadataService {
   /**
    * Extract metadata from the current YouTube page
@@ -208,5 +215,113 @@ export class YouTubeMetadataService {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+
+  static async fetchMusicMetadata(videoId: string): Promise<YouTubeMusicMetadata | null> {
+    console.log('[YouTubeMetadataService] fetchMusicMetadata for:', videoId);
+    
+    const ytMusicResult = await this.tryYouTubeMusicOEmbed(videoId);
+    if (ytMusicResult) {
+      console.log('[YouTubeMetadataService] Found via YouTube Music oEmbed:', ytMusicResult);
+      return ytMusicResult;
+    }
+    
+    const regularOEmbed = await this.fetchViaOEmbed(videoId);
+    if (regularOEmbed.title) {
+      const parsed = this.parseCleanMusicTitle(regularOEmbed.title, regularOEmbed.artist || '');
+      if (parsed) {
+        console.log('[YouTubeMetadataService] Parsed from title:', parsed);
+        return parsed;
+      }
+    }
+    
+    console.log('[YouTubeMetadataService] No music metadata found');
+    return null;
+  }
+
+  private static async tryYouTubeMusicOEmbed(videoId: string): Promise<YouTubeMusicMetadata | null> {
+    try {
+      const ytMusicUrl = `https://music.youtube.com/watch?v=${videoId}`;
+      const response = await fetch(
+        `https://www.youtube.com/oembed?url=${encodeURIComponent(ytMusicUrl)}&format=json`
+      );
+      
+      if (!response.ok) {
+        return null;
+      }
+      
+      const data = await response.json();
+      
+      if (data.title && data.author_name) {
+        const cleanTitle = this.sanitizeMusicTitle(data.title);
+        
+        if (data.title.includes(' - ')) {
+          const parts = data.title.split(' - ');
+          return {
+            title: this.sanitizeMusicTitle(parts.slice(1).join(' - ')),
+            artist: parts[0].trim(),
+            source: 'youtube_music',
+            confidence: 'high'
+          };
+        }
+        
+        return {
+          title: cleanTitle,
+          artist: data.author_name,
+          source: 'youtube_music',
+          confidence: 'medium'
+        };
+      }
+      
+      return null;
+    } catch (error) {
+      console.log('[YouTubeMetadataService] YouTube Music oEmbed failed:', error);
+      return null;
+    }
+  }
+
+  private static parseCleanMusicTitle(title: string, channelName: string): YouTubeMusicMetadata | null {
+    const cleanTitle = this.sanitizeMusicTitle(title);
+    
+    if (cleanTitle.includes(' - ')) {
+      const parts = cleanTitle.split(' - ');
+      return {
+        title: parts.slice(1).join(' - ').trim(),
+        artist: parts[0].trim(),
+        source: 'title_parse',
+        confidence: 'medium'
+      };
+    }
+    
+    if (channelName && !channelName.toLowerCase().includes('vevo') && 
+        !channelName.toLowerCase().includes('official')) {
+      return {
+        title: cleanTitle,
+        artist: channelName,
+        source: 'title_parse',
+        confidence: 'low'
+      };
+    }
+    
+    return null;
+  }
+
+  private static sanitizeMusicTitle(title: string): string {
+    return title
+      .replace(/\s*\(?\s*official\s*(music\s*)?(video|audio|visualizer|lyric\s*video)?\s*\)?\s*/gi, '')
+      .replace(/\s*\[?\s*official\s*(music\s*)?(video|audio|visualizer|lyric\s*video)?\s*\]?\s*/gi, '')
+      .replace(/\s*\(?\s*lyrics?\s*(video)?\s*\)?\s*/gi, '')
+      .replace(/\s*\[?\s*lyrics?\s*(video)?\s*\]?\s*/gi, '')
+      .replace(/\s*\(?\s*audio\s*(only)?\s*\)?\s*/gi, '')
+      .replace(/\s*\[?\s*audio\s*(only)?\s*\]?\s*/gi, '')
+      .replace(/\s*\(?\s*visualizer\s*\)?\s*/gi, '')
+      .replace(/\s*\[?\s*visualizer\s*\]?\s*/gi, '')
+      .replace(/\s*\(?\s*hd\s*\)?\s*/gi, '')
+      .replace(/\s*\[?\s*hd\s*\]?\s*/gi, '')
+      .replace(/\s*\(?\s*4k\s*\)?\s*/gi, '')
+      .replace(/\s*\[?\s*4k\s*\]?\s*/gi, '')
+      .replace(/\s*\|\s*.*$/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 }
