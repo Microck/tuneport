@@ -5,8 +5,6 @@ export interface CobaltRequest {
   url: string;
   downloadMode: 'audio';
   audioFormat: AudioFormat;
-  audioBitrate: AudioBitrate;
-  disableMetadata?: boolean;
   filenameStyle?: 'classic' | 'pretty' | 'basic' | 'nerdy';
 }
 
@@ -31,7 +29,6 @@ export type CobaltResponse = CobaltTunnelResponse | CobaltErrorResponse;
 
 export interface DownloadOptions {
   format?: AudioFormat;
-  bitrate?: AudioBitrate;
   customInstance?: string;
 }
 
@@ -44,10 +41,18 @@ export interface DownloadResult {
   quality: string;
 }
 
-const DEFAULT_INSTANCE = 'https://api.cobalt.tools';
+const COBALT_INSTANCES = [
+  'https://cobalt-api.meowing.de',
+  'https://cobalt-backend.canine.tools',
+  'https://kityune.imput.net',
+  'https://blossom.imput.net'
+];
+
+const DEFAULT_INSTANCE = COBALT_INSTANCES[0];
 
 export class CobaltService {
   private static instance: string = DEFAULT_INSTANCE;
+  private static instanceIndex: number = 0;
   private static apiKey?: string;
 
   static setInstance(url: string): void {
@@ -58,19 +63,48 @@ export class CobaltService {
     this.apiKey = key;
   }
 
+  static getAvailableInstances(): string[] {
+    return COBALT_INSTANCES;
+  }
+
   static async getDownloadUrl(
     youtubeUrl: string,
     options: DownloadOptions = {}
   ): Promise<DownloadResult> {
-    const { format = 'mp3', bitrate = '320', customInstance } = options;
+    const { format = 'best', customInstance } = options;
     
-    const instanceUrl = customInstance || this.instance;
+    const instancesToTry = customInstance 
+      ? [customInstance] 
+      : COBALT_INSTANCES;
 
+    for (const instanceUrl of instancesToTry) {
+      const result = await this.tryInstance(instanceUrl, youtubeUrl, format);
+      if (result.success) {
+        return result;
+      }
+      if (result.error?.includes('Rate limit') || result.error?.includes('authentication')) {
+        continue;
+      }
+      return result;
+    }
+
+    return {
+      success: false,
+      error: 'All Cobalt instances failed. Please try again later.',
+      source: 'cobalt',
+      quality: this.getActualYouTubeQuality(format)
+    };
+  }
+
+  private static async tryInstance(
+    instanceUrl: string,
+    youtubeUrl: string,
+    format: AudioFormat
+  ): Promise<DownloadResult> {
     const requestBody: CobaltRequest = {
       url: youtubeUrl,
       downloadMode: 'audio',
       audioFormat: format,
-      audioBitrate: bitrate,
       filenameStyle: 'pretty'
     };
 
@@ -96,7 +130,7 @@ export class CobaltService {
             success: false,
             error: 'Cobalt authentication required. Please configure an API key or use a different instance.',
             source: 'cobalt',
-            quality: `${format} ${bitrate}kbps`
+            quality: this.getActualYouTubeQuality(format)
           };
         }
         if (response.status === 429) {
@@ -104,14 +138,14 @@ export class CobaltService {
             success: false,
             error: 'Rate limit exceeded. Please try again later.',
             source: 'cobalt',
-            quality: `${format} ${bitrate}kbps`
+            quality: this.getActualYouTubeQuality(format)
           };
         }
         return {
           success: false,
           error: `Cobalt request failed: ${response.status}`,
           source: 'cobalt',
-          quality: `${format} ${bitrate}kbps`
+          quality: this.getActualYouTubeQuality(format)
         };
       }
 
@@ -122,17 +156,18 @@ export class CobaltService {
           success: false,
           error: this.formatError(data.error.code, data.error.context),
           source: 'cobalt',
-          quality: `${format} ${bitrate}kbps`
+          quality: this.getActualYouTubeQuality(format)
         };
       }
 
       if (data.status === 'tunnel' || data.status === 'redirect') {
+        const actualQuality = this.getActualYouTubeQuality(format);
         return {
           success: true,
           url: data.url,
           filename: data.filename,
           source: 'cobalt',
-          quality: `${format} ${bitrate}kbps`
+          quality: actualQuality
         };
       }
 
@@ -140,14 +175,14 @@ export class CobaltService {
         success: false,
         error: 'Unexpected response from Cobalt',
         source: 'cobalt',
-        quality: `${format} ${bitrate}kbps`
+        quality: this.getActualYouTubeQuality(format)
       };
     } catch (error) {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Network error',
         source: 'cobalt',
-        quality: `${format} ${bitrate}kbps`
+        quality: this.getActualYouTubeQuality(format)
       };
     }
   }
@@ -213,21 +248,27 @@ export class CobaltService {
     return message;
   }
 
-  static getQualityLabel(format: AudioFormat, bitrate: AudioBitrate): string {
-    if (format === 'best') {
-      return 'Best Quality';
+  static getQualityLabel(format: AudioFormat): string {
+    if (format === 'best' || format === 'opus') {
+      return 'Opus ~128k (best)';
     }
-    return `${format.toUpperCase()} ${bitrate}kbps`;
+    return `${format.toUpperCase()} (re-encoded)`;
   }
 
-  static getQualityPresets(): Array<{ format: AudioFormat; bitrate: AudioBitrate; label: string }> {
+  private static getActualYouTubeQuality(format: AudioFormat): string {
+    if (format === 'best' || format === 'opus') {
+      return 'Opus ~128k';
+    }
+    return `${format.toUpperCase()} (from Opus source)`;
+  }
+
+  static getQualityPresets(): Array<{ format: AudioFormat; label: string }> {
     return [
-      { format: 'best', bitrate: '320', label: 'Best Quality (Auto)' },
-      { format: 'mp3', bitrate: '320', label: 'MP3 320kbps' },
-      { format: 'mp3', bitrate: '256', label: 'MP3 256kbps' },
-      { format: 'mp3', bitrate: '128', label: 'MP3 128kbps' },
-      { format: 'opus', bitrate: '256', label: 'Opus 256kbps' },
-      { format: 'ogg', bitrate: '256', label: 'OGG 256kbps' }
+      { format: 'best', label: 'Opus (Best Quality)' },
+      { format: 'opus', label: 'Opus (Native)' },
+      { format: 'mp3', label: 'MP3 (Re-encoded)' },
+      { format: 'ogg', label: 'OGG (Re-encoded)' },
+      { format: 'wav', label: 'WAV (Uncompressed)' }
     ];
   }
 }

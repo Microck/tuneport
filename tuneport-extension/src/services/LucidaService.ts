@@ -96,6 +96,11 @@ export class LucidaService {
       const data = await response.json();
       
       if (data.found && data.url) {
+        if (!this.isStrictMatch(title, artist, data.title, data.artist)) {
+          console.warn(`Lucida: Rejected loose match - wanted "${artist} - ${title}", got "${data.artist} - ${data.title}"`);
+          return { found: false };
+        }
+        
         return {
           found: true,
           source,
@@ -112,6 +117,86 @@ export class LucidaService {
       console.warn(`Lucida search failed for ${source}:`, error);
       return { found: false };
     }
+  }
+
+  private static isStrictMatch(
+    wantTitle: string,
+    wantArtist: string,
+    gotTitle?: string,
+    gotArtist?: string
+  ): boolean {
+    if (!gotTitle || !gotArtist) {
+      return false;
+    }
+
+    const normalize = (s: string) => s
+      .toLowerCase()
+      .replace(/[^\w\s]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const normalizedWantTitle = normalize(wantTitle);
+    const normalizedWantArtist = normalize(wantArtist);
+    const normalizedGotTitle = normalize(gotTitle);
+    const normalizedGotArtist = normalize(gotArtist);
+
+    const titleMatch = normalizedWantTitle === normalizedGotTitle ||
+      normalizedGotTitle.includes(normalizedWantTitle) ||
+      normalizedWantTitle.includes(normalizedGotTitle);
+
+    const artistMatch = normalizedWantArtist === normalizedGotArtist ||
+      normalizedGotArtist.includes(normalizedWantArtist) ||
+      normalizedWantArtist.includes(normalizedGotArtist);
+
+    if (!titleMatch || !artistMatch) {
+      return false;
+    }
+
+    const titleSimilarity = this.similarity(normalizedWantTitle, normalizedGotTitle);
+    const artistSimilarity = this.similarity(normalizedWantArtist, normalizedGotArtist);
+
+    return titleSimilarity >= 0.85 && artistSimilarity >= 0.80;
+  }
+
+  private static similarity(a: string, b: string): number {
+    if (a === b) return 1;
+    if (a.length === 0 || b.length === 0) return 0;
+
+    const longer = a.length > b.length ? a : b;
+    const shorter = a.length > b.length ? b : a;
+
+    const longerLength = longer.length;
+    if (longerLength === 0) return 1;
+
+    const editDistance = this.levenshteinDistance(longer, shorter);
+    return (longerLength - editDistance) / longerLength;
+  }
+
+  private static levenshteinDistance(a: string, b: string): number {
+    const matrix: number[][] = [];
+
+    for (let i = 0; i <= b.length; i++) {
+      matrix[i] = [i];
+    }
+    for (let j = 0; j <= a.length; j++) {
+      matrix[0][j] = j;
+    }
+
+    for (let i = 1; i <= b.length; i++) {
+      for (let j = 1; j <= a.length; j++) {
+        if (b.charAt(i - 1) === a.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+
+    return matrix[b.length][a.length];
   }
 
   static async getDownloadUrl(

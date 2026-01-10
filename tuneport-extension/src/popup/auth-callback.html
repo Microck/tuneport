@@ -58,34 +58,6 @@
       z-index: 10;
     }
     
-    .logo-wrap {
-      margin-bottom: 32px;
-      position: relative;
-      display: inline-block;
-    }
-    
-    .logo-glow {
-      position: absolute;
-      inset: -20px;
-      background: var(--tf-emerald);
-      opacity: 0.15;
-      border-radius: 50%;
-      filter: blur(30px);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 0.15; }
-      50% { transform: scale(1.1); opacity: 0.25; }
-    }
-    
-    .logo {
-      width: 80px;
-      height: 80px;
-      position: relative;
-      z-index: 1;
-    }
-    
     .spinner-wrap {
       margin-bottom: 24px;
     }
@@ -135,11 +107,6 @@
   <div class="bg-blur bg-blur-2"></div>
   
   <div class="container">
-    <div class="logo-wrap">
-      <div class="logo-glow"></div>
-      <img class="logo" id="logo" alt="TunePort">
-    </div>
-    
     <div class="spinner-wrap">
       <div class="spinner"></div>
     </div>
@@ -151,7 +118,6 @@
   </div>
   
   <script>
-    document.getElementById('logo').src = chrome.runtime.getURL('assets/logo.png');
   </script>
 </body>
 </html>
