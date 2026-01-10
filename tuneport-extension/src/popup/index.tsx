@@ -130,11 +130,6 @@ const BentoCard: React.FC<{
   </motion.div>
 );
 
-interface SpotifyUser {
-  display_name: string;
-  images: Array<{ url: string }>;
-}
-
 interface Job {
   jobId: string;
   status: string;

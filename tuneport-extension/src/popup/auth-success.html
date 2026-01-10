@@ -212,7 +212,12 @@
   </div>
   
   <script>
-    document.getElementById('logo').src = chrome.runtime.getURL('assets/logo.png');
+    const logoImg = document.getElementById('logo');
+    logoImg.src = chrome.runtime.getURL('assets/logo.png');
+    logoImg.onerror = function() {
+      console.error('Failed to load logo, trying relative path');
+      logoImg.src = '../assets/logo.png';
+    };
     
     const params = new URLSearchParams(window.location.search);
     const userName = params.get('user');
@@ -227,6 +232,11 @@
       timerEl.textContent = seconds;
       if (seconds <= 0) {
         clearInterval(countdown);
+        try {
+          chrome.runtime.sendMessage({ type: 'CLOSE_TAB' });
+        } catch (e) {
+          console.error('Failed to send close message', e);
+        }
         window.close();
       }
     }, 1000);
