@@ -88,13 +88,24 @@ npm run build:github
 
 ```mermaid
 graph TD
-    A[content script] -->|video metadata| B[background service]
-    B -->|auth| C[spotify api]
-    B -->|download| D{download service}
-    D -->|priority 1| E[lucida (lossless)]
-    D -->|priority 2| F[cobalt (youtube)]
-    C -->|success| G[notification]
-    D -->|success| H[chrome.downloads]
+    User((User)) -->|Context Menu / Popup| BG[Background Service]
+    
+    subgraph Core Logic
+    BG -->|Fetch oEmbed| YT[YouTube]
+    BG -->|Sanitize & Match| Match[Matching Service]
+    Match -->|Search Query| SpotAPI[Spotify API]
+    SpotAPI -->|Track Found| Add[Add to Playlist]
+    end
+    
+    subgraph Download Pipeline
+    BG -->|If Enabled| DL[Download Service]
+    DL -->|1. Try Lossless| Lucida[Lucida API]
+    Lucida -.->|Fallback| Cobalt[Cobalt API]
+    Cobalt -->|Audio Stream| Disk[chrome.downloads]
+    end
+    
+    Add -->|Success| Notify[Notification]
+    Disk -->|Complete| Notify
 ```
 
 ## troubleshooting
