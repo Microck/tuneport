@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/05c36f3e-4e48-4ed0-92d9-aab5059dbec6" width="300" alt="tuneport preview" />
+  <img src="./docs/tuneport.gif" width="1000" alt="tuneport preview" />
 </p>
 
 ---
