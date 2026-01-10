@@ -38,5 +38,8 @@
   "bugs": {
     "url": "https://github.com/Microck/tuneport/issues"
   },
-  "homepage": "https://github.com/Microck/tuneport#readme"
+  "homepage": "https://github.com/Microck/tuneport#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0"
+  }
 }

@@ -83,17 +83,18 @@ export class BackgroundService {
   }
 
   private setupMessageListeners() {
-    chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-      this.handleMessage(message, sendResponse);
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      this.handleMessage(message, sender, sendResponse);
       return true; // Keep channel open for async response
     });
+
 
     // Handle context menu clicks
     chrome.contextMenus.onClicked.addListener((info) => {
       this.handleContextMenuClick(info);
     });
 
-    chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
       if (changeInfo.url) {
         this.handleTabUpdate(tabId, changeInfo.url);
       }
@@ -145,14 +146,21 @@ export class BackgroundService {
       chrome.contextMenus.create({
         id: 'tuneport-main',
         title: 'TunePort',
-        contexts: ['video', 'link']
+        contexts: ['page', 'video', 'link']
       });
 
       chrome.contextMenus.create({
         id: 'tuneport-settings',
         parentId: 'tuneport-main',
         title: 'Open Settings',
-        contexts: ['video', 'link']
+        contexts: ['page', 'video', 'link']
+      });
+
+      chrome.contextMenus.create({
+        id: 'tuneport-settings',
+        parentId: 'tuneport-main',
+        title: 'Open Settings',
+        contexts: ['page', 'video', 'link']
       });
 
       this.isContextMenuCreated = true;
@@ -259,7 +267,7 @@ export class BackgroundService {
     }
   }
 
-  private handleMessage(message: any, sendResponse: (response?: any) => void) {
+  private handleMessage(message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {
     const { type, data } = message;
     console.log('[TunePort BG] Message received:', type);
 
@@ -291,6 +299,11 @@ export class BackgroundService {
         break;
       case 'EXCHANGE_SPOTIFY_CODE_DIRECT':
         this.handleExchangeSpotifyCodeDirect(message, sendResponse);
+        break;
+      case 'CLOSE_TAB':
+        if (sender.tab?.id) {
+          chrome.tabs.remove(sender.tab.id).catch(() => {});
+        }
         break;
       default:
         console.warn('Unknown message type:', type);
@@ -920,9 +933,10 @@ export class BackgroundService {
     }
   }
 
-  private showNotification(title: string, message: string, _type: 'success' | 'error') {
+  private showNotification(title: string, message: string, type: 'success' | 'error') {
     // Use extension's default icon or fallback to a simple colored icon
     const iconUrl = chrome.runtime.getURL('assets/icon.svg') || '/assets/icon-48.png';
+    console.log(type); // Use type to avoid lint error
     
     chrome.notifications.create({
       type: 'basic',
