@@ -12,7 +12,11 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  Plus,
+  Trash2,
+  HelpCircle,
+  Search
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { SpotifyAuthService } from '../services/SpotifyAuthService';
@@ -22,6 +26,13 @@ interface SpotifyUser {
   display_name: string;
   email: string;
   images: Array<{ url: string }>;
+}
+
+interface QualityPreset {
+  id: string;
+  label: string;
+  format: string;
+  isCustom?: boolean;
 }
 
 interface SettingsState {
@@ -34,6 +45,8 @@ interface SettingsState {
   showNotFoundWarnings: boolean;
   cobaltInstance: string;
   lucidaEnabled: boolean;
+  customPresets: QualityPreset[];
+  spotifyFallbackMode: 'auto' | 'ask' | 'never';
 }
 
 const DEFAULT_SETTINGS: SettingsState = {
@@ -45,14 +58,17 @@ const DEFAULT_SETTINGS: SettingsState = {
   showQualityWarnings: true,
   showNotFoundWarnings: true,
   cobaltInstance: 'https://cobalt-api.meowing.de',
-  lucidaEnabled: false
+  lucidaEnabled: false,
+  customPresets: [],
+  spotifyFallbackMode: 'auto'
 };
 
 const QUALITY_OPTIONS = [
-  { id: 'best', label: 'Best Quality (Auto)' },
-  { id: 'mp3-320', label: 'MP3 320kbps' },
-  { id: 'mp3-256', label: 'MP3 256kbps' },
-  { id: 'mp3-128', label: 'MP3 128kbps' }
+  { id: 'best', label: 'Opus (Best)', description: 'Native YouTube quality. ~128kbps Opus, equivalent to MP3 320kbps.' },
+  { id: 'opus', label: 'Opus', description: 'Same as Best. Direct stream, no re-encoding.' },
+  { id: 'mp3', label: 'MP3', description: 'Universal compatibility. Re-encoded from Opus source.' },
+  { id: 'ogg', label: 'OGG Vorbis', description: 'Open format. Good for Linux/FOSS applications.' },
+  { id: 'wav', label: 'WAV', description: 'Uncompressed audio. Large files, lossless from transcode.' }
 ];
 
 const FILE_NAMING_OPTIONS = [
@@ -241,6 +257,7 @@ export const SettingsPage: React.FC = () => {
               value={settings.defaultQuality}
               onChange={(v) => updateSetting('defaultQuality', v)}
               options={QUALITY_OPTIONS}
+              showDescription={true}
             />
             <SelectField
               label="File Naming Format"
@@ -273,6 +290,36 @@ export const SettingsPage: React.FC = () => {
               value={settings.showNotFoundWarnings}
               onChange={(v) => updateSetting('showNotFoundWarnings', v)}
               className="pt-4"
+            />
+          </div>
+        </Section>
+
+        {/* Spotify Local Files Tutorial */}
+        <Section icon={HelpCircle} title="Sync with Spotify">
+          <SpotifyLocalFilesTutorial />
+        </Section>
+
+        {/* Custom Presets Section */}
+        <Section icon={Music2} title="Custom Presets">
+          <CustomPresetsManager
+            presets={settings.customPresets || []}
+            onChange={(presets) => updateSetting('customPresets', presets)}
+          />
+        </Section>
+
+        {/* Spotify Fallback Mode */}
+        <Section icon={Search} title="Track Matching">
+          <div className="space-y-4">
+            <SelectField
+              label="Fallback Mode"
+              value={settings.spotifyFallbackMode}
+              onChange={(v) => updateSetting('spotifyFallbackMode', v as 'auto' | 'ask' | 'never')}
+              options={[
+                { id: 'auto', label: 'Auto', description: 'Automatically search YouTube Music metadata if Spotify match fails' },
+                { id: 'ask', label: 'Ask', description: 'Prompt before using YouTube Music metadata' },
+                { id: 'never', label: 'Never', description: 'Never use fallback, fail if no Spotify match' }
+              ]}
+              showDescription={true}
             />
           </div>
         </Section>
@@ -353,25 +400,33 @@ const SelectField: React.FC<{
   label: string;
   value: string;
   onChange: (value: string) => void;
-  options: Array<{ id: string; label: string }>;
+  options: Array<{ id: string; label: string; description?: string }>;
   className?: string;
-}> = ({ label, value, onChange, options, className }) => (
-  <div className={className}>
-    <label className="block text-xs font-bold text-tf-slate mb-2 ml-1">{label}</label>
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2.5 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald focus:ring-2 focus:ring-tf-emerald/5 transition-all appearance-none cursor-pointer hover:bg-tf-gray/50"
-      >
-        {options.map((opt) => (
-          <option key={opt.id} value={opt.id}>{opt.label}</option>
-        ))}
-      </select>
-      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-tf-slate-muted pointer-events-none" />
+  showDescription?: boolean;
+}> = ({ label, value, onChange, options, className, showDescription = false }) => {
+  const selectedOption = options.find(opt => opt.id === value);
+  
+  return (
+    <div className={className}>
+      <label className="block text-xs font-bold text-tf-slate mb-2 ml-1">{label}</label>
+      <div className="relative">
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full px-3 py-2.5 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald focus:ring-2 focus:ring-tf-emerald/5 transition-all appearance-none cursor-pointer hover:bg-tf-gray/50"
+        >
+          {options.map((opt) => (
+            <option key={opt.id} value={opt.id}>{opt.label}</option>
+          ))}
+        </select>
+        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-tf-slate-muted pointer-events-none" />
+      </div>
+      {showDescription && selectedOption?.description && (
+        <p className="text-[10px] text-tf-slate-muted mt-1.5 ml-1">{selectedOption.description}</p>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 const ToggleField: React.FC<{
   label: string;
@@ -419,6 +474,165 @@ const TextField: React.FC<{
     {description && <p className="text-[10px] text-tf-slate-muted mt-1 ml-1">{description}</p>}
   </div>
 );
+
+const SpotifyLocalFilesTutorial: React.FC = () => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  return (
+    <div className="space-y-3">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between p-3 bg-tf-gray/30 hover:bg-tf-gray/50 rounded-lg transition-colors"
+      >
+        <span className="text-xs font-bold text-tf-slate">How to enable Spotify Local Files</span>
+        {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+      </button>
+      
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-xs space-y-3">
+              <p className="text-tf-slate font-medium">
+                Spotify doesn&apos;t scan local files by default. Follow these steps:
+              </p>
+              <ol className="list-decimal list-inside space-y-2 text-tf-slate-muted">
+                <li>Open the <span className="font-bold text-tf-slate">Spotify desktop app</span></li>
+                <li>Click your profile picture → <span className="font-bold text-tf-slate">Settings</span></li>
+                <li>Scroll to <span className="font-bold text-tf-slate">Library</span></li>
+                <li>Toggle <span className="font-bold text-tf-emerald">Show Local Files</span> ON</li>
+                <li>Under &quot;Show songs from&quot;, enable your <span className="font-bold text-tf-slate">Downloads</span> folder</li>
+                <li>Or click <span className="font-bold text-tf-slate">Add a source</span> and navigate to your Downloads/TunePort folder</li>
+              </ol>
+              <p className="text-[10px] text-tf-slate-muted pt-2 border-t border-blue-100">
+                Downloaded files are saved to: <span className="font-mono">Downloads/TunePort/</span>
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const CustomPresetsManager: React.FC<{
+  presets: QualityPreset[];
+  onChange: (presets: QualityPreset[]) => void;
+}> = ({ presets, onChange }) => {
+  const [isAdding, setIsAdding] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newFormat, setNewFormat] = useState('mp3');
+  
+  const MAX_PRESETS = 5;
+  const canAdd = presets.length < MAX_PRESETS;
+  
+  const handleAdd = () => {
+    if (!newName.trim() || !canAdd) return;
+    
+    const newPreset: QualityPreset = {
+      id: `custom-${Date.now()}`,
+      label: newName.trim(),
+      format: newFormat,
+      isCustom: true
+    };
+    
+    onChange([...presets, newPreset]);
+    setNewName('');
+    setNewFormat('mp3');
+    setIsAdding(false);
+  };
+  
+  const handleDelete = (id: string) => {
+    onChange(presets.filter(p => p.id !== id));
+  };
+  
+  return (
+    <div className="space-y-3">
+      <p className="text-[10px] text-tf-slate-muted">
+        Create up to {MAX_PRESETS} custom presets for quick access.
+      </p>
+      
+      {presets.length > 0 && (
+        <div className="space-y-2">
+          {presets.map((preset) => (
+            <div
+              key={preset.id}
+              className="flex items-center justify-between p-3 bg-tf-gray/30 rounded-lg"
+            >
+              <div>
+                <p className="text-xs font-bold text-tf-slate">{preset.label}</p>
+                <p className="text-[10px] text-tf-slate-muted">{preset.format.toUpperCase()}</p>
+              </div>
+              <button
+                onClick={() => handleDelete(preset.id)}
+                className="p-1.5 text-tf-rose hover:bg-tf-rose/10 rounded-lg transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      
+      {isAdding ? (
+        <div className="p-3 bg-tf-gray/30 rounded-lg space-y-3">
+          <input
+            type="text"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Preset name"
+            className="w-full px-3 py-2 bg-white border border-tf-border rounded-lg text-xs focus:outline-none focus:border-tf-emerald"
+            maxLength={20}
+          />
+          <select
+            value={newFormat}
+            onChange={(e) => setNewFormat(e.target.value)}
+            className="w-full px-3 py-2 bg-white border border-tf-border rounded-lg text-xs focus:outline-none focus:border-tf-emerald"
+          >
+            <option value="best">Opus (Best)</option>
+            <option value="opus">Opus</option>
+            <option value="mp3">MP3</option>
+            <option value="ogg">OGG</option>
+            <option value="wav">WAV</option>
+          </select>
+          <div className="flex gap-2">
+            <button
+              onClick={handleAdd}
+              disabled={!newName.trim()}
+              className="flex-1 py-2 bg-tf-emerald text-white text-xs font-bold rounded-lg disabled:opacity-50"
+            >
+              Save
+            </button>
+            <button
+              onClick={() => { setIsAdding(false); setNewName(''); }}
+              className="flex-1 py-2 bg-tf-gray text-tf-slate text-xs font-bold rounded-lg"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => setIsAdding(true)}
+          disabled={!canAdd}
+          className={cn(
+            "w-full flex items-center justify-center gap-2 p-3 rounded-lg text-xs font-bold transition-colors",
+            canAdd
+              ? "bg-tf-emerald/10 text-tf-emerald hover:bg-tf-emerald/20"
+              : "bg-tf-gray text-tf-slate-muted cursor-not-allowed"
+          )}
+        >
+          <Plus className="w-3.5 h-3.5" />
+          {canAdd ? 'Add Custom Preset' : `Maximum ${MAX_PRESETS} presets reached`}
+        </button>
+      )}
+    </div>
+  );
+};
 
 const container = document.getElementById('app');
 if (container) {

@@ -28,9 +28,12 @@ unlike other sync tools, tuneport also offers **simultaneous downloads**. it che
 
 -   **instant sync**: right-click any video -> "add to playlist".
 -   **smart matching**: uses jaro-winkler fuzzy matching to handle "official video", "lyrics", and "ft." noise.
+-   **youtube music fallback**: when spotify match fails, tries youtube music metadata for better results (auto/ask/never modes).
 -   **dual pipeline**: adds to spotify + downloads to disk in parallel.
 -   **lossless first**: prioritizes flac from lucida (qobuz/tidal/deezer); falls back to youtube's native opus stream (~128kbps, perceptually equivalent to mp3 320kbps).
+-   **custom quality presets**: create up to 5 custom download presets with format descriptions.
 -   **duplicate guard**: checks destination playlist before adding to prevent clutter.
+-   **spotify local files tutorial**: in-app guide for setting up spotify to scan downloaded files.
 -   **privacy**: runs entirely in the browser. no backend server. no data collection.
 
 ## quickstart

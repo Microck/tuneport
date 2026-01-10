@@ -1,5 +1,22 @@
 # changelog
 
+## v2.2.0
+
+**release date:** 2026-01-10
+
+youtube music fallback, custom presets, and download debugging.
+
+### changes
+
+- **youtube music fallback**: when spotify search fails, tries youtube music metadata for better matching. three modes: auto (default), ask (prompts user), never.
+- **custom quality presets**: create up to 5 custom download presets. presets now include descriptions visible in settings.
+- **spotify local files tutorial**: added collapsible in-app guide explaining how to enable local files scanning in spotify desktop.
+- **square thumbnails**: all thumbnails now display as 1:1 center-cropped squares.
+- **download debugging**: added comprehensive logging throughout download pipeline for troubleshooting.
+- **fallback ui**: activity tab shows confirmation prompt when awaiting user decision on fallback metadata.
+
+---
+
 ## v2.1.0
 
 **release date:** 2026-01-10

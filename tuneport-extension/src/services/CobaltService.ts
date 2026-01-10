@@ -73,12 +73,17 @@ export class CobaltService {
   ): Promise<DownloadResult> {
     const { format = 'best', customInstance } = options;
     
+    console.log('[CobaltService] getDownloadUrl called:', { youtubeUrl, format, customInstance });
+    
     const instancesToTry = customInstance 
       ? [customInstance] 
       : COBALT_INSTANCES;
 
     for (const instanceUrl of instancesToTry) {
+      console.log('[CobaltService] Trying instance:', instanceUrl);
       const result = await this.tryInstance(instanceUrl, youtubeUrl, format);
+      console.log('[CobaltService] Instance result:', { instanceUrl, success: result.success, error: result.error });
+      
       if (result.success) {
         return result;
       }
@@ -117,12 +122,16 @@ export class CobaltService {
       headers['Authorization'] = `Api-Key ${this.apiKey}`;
     }
 
+    console.log('[CobaltService] Request:', { instanceUrl, requestBody });
+
     try {
       const response = await fetch(`${instanceUrl}/`, {
         method: 'POST',
         headers,
         body: JSON.stringify(requestBody)
       });
+
+      console.log('[CobaltService] Response status:', response.status);
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -150,6 +159,7 @@ export class CobaltService {
       }
 
       const data: CobaltResponse = await response.json();
+      console.log('[CobaltService] Response data:', data);
 
       if (data.status === 'error') {
         return {
@@ -162,6 +172,7 @@ export class CobaltService {
 
       if (data.status === 'tunnel' || data.status === 'redirect') {
         const actualQuality = this.getActualYouTubeQuality(format);
+        console.log('[CobaltService] Success - URL:', data.url?.substring(0, 100));
         return {
           success: true,
           url: data.url,
@@ -178,6 +189,7 @@ export class CobaltService {
         quality: this.getActualYouTubeQuality(format)
       };
     } catch (error) {
+      console.error('[CobaltService] Exception:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Network error',

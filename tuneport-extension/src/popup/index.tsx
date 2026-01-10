@@ -21,7 +21,8 @@ import {
   Settings,
   User,
   Shield,
-  Check
+  Check,
+  AlertCircle
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ChromeMessageService } from '../services/ChromeMessageService';
@@ -136,7 +137,7 @@ const BentoCard: React.FC<{
 
 interface Job {
   jobId: string;
-  status: string;
+  status: 'queued' | 'searching' | 'adding' | 'downloading' | 'completed' | 'failed' | 'awaiting_fallback';
   progress: number;
   trackInfo?: {
     title: string;
@@ -153,12 +154,19 @@ interface Job {
   currentStep?: string;
   startedAt?: number;
   stepStartedAt?: number;
+  fallbackMetadata?: {
+    title: string;
+    artist: string;
+    source: string;
+    confidence: string;
+  };
 }
 
 interface QualityPreset {
   id: string;
   label: string;
   format: string;
+  isCustom?: boolean;
 }
 
 const QUALITY_PRESETS: QualityPreset[] = [
@@ -186,6 +194,8 @@ interface SettingsState {
   cobaltInstance: string;
   lucidaEnabled: boolean;
   visiblePlaylists: string[];
+  customPresets: QualityPreset[];
+  spotifyFallbackMode: 'auto' | 'ask' | 'never';
 }
 
 const DEFAULT_SETTINGS: SettingsState = {
@@ -198,7 +208,9 @@ const DEFAULT_SETTINGS: SettingsState = {
   showNotFoundWarnings: true,
   cobaltInstance: 'https://cobalt-api.meowing.de',
   lucidaEnabled: false,
-  visiblePlaylists: []
+  visiblePlaylists: [],
+  customPresets: [],
+  spotifyFallbackMode: 'auto'
 };
 
 export const TunePortPopup: React.FC = () => {
@@ -300,6 +312,24 @@ export const TunePortPopup: React.FC = () => {
     }
   };
 
+  const confirmFallback = async (jobId: string) => {
+    try {
+      await ChromeMessageService.sendMessage({ type: 'CONFIRM_FALLBACK', jobId });
+      loadJobs();
+    } catch (error) {
+      console.error('Failed to confirm fallback:', error);
+    }
+  };
+
+  const rejectFallback = async (jobId: string) => {
+    try {
+      await ChromeMessageService.sendMessage({ type: 'REJECT_FALLBACK', jobId });
+      loadJobs();
+    } catch (error) {
+      console.error('Failed to reject fallback:', error);
+    }
+  };
+
   const getCurrentUrl = async () => {
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -376,6 +406,15 @@ export const TunePortPopup: React.FC = () => {
     return filtered;
   }, [playlists, playlistSearch, settings.visiblePlaylists]);
 
+  const allQualityPresets = useMemo(() => {
+    const customPresets = (settings.customPresets || []).map(p => ({
+      ...p,
+      isCustom: true,
+      label: `${p.label} (Custom)`
+    }));
+    return [...QUALITY_PRESETS, ...customPresets];
+  }, [settings.customPresets]);
+
   const handleConnect = async () => {
     setIsAuthenticating(true);
     try {
@@ -395,7 +434,7 @@ export const TunePortPopup: React.FC = () => {
 
   const handleSync = async (playlistId: string) => {
     try {
-      const quality = QUALITY_PRESETS.find(q => q.id === selectedQuality) || QUALITY_PRESETS[0];
+      const quality = allQualityPresets.find(q => q.id === selectedQuality) || QUALITY_PRESETS[0];
       const response = await ChromeMessageService.sendMessage({
         type: 'ADD_TRACK_TO_PLAYLIST',
         data: { 
@@ -532,11 +571,13 @@ export const TunePortPopup: React.FC = () => {
                 <>
                   <div className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-tf-border shadow-sm">
                     {videoMetadata?.thumbnail ? (
-                      <img 
-                        src={videoMetadata.thumbnail} 
-                        alt="" 
-                        className="w-16 h-16 rounded-xl object-cover flex-shrink-0 shadow-md"
-                      />
+                      <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-md">
+                        <img 
+                          src={videoMetadata.thumbnail} 
+                          alt="" 
+                          className="w-full h-full object-cover object-center"
+                        />
+                      </div>
                     ) : (
                       <div className="w-16 h-16 rounded-xl bg-tf-gray flex items-center justify-center flex-shrink-0">
                         <Youtube className="w-8 h-8 text-tf-slate-muted" />
@@ -578,13 +619,13 @@ export const TunePortPopup: React.FC = () => {
                         className="w-full flex items-center justify-between p-3 rounded-2xl border border-tf-border bg-white hover:border-tf-emerald transition-all"
                       >
                         <span className="text-[11px] font-semibold text-tf-slate">
-                          {QUALITY_PRESETS.find(q => q.id === selectedQuality)?.label || 'Best Quality'}
+                          {allQualityPresets.find(q => q.id === selectedQuality)?.label || 'Best Quality'}
                         </span>
                         <ChevronDown className={cn("w-4 h-4 text-tf-slate-muted transition-transform", showQualityDropdown && "rotate-180")} />
                       </button>
                       {showQualityDropdown && (
                         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-tf-border rounded-xl shadow-lg z-20 max-h-48 overflow-y-auto">
-                          {QUALITY_PRESETS.map((preset) => (
+                          {allQualityPresets.map((preset) => (
                             <button
                               key={preset.id}
                               onClick={() => {
@@ -611,7 +652,9 @@ export const TunePortPopup: React.FC = () => {
                     >
                       <div className="flex items-center gap-3 overflow-hidden">
                         {selectedPlaylist?.images?.[0]?.url ? (
-                          <img src={selectedPlaylist.images[0].url} alt="" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
+                          <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+                            <img src={selectedPlaylist.images[0].url} alt="" className="w-full h-full object-cover object-center" />
+                          </div>
                         ) : (
                           <div className="w-8 h-8 rounded-lg bg-tf-emerald/10 flex items-center justify-center flex-shrink-0">
                             <Music2 className="w-4 h-4 text-tf-emerald" />
@@ -653,7 +696,9 @@ export const TunePortPopup: React.FC = () => {
                               )}
                             >
                               {pl.images?.[0]?.url ? (
-                                <img src={pl.images[0].url} alt="" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
+                                <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+                                  <img src={pl.images[0].url} alt="" className="w-full h-full object-cover object-center" />
+                                </div>
                               ) : (
                                 <div className="w-8 h-8 rounded-lg bg-tf-emerald/10 flex items-center justify-center flex-shrink-0">
                                   <Music2 className="w-4 h-4 text-tf-emerald" />
@@ -723,12 +768,16 @@ export const TunePortPopup: React.FC = () => {
                         <p className="text-[10px] text-tf-slate-muted font-semibold">{job.trackInfo?.artist || ''}</p>
                       </div>
                       {job.thumbnail && (
-                        <img src={job.thumbnail} alt="" className="w-10 h-10 rounded-lg object-cover ml-2 border border-tf-border" />
+                        <div className="w-10 h-10 rounded-lg overflow-hidden ml-2 border border-tf-border flex-shrink-0">
+                          <img src={job.thumbnail} alt="" className="w-full h-full object-cover object-center" />
+                        </div>
                       )}
                       {job.status === 'completed' ? (
                         <CheckCircle2 className="w-5 h-5 text-tf-emerald ml-2" />
                       ) : job.status === 'failed' ? (
                         <XCircle className="w-5 h-5 text-tf-rose ml-2" />
+                      ) : job.status === 'awaiting_fallback' ? (
+                        <AlertCircle className="w-5 h-5 text-amber-500 ml-2" />
                       ) : (
                         <Loader2 className="w-5 h-5 text-tf-emerald animate-spin ml-2" />
                       )}
@@ -738,9 +787,10 @@ export const TunePortPopup: React.FC = () => {
                         "text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full",
                         job.status === 'completed' ? "bg-tf-emerald/10 text-tf-emerald" :
                         job.status === 'failed' ? "bg-tf-rose/10 text-tf-rose" :
+                        job.status === 'awaiting_fallback' ? "bg-amber-50 text-amber-600" :
                         "bg-tf-gray text-tf-slate-muted"
                       )}>
-                        {job.status}
+                        {job.status === 'awaiting_fallback' ? 'confirm match' : job.status}
                       </span>
                       {job.downloadInfo?.enabled && job.downloadInfo?.quality && (
                         <span className="text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 flex items-center gap-1">
@@ -754,8 +804,29 @@ export const TunePortPopup: React.FC = () => {
                         </span>
                       )}
                     </div>
-                    {job.currentStep && job.status !== 'completed' && job.status !== 'failed' && (
+                    {job.currentStep && job.status !== 'completed' && job.status !== 'failed' && job.status !== 'awaiting_fallback' && (
                       <p className="text-[10px] text-tf-slate-muted font-medium mb-2 mono">{job.currentStep}</p>
+                    )}
+                    {job.status === 'awaiting_fallback' && job.fallbackMetadata && (
+                      <div className="bg-amber-50/50 border border-amber-200 rounded-lg p-3 mb-2">
+                        <p className="text-[10px] text-amber-700 font-medium mb-2">
+                          Found via YouTube Music: <span className="font-bold">{job.fallbackMetadata.title}</span> by <span className="font-bold">{job.fallbackMetadata.artist}</span>
+                        </p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => confirmFallback(job.jobId)}
+                            className="flex-1 text-[10px] font-bold py-1.5 px-3 rounded-lg bg-tf-emerald text-white hover:bg-tf-emerald/90 transition-colors"
+                          >
+                            Try This
+                          </button>
+                          <button
+                            onClick={() => rejectFallback(job.jobId)}
+                            className="flex-1 text-[10px] font-bold py-1.5 px-3 rounded-lg bg-tf-gray text-tf-slate hover:bg-tf-border transition-colors"
+                          >
+                            Skip
+                          </button>
+                        </div>
+                      </div>
                     )}
                     {job.error && (
                       <p className="text-[10px] text-tf-rose font-medium mb-2">{job.error}</p>
@@ -843,7 +914,7 @@ export const TunePortPopup: React.FC = () => {
                       onChange={(e) => updateSetting('defaultQuality', e.target.value)}
                       className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
                     >
-                      {QUALITY_PRESETS.map(q => <option key={q.id} value={q.id}>{q.label}</option>)}
+                      {allQualityPresets.map(q => <option key={q.id} value={q.id}>{q.label}</option>)}
                     </select>
                   </div>
                   <div>
@@ -889,7 +960,9 @@ export const TunePortPopup: React.FC = () => {
                       />
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         {p.images?.[0]?.url ? (
-                          <img src={p.images[0].url} alt="" className="w-6 h-6 rounded object-cover flex-shrink-0" />
+                          <div className="w-6 h-6 rounded overflow-hidden flex-shrink-0">
+                            <img src={p.images[0].url} alt="" className="w-full h-full object-cover object-center" />
+                          </div>
                         ) : (
                           <div className="w-6 h-6 rounded bg-tf-emerald/10 flex items-center justify-center flex-shrink-0">
                             <Music2 className="w-3 h-3 text-tf-emerald" />
