@@ -1,5 +1,22 @@
 # changelog
 
+## v2.1.0
+
+**release date:** 2026-01-10
+
+audio quality overhaul and strict matching for lossless sources.
+
+### changes
+
+- **opus-first audio**: default to youtube's native opus stream (~128kbps) without re-encoding. opus at this bitrate is perceptually equivalent to mp3 320kbps.
+- **honest quality labels**: removed misleading "320kbps" claims. now shows actual quality like "opus ~128k".
+- **strict lucida matching**: added levenshtein-based validation (85% title / 80% artist threshold) to prevent false positive downloads.
+- **technical documentation**: added `docs/report.tex` covering youtube's audio infrastructure, codec analysis, and quality recommendations.
+- **ui improvements**: centered sync card text, added download folder info in settings, job step tracking in activity tab.
+- **updated cobalt defaults**: changed default instance to `cobalt-api.meowing.de` with alternatives listed.
+
+---
+
 ## v2.0.0
 
 **release date:** 2026-01-10
