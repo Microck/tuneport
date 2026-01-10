@@ -184,11 +184,6 @@
   <div class="bg-blur bg-blur-2"></div>
   
   <div class="container">
-    <div class="logo-wrap">
-      <div class="logo-glow"></div>
-      <img class="logo" id="logo" alt="TunePort">
-    </div>
-    
     <div class="card">
       <div class="status-badge">Connection Successful</div>
       
@@ -205,47 +200,27 @@
       
       <p style="margin-top: 16px;">You can close this tab and return to TunePort.</p>
     </div>
-    
-    <div class="countdown">
-      Closing in <span id="timer">5</span> seconds
-    </div>
   </div>
   
   <script>
-    const logoImg = document.getElementById('logo');
-    logoImg.src = chrome.runtime.getURL('assets/logo.png');
-    logoImg.onerror = function() {
-      console.error('Failed to load logo, trying relative path');
-      logoImg.src = '../assets/logo.png';
-    };
-    
     const params = new URLSearchParams(window.location.search);
     const userName = params.get('user');
     if (userName) {
       document.getElementById('user-info').textContent = `Welcome, ${decodeURIComponent(userName)}`;
     }
     
-    let seconds = 5;
-    const timerEl = document.getElementById('timer');
-    const countdown = setInterval(() => {
-      seconds--;
-      timerEl.textContent = seconds;
-      if (seconds <= 0) {
-        clearInterval(countdown);
-        
-        // Attempt to close via background script first
-        chrome.runtime.sendMessage({ type: 'CLOSE_TAB' }, () => {
-          // Callback received (or ignored), try window.close as fallback
-          if (chrome.runtime.lastError) {
-            console.warn('Close message error:', chrome.runtime.lastError);
-          }
-          window.close();
-        });
-        
-        // Hard fallback if message hangs
-        setTimeout(() => window.close(), 500);
-      }
-    }, 1000);
+    // Auto-close logic without UI countdown
+    setTimeout(() => {
+      // Attempt to close via background script first
+      chrome.runtime.sendMessage({ type: 'CLOSE_TAB' }, () => {
+        if (chrome.runtime.lastError) {
+          console.warn('Close message error:', chrome.runtime.lastError);
+        }
+        window.close();
+      });
+      // Hard fallback
+      setTimeout(() => window.close(), 500);
+    }, 5000);
   </script>
 </body>
 </html>
