@@ -232,12 +232,18 @@
       timerEl.textContent = seconds;
       if (seconds <= 0) {
         clearInterval(countdown);
-        try {
-          chrome.runtime.sendMessage({ type: 'CLOSE_TAB' });
-        } catch (e) {
-          console.error('Failed to send close message', e);
-        }
-        window.close();
+        
+        // Attempt to close via background script first
+        chrome.runtime.sendMessage({ type: 'CLOSE_TAB' }, () => {
+          // Callback received (or ignored), try window.close as fallback
+          if (chrome.runtime.lastError) {
+            console.warn('Close message error:', chrome.runtime.lastError);
+          }
+          window.close();
+        });
+        
+        // Hard fallback if message hangs
+        setTimeout(() => window.close(), 500);
       }
     }, 1000);
   </script>
