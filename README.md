@@ -1,10 +1,13 @@
 <div align="center">
-  <img src="tuneflow-extension/assets/icon-128.png" width="100" alt="tuneport logo" />
+  <img src="tuneport-extension/assets/icon-128.png" width="100" alt="tuneport logo" />
 
-  a chrome extension that syncs youtube videos to spotify playlists and downloads audio.
+  **tuneport**
+
+  sync youtube to spotify. download lossless audio. zero friction.
 
   [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
   [![node](https://img.shields.io/badge/node-18%2B-blue)](package.json)
+  [![platform](https://img.shields.io/badge/platform-chrome-grey)](manifest.json)
 
   <br/>
 
@@ -13,73 +16,95 @@
 
 ---
 
-## quickstart
+## overview
 
-1. download the latest release from github.
-2. unzip the archive.
-3. open `chrome://extensions` and enable **developer mode**.
-4. click **load unpacked** and select the unzipped folder.
+tuneport bridges the gap between youtube's discovery algorithm and spotify's library management. it detects the video you're watching, finds the best match on spotify, and adds it to your chosen playlist with a single click.
+
+unlike other sync tools, tuneport also offers **simultaneous downloads**. it checks lossless sources (qobuz, tidal, deezer) via lucida before falling back to youtube's audio stream, ensuring you always get the highest quality file for your local archive.
 
 ## features
 
-- **one-click sync**: adds youtube videos to spotify playlists via right-click context menu.
-- **dual action**: downloads audio locally while syncing to spotify.
-- **smart matching**: uses jaro-winkler similarity to match fuzzy titles.
-- **source fallback**: tries lossless sources (lucida) first, falls back to youtube (cobalt).
-- **client-side**: no backend server. authentication happens directly with spotify.
+-   **instant sync**: right-click any video -> "add to playlist".
+-   **smart matching**: uses jaro-winkler fuzzy matching to handle "official video", "lyrics", and "ft." noise.
+-   **dual pipeline**: adds to spotify + downloads to disk in parallel.
+-   **lossless first**: prioritizes flac/320kbps from studio sources; falls back to cobalt (youtube) if unavailable.
+-   **duplicate guard**: checks destination playlist before adding to prevent clutter.
+-   **privacy**: runs entirely in the browser. no backend server. no data collection.
 
-## how it works
+## quickstart
 
-```mermaid
-graph LR
-  A[user right-clicks] --> B{extract metadata}
-  B --> C[search spotify]
-  C -->|match found| D[add to playlist]
-  C -->|no match| E[notify user]
-  B --> F{download enabled?}
-  F -->|yes| G[fetch audio]
-  G --> H[save to disk]
-```
+### manual installation
 
-1. content script extracts video title and channel from the active tab.
-2. background service sanitizes the title (removes "official video", "lyrics", etc).
-3. searches spotify api with multi-query fallback.
-4. adds track to selected playlist if confidence score > 0.5.
-5. downloads audio via cobalt or lucida api if enabled in settings.
-
-## usage
+1.  download the latest `tuneport-github-v*.zip` from [releases](https://github.com/Microck/tuneflow/releases).
+2.  unzip the archive.
+3.  navigate to `chrome://extensions`.
+4.  enable **developer mode** (top right toggle).
+5.  click **load unpacked** and select the unzipped folder.
 
 ### configuration
 
-access settings via the popup gear icon.
+click the extension icon or access settings via the right-click menu.
 
-```json
-{
-  "default_playlist": "ask every time",
-  "quality": "mp3-320",
-  "naming": "artist - title",
-  "sources": ["cobalt", "lucida"]
-}
+-   **default playlist**: set a target to skip the selection menu.
+-   **download quality**: choose between `best` (auto), `mp3-320`, or `flac`.
+-   **lossless sources**: enable "lucida" in advanced settings for high-fidelity downloads.
+
+## development
+
+### prerequisites
+
+-   node.js 18+
+-   npm 8+
+
+### setup
+
+```bash
+# clone repository
+git clone https://github.com/Microck/tuneflow.git
+cd tuneflow
+
+# install dependencies
+npm install
+
+# start dev server (watch mode)
+npm run dev
 ```
 
-### commands
+load the `tuneport-extension/dist` folder in chrome as an unpacked extension.
 
-- **right-click video**: opens context menu with playlist options.
-- **popup click**: allows manual sync of current tab.
+### building
 
-## project structure
+```bash
+# build for chrome web store (restricted features)
+npm run build:webstore
 
+# build for github release (full features)
+npm run build:github
 ```
-tuneflow-extension/
-├── src/
-│   ├── background/    # service worker & api logic
-│   ├── content/       # youtube dom scraper
-│   ├── popup/         # react ui for extension
-│   ├── settings/      # options page
-│   └── services/      # spotify, cobalt, lucida integrations
-├── scripts/           # build & package tools
-└── assets/            # icons & static files
+
+## architecture
+
+```mermaid
+graph TD
+    A[content script] -->|video metadata| B[background service]
+    B -->|auth| C[spotify api]
+    B -->|download| D{download service}
+    D -->|priority 1| E[lucida (lossless)]
+    D -->|priority 2| F[cobalt (youtube)]
+    C -->|success| G[notification]
+    D -->|success| H[chrome.downloads]
 ```
+
+## troubleshooting
+
+**"not authenticated with spotify"**
+click the tuneport icon in the toolbar and hit "connect spotify". the token refreshes automatically.
+
+**"download failed"**
+ensure the cobalt instance URL in settings is reachable. default: `https://api.cobalt.tools`.
+
+**"track not found"**
+the matching algorithm requires a clean title format (e.g., "Artist - Title"). heavy remix/mashup titles may fail confidence checks.
 
 ## license
 

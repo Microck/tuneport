@@ -3,7 +3,7 @@
   "manifest_version": 3,
   "name": "TunePort - YouTube to Spotify",
   "version": "2.0.0",
-  "description": "Add YouTube videos to Spotify playlists and download high-quality audio",
+  "description": "Sync YouTube videos to Spotify and download lossless audio.",
   "permissions": [
     "contextMenus",
     "storage",

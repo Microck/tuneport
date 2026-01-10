@@ -33,10 +33,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/tuneport.git"
+    "url": "https://github.com/Microck/tuneflow.git"
   },
   "bugs": {
-    "url": "https://github.com/your-username/tuneport/issues"
+    "url": "https://github.com/Microck/tuneflow/issues"
   },
-  "homepage": "https://github.com/your-username/tuneport#readme"
+  "homepage": "https://github.com/Microck/tuneflow#readme"
 }
