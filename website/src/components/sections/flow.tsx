@@ -1,8 +1,10 @@
 "use client";
 
 import React, { forwardRef, useRef } from "react";
+import Image from "next/image";
 
 import { cn } from "@/lib/utils";
+
 import { AnimatedBeam } from "@/components/ui/animated-beam";
 
 const Circle = forwardRef<
@@ -59,7 +61,7 @@ export function Flow() {
   const div4Ref = useRef<HTMLDivElement>(null);
 
   return (
-    <section className="container py-24 sm:py-32">
+    <section className="container py-24 sm:py-32" id="how-it-works">
       <div className="flex flex-col items-center justify-center gap-4 text-center">
         <h2 className="text-3xl font-bold tracking-tighter text-slate-900 md:text-4xl">
           Seamless Integration
@@ -83,8 +85,15 @@ export function Flow() {
             </div>
             
             <div className="flex flex-col items-center gap-2">
-              <Circle ref={div4Ref}>
-                <TunePortIcon className="size-6 text-amber-500" />
+              <Circle ref={div4Ref} className="size-16">
+                 <div className="relative h-10 w-10">
+                  <Image 
+                    src="/logo.png" 
+                    fill 
+                    alt="TunePort" 
+                    className="object-contain" 
+                  />
+                </div>
               </Circle>
               <span className="text-sm font-medium text-slate-700">TunePort</span>
             </div>
