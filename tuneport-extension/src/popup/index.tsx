@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -174,10 +174,9 @@ interface QualityPreset {
 
 const QUALITY_PRESETS: QualityPreset[] = [
   { id: 'best', label: 'Opus (Best)', format: 'best', description: 'Native YouTube quality. ~128kbps Opus, equivalent to MP3 320kbps.' },
-  { id: 'opus', label: 'Opus', format: 'opus', description: 'Same as Best. Direct stream, no re-encoding.' },
-  { id: 'mp3', label: 'MP3', format: 'mp3', description: 'Universal compatibility. Re-encoded from Opus source.' },
+  { id: 'mp3', label: 'MP3', format: 'mp3', description: 'Universal compatibility. Re-encoded from source.' },
   { id: 'ogg', label: 'OGG Vorbis', format: 'ogg', description: 'Open format. Good for Linux/FOSS applications.' },
-  { id: 'wav', label: 'WAV', format: 'wav', description: 'Uncompressed audio. Large files, lossless from transcode.' },
+  { id: 'wav', label: 'WAV', format: 'wav', description: 'Uncompressed audio. Large files.' },
 ];
 
 const FILE_NAMING_OPTIONS = [
@@ -398,6 +397,9 @@ export const TunePortPopup: React.FC = () => {
   const [selectedPlaylist, setSelectedPlaylist] = useState<any | null>(null);
   const [playlistSearch, setPlaylistSearch] = useState('');
 
+  const qualityDropdownRef = useRef<HTMLDivElement>(null);
+  const playlistDropdownRef = useRef<HTMLDivElement>(null);
+
   const logoUrl = useMemo(() => chrome.runtime.getURL('assets/logo.png'), []);
 
   useEffect(() => {
@@ -408,6 +410,21 @@ export const TunePortPopup: React.FC = () => {
     
     const interval = setInterval(loadJobs, 2000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (qualityDropdownRef.current && !qualityDropdownRef.current.contains(event.target as Node)) {
+        setShowQualityDropdown(false);
+      }
+      if (playlistDropdownRef.current && !playlistDropdownRef.current.contains(event.target as Node)) {
+        setShowPlaylistDropdown(false);
+        setPlaylistSearch('');
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const loadSettings = async () => {
@@ -791,7 +808,7 @@ export const TunePortPopup: React.FC = () => {
                   </div>
 
                   {enableDownload && (
-                    <div className="relative">
+                    <div className="relative" ref={qualityDropdownRef}>
                       <button
                         onClick={() => setShowQualityDropdown(!showQualityDropdown)}
                         className="w-full flex items-center justify-between p-3 rounded-2xl border border-tf-border bg-white hover:border-tf-emerald transition-all"
@@ -823,7 +840,7 @@ export const TunePortPopup: React.FC = () => {
                     </div>
                   )}
 
-                  <div className="relative">
+                  <div className="relative" ref={playlistDropdownRef}>
                     <button
                       onClick={() => setShowPlaylistDropdown(!showPlaylistDropdown)}
                       className="w-full flex items-center justify-between p-3 rounded-2xl border border-tf-border bg-white hover:border-tf-emerald transition-all"
