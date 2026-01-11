@@ -1,5 +1,19 @@
 # changelog
 
+## v2.2.5
+
+**release date:** 2026-01-11
+
+ui polish and improved preset descriptions.
+
+### changes
+
+- **preset descriptions**: quality presets now show detailed descriptions in settings (e.g., "native youtube quality, ~128kbps opus, equivalent to mp3 320kbps").
+- **saved indicator**: moved "saved" notification to header to prevent layout shifts.
+- **spotify tutorial**: updated wording to clarify that local files is disabled by default and improved step-by-step instructions for adding custom folders.
+
+---
+
 ## v2.2.0
 
 **release date:** 2026-01-10
