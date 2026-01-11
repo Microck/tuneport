@@ -65,10 +65,9 @@ const DEFAULT_SETTINGS: SettingsState = {
 
 const QUALITY_OPTIONS = [
   { id: 'best', label: 'Opus (Best)', description: 'Native YouTube quality. ~128kbps Opus, equivalent to MP3 320kbps.' },
-  { id: 'opus', label: 'Opus', description: 'Same as Best. Direct stream, no re-encoding.' },
-  { id: 'mp3', label: 'MP3', description: 'Universal compatibility. Re-encoded from Opus source.' },
+  { id: 'mp3', label: 'MP3', description: 'Universal compatibility. Re-encoded from source.' },
   { id: 'ogg', label: 'OGG Vorbis', description: 'Open format. Good for Linux/FOSS applications.' },
-  { id: 'wav', label: 'WAV', description: 'Uncompressed audio. Large files, lossless from transcode.' }
+  { id: 'wav', label: 'WAV', description: 'Uncompressed audio. Large files.' }
 ];
 
 const FILE_NAMING_OPTIONS = [
