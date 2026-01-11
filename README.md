@@ -124,7 +124,7 @@ the matching algorithm requires a clean title format (e.g., "Artist - Title"). h
 
 ## technical documentation
 
-for details on youtube's audio infrastructure, codec choices, and why opus ~128kbps rivals mp3 320kbps, see [`docs/paper.pdf`](docs/paper.pdf).
+for details on youtube's audio infrastructure, codec choices, and why opus ~128kbps rivals mp3 320kbps, see [`docs/archival_and_transcoding.pdf`](docs/archival_and_transcoding.pdf).
 
 ## license
 
