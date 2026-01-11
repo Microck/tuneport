@@ -117,7 +117,7 @@ graph TD
 click the tuneport icon in the toolbar and hit "connect spotify". the token refreshes automatically.
 
 **"download failed"**
-ensure the cobalt instance URL in settings is reachable. default: `https://cobalt.micr.dev`. backup: `http://141.145.192.88:9000`. downloads may require a one-time verification via the "verify download access" popup.
+ensure the cobalt instance URL in settings is reachable. default: `https://cobalt.micr.dev`. downloads may require a one-time verification via the "verify download access" popup.
 
 **"track not found"**
 the matching algorithm requires a clean title format (e.g., "Artist - Title"). heavy remix/mashup titles may fail confidence checks.
