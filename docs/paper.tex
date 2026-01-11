@@ -1,0 +1,201 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{cite}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{hyperref}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{subcaption}
+\usepackage{microtype}
+\usepackage{ragged2e}
+\usepackage{float}
+
+\setlength{\emergencystretch}{1em}
+\sloppy
+
+\begin{document}
+
+\title{Generation Loss in Digital Archival: Why Transcoding Destroys Fidelity}
+
+\author{
+\IEEEauthorblockN{By 5 aka M. J.}
+\IEEEauthorblockA{
+Independent Researcher, 11 Jan 2026\\
+contact@micr.dev\\
+}
+}
+
+\maketitle
+
+\begin{abstract}
+User-generated audio on video platforms has become a massive, unplanned music archive. Yet, serious misconceptions persist about the quality of these streams. Commercial converters profit from this confusion, selling "320kbps MP3" tools that cannot mathematically exist given the source material. In this paper, I evaluate YouTube's actual delivery infrastructure. Through spectral analysis and codec specification review, I demonstrate that the platform's standard format---Opus at approximately 130kbps---provides superior spectral fidelity (20kHz cutoff) compared to the legacy AAC-LC format (16kHz cutoff). While Premium tiers and surround sound options offer higher bitrates (up to 384kbps), they remain inaccessible to standard extraction tools. Furthermore, I quantify the degradation introduced by transcoding these lossy streams to MP3, establishing that such "upscaling" increases file size by 250\% while introducing generation loss. Finally, I discuss verification methodologies using spectral analysis tools like Spek to validate true lossless files against inflated transcodes.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Audio Codecs, Opus, AAC, Generation Loss, Digital Archival, Spectral Analysis, Spek
+\end{IEEEkeywords}
+
+\section{Introduction}
+\label{sec:intro}
+
+The digital audio landscape is characterized by a trade-off between bandwidth efficiency and spectral fidelity. YouTube, serving billions of hours of content daily, utilizes adaptive bitrate streaming (DASH) to optimize this balance. Despite this, a persistent myth exists among end-users: that "320kbps MP3" represents the gold standard for ripped audio.
+
+Commercial "YouTube to MP3" converters exploit this misconception by performing deceptive upsampling. These services decode the ~128kbps source stream and re-encode it at 320kbps, padding the file with null data without restoring missing frequencies.
+
+This paper aims to:
+\begin{enumerate}
+    \item Contrast YouTube's recommended upload specifications \cite{youtube2024specs} with its actual streaming delivery architecture.
+    \item Compare the spectral performance of the Opus \cite{rfc6716, valin2016opus} and AAC \cite{iso14496-3, moser2005heaac} codecs.
+    \item Mathematically and empirically demonstrate the destructive nature of transcoding \cite{wikipedia2024genloss}.
+    \item Outline methodologies for detecting fake high-bitrate files using spectral analysis \cite{spek}.
+\end{enumerate}
+
+The findings in this paper are corroborated by direct spectral analysis of YouTube streams, official codec documentation \cite{rfc6716, iso14496-3}, and community verification efforts from the r/audiophile and r/youtubedl research groups \cite{reddit2020myth, reddit2021ytdl}.
+
+\section{Audio Architecture}
+\label{sec:architecture}
+
+YouTube decouples audio and video into separate DASH streams, identified by integer "Itags". Clients independently request audio streams based on bandwidth availability, decoder support, and account tier.
+
+\subsection{Supported Formats}
+
+Table \ref{tab:formats} details the primary audio formats. Data is derived from independent analyses \cite{audiomisc2023yt, newpipe2024itag} and client manifests. It is crucial to note that while YouTube accepts lossless uploads (FLAC/PCM), the client is always served a compressed stream.
+
+\begin{table}[t]
+\centering
+\caption{YouTube Audio Stream Specifications}
+\label{tab:formats}
+\begin{tabular}{llccc}
+\toprule
+\textbf{Itag} & \textbf{Codec} & \textbf{Container} & \textbf{Bitrate} & \textbf{Notes} \\
+\midrule
+380 & EC-3 & .m4a & 384k & 5.1 Surround \\
+141 & AAC-LC & .m4a & 256k & Premium Only \\
+\textbf{251} & \textbf{Opus} & \textbf{.webm} & \textbf{130--160k} & \textbf{Standard Best} \\
+140 & AAC-LC & .m4a & 128k & Legacy Default \\
+250 & Opus & .webm & 60--80k & Mobile \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{The Opus Advantage}
+
+For the vast majority of users (non-Premium, stereo playback), Opus (Itag 251) is the highest quality option. It employs a hybrid architecture combining linear predictive coding (SILK) for speech and a modified discrete cosine transform (CELT) for music \cite{valin2016opus}. It utilizes spectral folding to reconstruct high-frequency content, allowing it to maintain a 20kHz bandwidth even at lower bitrates \cite{xiph2024opus}.
+
+In contrast, YouTube's implementation of the AAC-LC profile (Itag 140) applies a steep low-pass filter at approximately 16kHz. This is not an inherent limitation of the AAC codec, but rather a configuration choice in YouTube's encoding pipeline. This results in the loss of nearly 4kHz of audible high-frequency content. While the Premium-exclusive Itag 141 (256kbps AAC) likely mitigates this, it remains inaccessible for standard archival tools.
+
+\section{The Fallacy of Transcoding}
+\label{sec:transcoding}
+
+Commercial "YouTube to MP3" services operate on a flawed premise: that converting a 128kbps source to a 320kbps container improves, or at least preserves, quality. In reality, this process introduces \textit{generation loss}.
+
+\subsection{Theoretical Framework}
+
+Let $S$ be the original PCM signal. The YouTube encoding chain produces:
+\begin{equation}
+S_{yt} = E_{opus}(S) = S + \epsilon_{opus}
+\end{equation}
+where $\epsilon_{opus}$ represents quantization noise and psychoacoustic removal.
+
+When a user transcodes this to MP3:
+\begin{equation}
+S_{final} = E_{mp3}(D_{opus}(S_{yt})) = S + \epsilon_{opus} + \epsilon_{mp3} + \delta
+\end{equation}
+The term $\epsilon_{mp3}$ represents new quantization artifacts introduced by the MP3 encoder trying to model the already-compressed signal \cite{rao2021coding}. The result is strictly worse than the source.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{genloss_diagram.png}
+\caption{The generation loss pipeline. Re-encoding compressed audio (Opus) to another lossy format (MP3) cumulatively adds artifacts ($\epsilon$) without restoring missing data.}
+\label{fig:genloss}
+\end{figure}
+
+\subsection{Storage Inefficiency}
+
+Transcoding 130kbps Opus to 320kbps MP3 results in a file size increase of approximately 250\%:
+\begin{equation}
+\Delta_{size} = \frac{320\text{kbps}}{130\text{kbps}} \approx 2.46\times
+\end{equation}
+This storage penalty incurs zero information gain.
+
+\section{Validation Methodology}
+\label{sec:validation}
+
+To distinguish between true high-fidelity audio and upscaled transcoding, spectral analysis is required. Tools such as Spek (Acoustic Spectrum Analyser) allow for visual inspection of the audio frequency domain \cite{spek}.
+
+\subsection{Spectral Signatures}
+
+\begin{enumerate}
+    \item \textbf{True 320kbps MP3}: Shows energy content reaching up to 20kHz or 22kHz, with a gradual rolloff.
+    \item \textbf{Upscaled Transcode}: Exhibits a "hard shelf" cut-off at 16kHz (if sourced from AAC) or distinct block artifacts above 16kHz (if sourced from Opus), despite the file header reporting a 320kbps bitrate \cite{reddit2020myth}.
+    \item \textbf{Opus (Itag 251)}: Displays energy up to 20kHz but with a characteristic noise floor pattern in the high frequencies due to spectral folding.
+\end{enumerate}
+
+\subsection{The Spek Test}
+
+In my experiments, files downloaded from popular "YouTube to MP3" sites consistently failed the spectral validation. While the metadata reported 320kbps, the spectrograms revealed a hard cut-off at 16kHz, confirming the source was the inferior Itag 140 (AAC) stream, padded with zeros to inflate the bitrate. This practice is not merely inefficient; it is deceptive.
+
+\section{Archival Recommendations}
+\label{sec:recommendations}
+
+Based on this analysis, I propose the following design principles for audio archival software:
+
+\begin{enumerate}
+    \item \textbf{Native Extraction}: Always prefer direct stream extraction (Itag 251/.webm) over transcoding.
+    \item \textbf{Stream Selection}: Advanced archivers should query for Itag 141 (Premium) or 380 (5.1 Surround) availability before defaulting to Opus.
+    \item \textbf{Transparent Labeling}: UI should reflect the actual source bitrate ($\sim$128-160k) rather than the container target.
+    \item \textbf{Format Education}: Users must be informed that Opus at 128kbps is perceptually transparent and superior to MP3 at 192kbps \cite{xiph2024opus}.
+\end{enumerate}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+The belief that "320kbps" implies quality is a relic of the MP3 era. In the context of YouTube's standard free tier infrastructure, Itag 251 (Opus) represents the archival gold standard. While higher bitrate options exist for Premium subscribers, they are rarely the source for common third-party conversion tools. Consequently, tools that transcode standard streams to 320kbps MP3 are not only inefficient but actively destructive. Future archival systems must prioritize native stream preservation and educate users on spectral validation to ensure the integrity of their digital libraries.
+
+\begin{thebibliography}{1}
+
+\bibitem{youtube2024specs}
+Google LLC, ``Recommended upload encoding settings,'' YouTube Help Center, 2024, accessed: 2025-01-10. [Online]. Available: \url{https://support.google.com/youtube/answer/1722171}
+
+\bibitem{rfc6716}
+J.-M. Valin, K.~Vos, and T.~B. Terriberry, ``Definition of the opus audio codec,'' Internet Engineering Task Force, RFC 6716, Sep. 2012. [Online]. Available: \url{https://tools.ietf.org/html/rfc6716}
+
+\bibitem{valin2016opus}
+J.-M. Valin, G.~Maxwell, T.~B. Terriberry, and K.~Vos, ``High-quality, low-delay music coding in the opus codec,'' \emph{Proceedings of the 135th Audio Engineering Society Convention}, 2013, paper 8942. [Online]. Available: \url{https://jmvalin.ca/papers/aes135_opus_celt.pdf}
+
+\bibitem{iso14496-3}
+International Organization for Standardization, ``Information technology -- coding of audio-visual objects -- part 3: Audio,'' ISO/IEC 14496-3:2019, 2019.
+
+\bibitem{moser2005heaac}
+G.~Moser and T.~Neukirch, ``Mpeg-4 he-aac v2 -- audio coding for today's digital media world,'' \emph{EBU Technical Review}, no. 305, Jan. 2005. [Online]. Available: \url{https://tech.ebu.ch/docs/techreview/trev_305-moser.pdf}
+
+\bibitem{wikipedia2024genloss}
+Wikipedia Contributors, ``Generation loss,'' 2024, accessed: 2025-01-10. [Online]. Available: \url{https://en.wikipedia.org/wiki/Generation_loss}
+
+\bibitem{spek}
+The Spek Team, ``Spek – acoustic spectrum analyser,'' 2024, accessed: 2026-01-11. [Online]. Available: \url{http://spek.cc/}
+
+\bibitem{audiomisc2023yt}
+C.~Sherlaw-Johnson, ``Youtube audio quality: Spot the difference,'' 2023, independent spectral analysis of YouTube audio streams. [Online]. Available: \url{https://www.audiomisc.co.uk/YouTube/SpotTheDifference.html}
+
+\bibitem{newpipe2024itag}
+TeamNewPipe, ``Discussion: Opus 251 bitrate clarification,'' 2024, gitHub Discussions \#10762. [Online]. Available: \url{https://github.com/TeamNewPipe/NewPipe/discussions/10762}
+
+\bibitem{xiph2024opus}
+Xiph.Org Foundation, ``Opus recommended settings,'' 2024, accessed: 2025-01-10. [Online]. Available: \url{https://wiki.xiph.org/Opus_Recommended_Settings}
+
+\bibitem{rao2021coding}
+A.~Rao, S.~I. Mimilakis, G.~Schuller, and IIS Fraunhofer, ``On the effect of perceptual audio coding artifacts on acoustic scene classification,'' in \emph{Proceedings of the Detection and Classification of Acoustic Scenes and Events Workshop}, 2021, pp. 48--52.
+
+\bibitem{reddit2020myth}
+r/4kdownloadapps, ``Youtube myth busted: 320kbps audio availability,'' 2020, reddit thread. [Online]. Available: \url{https://www.reddit.com/r/4kdownloadapps/comments/hbcb28/}
+
+\bibitem{reddit2021ytdl}
+r/youtubedl, ``What happened to the \#141 256k aac format?'' 2021, reddit thread. [Online]. Available: \url{https://www.reddit.com/r/youtubedl/comments/gluww7/}
+
+\end{thebibliography}
+
+\end{document}

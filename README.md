@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <img src="./docs/tuneport.gif" width="1000" alt="tuneport preview" />
+  <img src="./assets/tuneport.gif" width="1000" alt="tuneport preview" />
 </p>
 
 ---
@@ -124,7 +124,7 @@ the matching algorithm requires a clean title format (e.g., "Artist - Title"). h
 
 ## technical documentation
 
-for details on youtube's audio infrastructure, codec choices, and why opus ~128kbps rivals mp3 320kbps, see [`docs/report.tex`](docs/report.tex).
+for details on youtube's audio infrastructure, codec choices, and why opus ~128kbps rivals mp3 320kbps, see [`docs/paper.pdf`](docs/paper.pdf).
 
 ## license
 
