@@ -117,7 +117,7 @@ const features = [
     Icon: FileAudio,
     name: "Lossless Audio",
     description: "Prioritizes FLAC from Lucida (Qobuz/Tidal) or falls back to high-quality Opus.",
-    href: "https://github.com/Microck/tuneport/blob/main/docs/archival_and_transcoding.pdf",
+    href: "/research",
     cta: "Read docs",
     className: "col-span-3 lg:col-span-2 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
     background: <LosslessAudioBackground />,

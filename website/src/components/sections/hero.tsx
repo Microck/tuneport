@@ -5,8 +5,10 @@ import Link from "next/link";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
+import { Button } from "@/components/ui/button";
 import { TextAnimate } from "@/components/ui/text-animate";
 import { cn } from "@/lib/utils";
+import { Github } from "lucide-react";
 
 export function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -41,13 +43,22 @@ export function Hero() {
         repeatDelay={1}
         className={cn(
           "[mask-image:radial-gradient(800px_circle_at_center,white,transparent)]",
-          "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12 mix-blend-multiply opacity-50"
+          "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12 mix-blend-multiply opacity-50",
+          "text-rose-500/20"
         )}
       />
 
       <div className="z-10 flex w-full max-w-5xl flex-col items-center gap-8 text-center">
         
         <div className="flex flex-col items-center gap-4">
+          <div className="flex items-center gap-2 rounded-full border border-rose-100 bg-rose-50/50 px-3 py-1 text-sm font-medium text-rose-600 backdrop-blur-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+            </span>
+            Open Source
+          </div>
+
           <TextAnimate
             animation="blurInUp"
             by="character"
@@ -64,13 +75,20 @@ export function Hero() {
             The missing link between YouTube and Spotify.
           </TextAnimate>
 
-          <div className="mt-8 flex gap-4">
+          <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center">
             <Link href="https://chromewebstore.google.com/detail/tuneport/..." target="_blank">
               <ShimmerButton className="shadow-2xl h-12 px-8">
                 <span className="whitespace-pre-wrap text-center text-base font-semibold leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg">
                   Add to Chrome
                 </span>
               </ShimmerButton>
+            </Link>
+            
+            <Link href="https://github.com/Microck/tuneport" target="_blank">
+              <Button variant="outline" className="h-12 px-8 border-slate-200 hover:bg-slate-50 text-slate-700 font-medium">
+                <Github className="mr-2 h-4 w-4" />
+                Go to GitHub
+              </Button>
             </Link>
           </div>
         </div>
@@ -81,7 +99,7 @@ export function Hero() {
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
         >
-          <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/30 to-rose-500/30 blur-3xl opacity-50 rounded-[3rem]" />
+          <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 via-slate-500/10 to-rose-500/20 blur-3xl opacity-60 rounded-[3rem]" />
 
           <div
             ref={containerRef}
@@ -91,7 +109,7 @@ export function Hero() {
               transitionDuration: "300ms",
             }}
           >
-            <BorderBeam size={250} duration={12} delay={9} className="opacity-50" />
+            <BorderBeam size={250} duration={12} delay={9} className="opacity-50 from-emerald-500 via-rose-500 to-emerald-500" />
             <video
               src="/tuneport.mp4"
               autoPlay
