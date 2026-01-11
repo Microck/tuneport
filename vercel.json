@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd website && npm install && npm run build",
-  "outputDirectory": "website/.next",
+  "buildCommand": "if [ -d \"website\" ]; then cd website && npm install && npm run build && mv out ..; else npm install && npm run build; fi",
+  "outputDirectory": "out",
   "framework": "nextjs"
 }
