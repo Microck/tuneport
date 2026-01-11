@@ -1,5 +1,19 @@
 # changelog
 
+## v2.2.7
+
+**release date:** 2026-01-11
+
+improved download reliability with self-hosted cobalt instances and authenticated access.
+
+### changes
+
+- **cobalt authentication**: added support for jwt-based authentication to prevent rate limiting and improve stability.
+- **self-hosted infrastructure**: switched default download instances to self-hosted servers for better performance.
+- **context menu fix**: resolved an issue where the right-click menu might not initialize correctly after an update.
+
+---
+
 ## v2.2.5
 
 **release date:** 2026-01-11

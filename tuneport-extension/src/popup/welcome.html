@@ -4,7 +4,115 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Welcome to TuneFlow</title>
-  <link rel="stylesheet" href="welcome.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      margin: 0;
+      padding: 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 600px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    h1 {
+      color: #333;
+      margin: 0 0 10px 0;
+      font-size: 32px;
+    }
+    p {
+      color: #666;
+      line-height: 1.6;
+      margin: 0 0 20px 0;
+    }
+    .emoji {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    .steps {
+      background: #f7fafc;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      margin: 15px 0;
+    }
+    .step-number {
+      background: #22c55e;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 15px;
+      flex-shrink: 0;
+    }
+    .step-content {
+      flex: 1;
+    }
+    .step-title {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+    .step-desc {
+      color: #6b7280;
+      font-size: 14px;
+      margin: 0;
+    }
+    .button {
+      display: inline-block;
+      background: #22c55e;
+      color: white;
+      text-decoration: none;
+      padding: 15px 40px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 16px;
+      margin-top: 20px;
+      transition: background 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .button:hover {
+      background: #16a34a;
+    }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .feature {
+      background: #f0fdf4;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 3px solid #22c55e;
+    }
+    .feature h3 {
+      margin: 0 0 5px 0;
+      font-size: 16px;
+      color: #166534;
+    }
+    .feature p {
+      margin: 0;
+      font-size: 13px;
+      color: #15803d;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -70,13 +178,17 @@
     </div>
 
     <div style="text-align: center;">
-      <button class="button" id="close-btn">Let's Go!</button>
+      <button class="button" onclick="closePage()">Let's Go!</button>
       <p style="margin-top: 15px; font-size: 13px; color: #9ca3af;">
         You can always find TuneFlow in your browser toolbar
       </p>
     </div>
   </div>
 
-  <script src="welcome.js"></script>
+  <script>
+    function closePage() {
+      window.close();
+    }
+  </script>
 </body>
 </html>

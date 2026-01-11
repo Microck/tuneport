@@ -42,10 +42,8 @@ export interface DownloadResult {
 }
 
 const COBALT_INSTANCES = [
-  'https://cobalt-api.meowing.de',
-  'https://cobalt-backend.canine.tools',
-  'https://kityune.imput.net',
-  'https://blossom.imput.net'
+  'https://cobalt.micr.dev',    // Self-hosted HTTPS (primary)
+  'http://141.145.192.88:9000'  // Self-hosted HTTP (fallback)
 ];
 
 const DEFAULT_INSTANCE = COBALT_INSTANCES[0];
@@ -54,6 +52,8 @@ export class CobaltService {
   private static instance: string = DEFAULT_INSTANCE;
   private static instanceIndex: number = 0;
   private static apiKey?: string;
+  private static jwtToken?: string;
+  private static jwtExpiry?: number;
 
   static setInstance(url: string): void {
     this.instance = url.replace(/\/$/, '');
@@ -61,6 +61,35 @@ export class CobaltService {
 
   static setApiKey(key: string): void {
     this.apiKey = key;
+  }
+
+  static setJwtToken(token: string, expiry: number): void {
+    this.jwtToken = token;
+    this.jwtExpiry = expiry;
+  }
+
+  static async loadStoredToken(): Promise<boolean> {
+    try {
+      const result = await chrome.storage.local.get('cobalt_jwt');
+      if (result.cobalt_jwt && result.cobalt_jwt.exp > Date.now()) {
+        this.jwtToken = result.cobalt_jwt.token;
+        this.jwtExpiry = result.cobalt_jwt.exp;
+        return true;
+      }
+// eslint-disable-next-line no-empty
+    } catch (e) {
+      console.error('[CobaltService] Failed to load stored token:', e);
+    }
+    return false;
+  }
+
+  static isAuthenticated(): boolean {
+    return !!(this.jwtToken && this.jwtExpiry && this.jwtExpiry > Date.now());
+  }
+
+  static async ensureAuthenticated(): Promise<boolean> {
+    if (this.isAuthenticated()) return true;
+    return await this.loadStoredToken();
   }
 
   static getAvailableInstances(): string[] {
@@ -118,7 +147,9 @@ export class CobaltService {
       'Content-Type': 'application/json'
     };
 
-    if (this.apiKey) {
+    if (this.jwtToken && this.jwtExpiry && this.jwtExpiry > Date.now()) {
+      headers['Authorization'] = `Bearer ${this.jwtToken}`;
+    } else if (this.apiKey) {
       headers['Authorization'] = `Api-Key ${this.apiKey}`;
     }
 

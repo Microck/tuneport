@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TunePort - Verify Download Access</title>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --tf-emerald: #10b981;
+      --tf-slate: #1e293b;
+      --tf-slate-muted: #64748b;
+      --tf-gray: #f1f5f9;
+      --tf-white: #fafafa;
+    }
+    
+    body {
+      font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: var(--tf-white);
+      padding: 20px;
+    }
+    
+    .container {
+      text-align: center;
+      max-width: 400px;
+    }
+    
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--tf-slate);
+      margin-bottom: 12px;
+    }
+    
+    p {
+      font-size: 14px;
+      color: var(--tf-slate-muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    
+    .turnstile-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    
+    .status {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+    }
+    
+    .status.success {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--tf-emerald);
+    }
+    
+    .status.error {
+      background: rgba(244, 63, 94, 0.1);
+      color: #f43f5e;
+    }
+    
+    .status.loading {
+      background: var(--tf-gray);
+      color: var(--tf-slate-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Verify Download Access</h1>
+    <p>Complete this quick verification to enable audio downloads. This only needs to be done once every few hours.</p>
+    
+    <div class="turnstile-container">
+      <div class="cf-turnstile" 
+           data-sitekey="" 
+           data-callback="onTurnstileSuccess"
+           data-error-callback="onTurnstileError"
+           data-theme="light">
+      </div>
+    </div>
+    
+    <div id="status" class="status loading">Waiting for verification...</div>
+  </div>
+  
+  <script src="cobalt-auth.js"></script>
+</body>
+</html>

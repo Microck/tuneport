@@ -5,6 +5,7 @@
 // Mock chrome API
 const mockStorage: Record<string, any> = {};
 const mockTabs: any[] = [];
+// eslint-disable-next-line @typescript-eslint/ban-types
 const mockListeners: Map<string, Function> = new Map();
 
 global.chrome = {
@@ -68,7 +69,7 @@ global.chrome = {
   }
 };
 
-import { ChromeMessageService, MessageTypes } from '../services/ChromeMessageService';
+import { ChromeMessageService } from '../ChromeMessageService';
 
 describe('ChromeMessageService', () => {
   beforeEach(() => {

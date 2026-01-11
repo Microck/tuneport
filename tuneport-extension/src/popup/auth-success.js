@@ -1,3 +1,4 @@
+/* global chrome */
 const params = new URLSearchParams(window.location.search);
 const userName = params.get('user');
 if (userName) {
