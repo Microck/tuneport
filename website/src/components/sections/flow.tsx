@@ -2,6 +2,7 @@
 
 import React, { forwardRef, useRef } from "react";
 import Image from "next/image";
+import { FileAudio } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -38,21 +39,6 @@ const SpotifyIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const TunePortIcon = ({ className }: { className?: string }) => (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-    </svg>
-);
-
-const FileIcon = ({ className }: { className?: string }) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-        <polyline points="14 2 14 8 20 8" />
-        <path d="M12 18v-6" />
-        <path d="m9 15 3 3 3-3" />
-    </svg>
-);
-
 export function Flow() {
   const containerRef = useRef<HTMLDivElement>(null);
   const div1Ref = useRef<HTMLDivElement>(null);
@@ -72,10 +58,10 @@ export function Flow() {
       </div>
 
       <div
-        className="relative flex h-[500px] w-full items-center justify-center overflow-hidden rounded-lg border bg-white/50 md:shadow-xl mt-12"
+        className="relative flex min-h-[300px] w-full items-center justify-center overflow-hidden rounded-lg border bg-white/50 md:shadow-xl mt-12 py-12"
         ref={containerRef}
       >
-        <div className="flex size-full flex-col max-w-lg max-h-[200px] items-stretch justify-between gap-10">
+        <div className="flex size-full flex-col max-w-2xl items-stretch justify-between gap-12 px-4">
           <div className="flex flex-row items-center justify-between">
             <div className="flex flex-col items-center gap-2">
               <Circle ref={div1Ref}>
@@ -85,7 +71,7 @@ export function Flow() {
             </div>
             
             <div className="flex flex-col items-center gap-2">
-              <Circle ref={div4Ref} className="size-16">
+              <Circle ref={div4Ref} className="size-16 border-emerald-100 bg-emerald-50">
                  <div className="relative h-10 w-10">
                   <Image 
                     src="/logo.png" 
@@ -108,7 +94,7 @@ export function Flow() {
           <div className="flex flex-row items-center justify-center">
              <div className="flex flex-col items-center gap-2">
               <Circle ref={div3Ref}>
-                <FileIcon className="size-6 text-blue-500" />
+                <FileAudio className="size-6 text-emerald-500" />
               </Circle>
               <span className="text-sm font-medium text-slate-700">Sync & Download</span>
             </div>
@@ -121,14 +107,14 @@ export function Flow() {
           toRef={div4Ref}
           pathColor="rgba(200, 200, 200, 0.5)"
           gradientStartColor="#FF0000"
-          gradientStopColor="#F59E0B"
+          gradientStopColor="#10B981"
         />
         <AnimatedBeam
           containerRef={containerRef}
           fromRef={div4Ref}
           toRef={div2Ref}
           pathColor="rgba(200, 200, 200, 0.5)"
-          gradientStartColor="#F59E0B"
+          gradientStartColor="#10B981"
           gradientStopColor="#1DB954"
         />
          <AnimatedBeam
@@ -136,8 +122,8 @@ export function Flow() {
           fromRef={div4Ref}
           toRef={div3Ref}
           pathColor="rgba(200, 200, 200, 0.5)"
-          gradientStartColor="#F59E0B"
-          gradientStopColor="#3B82F6"
+          gradientStartColor="#10B981"
+          gradientStopColor="#10B981"
         />
       </div>
       
