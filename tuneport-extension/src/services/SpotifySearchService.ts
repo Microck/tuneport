@@ -169,6 +169,7 @@ export class SpotifySearchService {
     let offset = 0;
     const limit = 100;
 
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const response = await fetch(
         `https://api.spotify.com/v1/playlists/${playlistId}/tracks?offset=${offset}&limit=${limit}&fields=items(track(uri)),total`,

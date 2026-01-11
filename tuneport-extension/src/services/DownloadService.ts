@@ -178,6 +178,7 @@ export class DownloadService {
 
   private static sanitizeFilename(filename: string): string {
     return filename
+// eslint-disable-next-line no-control-regex
       .replace(/[<>:"/\\|?*\x00-\x1F]/g, '')
       .replace(/\s+/g, ' ')
       .trim()

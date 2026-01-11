@@ -18,6 +18,7 @@ import {
   Download,
   ChevronDown,
   ChevronUp,
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
   Settings,
   User,
   Shield,

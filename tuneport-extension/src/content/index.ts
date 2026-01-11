@@ -253,6 +253,7 @@ const tuneportContentScript = new YouTubeContentScript();
 // Handle context menu clicks
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type === 'CONTEXT_MENU_CLICKED') {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { menuItemId, youtubeUrl } = message.data;
     
     // Get current video data
