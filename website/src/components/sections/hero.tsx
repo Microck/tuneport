@@ -33,7 +33,7 @@ export function Hero() {
   };
 
   return (
-    <section className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-[#FAFAFA] px-4 py-12 md:py-24">
+    <section className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-[#FAFAFA] px-4 pt-32 pb-12 md:pb-24">
       <AnimatedGridPattern
         numSquares={30}
         maxOpacity={0.1}
