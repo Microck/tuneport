@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -308,7 +308,6 @@ const CustomPresetsManager: React.FC<{
             className="w-full px-3 py-2 bg-white border border-tf-border rounded-lg text-xs focus:outline-none focus:border-tf-emerald"
           >
             <option value="best">Opus (Best)</option>
-            <option value="opus">Opus</option>
             <option value="mp3">MP3</option>
             <option value="ogg">OGG</option>
             <option value="wav">WAV</option>
@@ -397,9 +396,6 @@ export const TunePortPopup: React.FC = () => {
   const [selectedPlaylist, setSelectedPlaylist] = useState<any | null>(null);
   const [playlistSearch, setPlaylistSearch] = useState('');
 
-  const qualityDropdownRef = useRef<HTMLDivElement>(null);
-  const playlistDropdownRef = useRef<HTMLDivElement>(null);
-
   const logoUrl = useMemo(() => chrome.runtime.getURL('assets/logo.png'), []);
 
   useEffect(() => {
@@ -410,21 +406,6 @@ export const TunePortPopup: React.FC = () => {
     
     const interval = setInterval(loadJobs, 2000);
     return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (qualityDropdownRef.current && !qualityDropdownRef.current.contains(event.target as Node)) {
-        setShowQualityDropdown(false);
-      }
-      if (playlistDropdownRef.current && !playlistDropdownRef.current.contains(event.target as Node)) {
-        setShowPlaylistDropdown(false);
-        setPlaylistSearch('');
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const loadSettings = async () => {
@@ -808,7 +789,7 @@ export const TunePortPopup: React.FC = () => {
                   </div>
 
                   {enableDownload && (
-                    <div className="relative" ref={qualityDropdownRef}>
+                    <div className="relative">
                       <button
                         onClick={() => setShowQualityDropdown(!showQualityDropdown)}
                         className="w-full flex items-center justify-between p-3 rounded-2xl border border-tf-border bg-white hover:border-tf-emerald transition-all"
@@ -840,7 +821,7 @@ export const TunePortPopup: React.FC = () => {
                     </div>
                   )}
 
-                  <div className="relative" ref={playlistDropdownRef}>
+                  <div className="relative">
                     <button
                       onClick={() => setShowPlaylistDropdown(!showPlaylistDropdown)}
                       className="w-full flex items-center justify-between p-3 rounded-2xl border border-tf-border bg-white hover:border-tf-emerald transition-all"
@@ -1101,11 +1082,6 @@ export const TunePortPopup: React.FC = () => {
                     >
                       {allQualityPresets.map(q => <option key={q.id} value={q.id}>{q.label}</option>)}
                     </select>
-                    {allQualityPresets.find(q => q.id === settings.defaultQuality)?.description && (
-                      <p className="text-[9px] text-tf-slate-muted mt-1">
-                        {allQualityPresets.find(q => q.id === settings.defaultQuality)?.description}
-                      </p>
-                    )}
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-tf-slate mb-1">File Naming</label>
@@ -1226,42 +1202,6 @@ export const TunePortPopup: React.FC = () => {
                       <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.showQualityWarnings ? "left-4" : "left-0.5")} />
                     </button>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-tf-slate">'Not Found' Alerts</p>
-                      <p className="text-[10px] text-tf-slate-muted">Warn if track not found on Spotify</p>
-                    </div>
-                    <button
-                      onClick={() => updateSetting('showNotFoundWarnings', !settings.showNotFoundWarnings)}
-                      className={cn("w-9 h-5 rounded-full transition-all relative", settings.showNotFoundWarnings ? "bg-tf-emerald" : "bg-tf-border")}
-                    >
-                      <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.showNotFoundWarnings ? "left-4" : "left-0.5")} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
-                    <Search className="w-4 h-4" />
-                  </div>
-                  <h2 className="text-sm font-bold text-tf-slate">Track Matching</h2>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-tf-slate mb-1">Fallback Mode</label>
-                  <select
-                    value={settings.spotifyFallbackMode}
-                    onChange={(e) => updateSetting('spotifyFallbackMode', e.target.value as 'auto' | 'ask' | 'never')}
-                    className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
-                  >
-                    <option value="auto">Auto - Use YouTube Music if Spotify fails</option>
-                    <option value="ask">Ask - Prompt before using fallback</option>
-                    <option value="never">Never - Only use Spotify matching</option>
-                  </select>
-                  <p className="text-[9px] text-tf-slate-muted mt-1">
-                    When Spotify can't find a match, try YouTube Music metadata.
-                  </p>
                 </div>
               </div>
 
