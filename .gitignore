@@ -44,3 +44,5 @@ docs/*
 !docs/compile.sh
 !docs/compile.bat
 !docs/TEXWORKS_INSTRUCTIONS.md
+.vercel
+.worktrees/
