@@ -1,17 +1,30 @@
-import { Footer } from "@/components/layout/footer";
-import { Header } from "@/components/layout/header";
+import type { Metadata } from "next";
 import { Features } from "@/components/sections/features";
 import { Flow } from "@/components/sections/flow";
 import { Hero } from "@/components/sections/hero";
 
+export const metadata: Metadata = {
+  title: "YouTube to Spotify Sync",
+  description: "Sync YouTube to Spotify with zero friction. Match tracks, add to playlists, and download audio locally.",
+  openGraph: {
+    title: "YouTube to Spotify Sync",
+    description: "Sync YouTube to Spotify with zero friction. Match tracks, add to playlists, and download audio locally.",
+    url: "https://tuneflow.micr.dev",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "YouTube to Spotify Sync",
+    description: "Sync YouTube to Spotify with zero friction. Match tracks, add to playlists, and download audio locally.",
+  },
+};
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between">
-      <Header />
+    <>
       <Hero />
       <Features />
       <Flow />
-      <Footer />
-    </main>
+    </>
   );
 }

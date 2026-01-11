@@ -1,10 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { BookOpen, ListChecks, Menu, Route, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Header() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
+
+  const linkClassName = (active: boolean) =>
+    `flex items-center gap-2 text-sm font-medium transition-colors ${active ? "text-rose-600" : "text-slate-600 hover:text-slate-900"}`;
+
+  const mobileLinkClassName = (active: boolean) =>
+    `flex items-center gap-2 text-sm font-medium ${active ? "text-rose-600" : "text-slate-700"}`;
+
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
     const element = document.getElementById(id);
@@ -26,26 +38,105 @@ export function Header() {
         <a 
           href="#features" 
           onClick={(e) => scrollToSection(e, "features")}
-          className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900"
+          className={linkClassName(false)}
         >
+          <Sparkles className="h-4 w-4" />
           Features
         </a>
         <a 
           href="#how-it-works" 
           onClick={(e) => scrollToSection(e, "how-it-works")}
-          className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900"
+          className={linkClassName(false)}
         >
+          <Route className="h-4 w-4" />
           How it Works
         </a>
+        <Link
+          href="/research"
+          aria-current={pathname === "/research" ? "page" : undefined}
+          className={linkClassName(pathname === "/research")}
+        >
+          <BookOpen className="h-4 w-4" />
+          Research
+        </Link>
+        <Link
+          href="/tutorial"
+          aria-current={pathname === "/tutorial" ? "page" : undefined}
+          className={linkClassName(pathname === "/tutorial")}
+        >
+          <ListChecks className="h-4 w-4" />
+          Tutorial
+        </Link>
       </nav>
 
-      <div className="flex items-center gap-4">
-        <Link href="https://github.com/Microck/tuneport/releases" target="_blank">
-          <Button size="sm" className="font-medium">
-            Add to Chrome
+      <div className="flex items-center gap-2 md:gap-4">
+        <div className="hidden md:flex flex-col items-end gap-1">
+          <Button size="sm" className="font-medium" disabled>
+            Chrome Web Store soon
           </Button>
-        </Link>
+          <span className="text-xs text-slate-400">Replace URL when published.</span>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={() => setMobileOpen((open) => !open)}
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+        >
+          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </Button>
       </div>
+
+      {mobileOpen && (
+        <div className="absolute top-full left-0 right-0 border-b border-slate-100 bg-white/95 backdrop-blur-md md:hidden">
+          <div className="flex flex-col gap-3 px-6 py-4">
+            <a
+              href="#features"
+              onClick={(e) => {
+                scrollToSection(e, "features");
+                setMobileOpen(false);
+              }}
+              className={mobileLinkClassName(false)}
+            >
+              <Sparkles className="h-4 w-4" />
+              Features
+            </a>
+            <a
+              href="#how-it-works"
+              onClick={(e) => {
+                scrollToSection(e, "how-it-works");
+                setMobileOpen(false);
+              }}
+              className={mobileLinkClassName(false)}
+            >
+              <Route className="h-4 w-4" />
+              How it Works
+            </a>
+            <Link
+              href="/research"
+              className={mobileLinkClassName(pathname === "/research")}
+              onClick={() => setMobileOpen(false)}
+            >
+              <BookOpen className="h-4 w-4" />
+              Research
+            </Link>
+            <Link
+              href="/tutorial"
+              className={mobileLinkClassName(pathname === "/tutorial")}
+              onClick={() => setMobileOpen(false)}
+            >
+              <ListChecks className="h-4 w-4" />
+              Tutorial
+            </Link>
+            <div className="pt-2">
+              <Button size="sm" className="w-full" disabled>
+                Chrome Web Store soon
+              </Button>
+              <span className="mt-2 block text-xs text-slate-400">Replace URL when published.</span>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

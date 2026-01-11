@@ -4,13 +4,24 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Generation Loss Research | TunePort",
-  description: "Why transcoding destroys audio fidelity: A technical analysis of YouTube's delivery infrastructure.",
+  title: "Generation Loss Research",
+  description: "Why transcoding destroys audio fidelity: a technical analysis of YouTube's delivery infrastructure.",
+  openGraph: {
+    title: "Generation Loss Research",
+    description: "Why transcoding destroys audio fidelity: a technical analysis of YouTube's delivery infrastructure.",
+    url: "https://tuneflow.micr.dev/research",
+    type: "article",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Generation Loss Research",
+    description: "Why transcoding destroys audio fidelity: a technical analysis of YouTube's delivery infrastructure.",
+  },
 };
 
 export default function ResearchPage() {
   return (
-    <div className="min-h-screen bg-[#FAFAFA] py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#FAFAFA] pt-24 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-3xl">
         <div className="mb-8">
           <Link href="/">
@@ -34,11 +45,24 @@ export default function ResearchPage() {
             <time>Jan 11, 2026</time>
           </div>
 
-          <div className="bg-rose-50 border border-rose-100 rounded-lg p-6 mb-8">
+          <div className="bg-rose-50 border border-rose-100 rounded-lg p-6 mb-6">
             <h3 className="text-rose-900 font-semibold mt-0 mb-2">Abstract</h3>
             <p className="text-rose-800/80 m-0 text-base leading-relaxed">
               User-generated audio on video platforms has become a massive, unplanned music archive. Yet, serious misconceptions persist about the quality of these streams. Commercial converters profit from this confusion, selling "320kbps MP3" tools that cannot mathematically exist given the source material. This research evaluates YouTube's actual delivery infrastructure, demonstrating that the platform's standard Opus format provides superior spectral fidelity compared to legacy AAC-LC, and quantifies the degradation introduced by transcoding.
             </p>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 mb-10">
+            <Link href="https://github.com/Microck/tuneport/blob/main/docs/archival_and_transcoding.pdf" target="_blank">
+              <Button className="h-11 px-6">Download PDF</Button>
+            </Link>
+            <Link href="/tutorial">
+              <Button variant="outline" className="h-11 px-6">Read tutorial</Button>
+            </Link>
+            <Link href="https://github.com/Microck/tuneport" target="_blank">
+              <Button variant="outline" className="h-11 px-6">View Open Source</Button>
+            </Link>
+            <p className="text-sm text-slate-500">Full paper, code, and reproduction materials are public.</p>
           </div>
 
           <h2>The "320kbps" Myth</h2>

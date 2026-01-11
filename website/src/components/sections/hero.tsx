@@ -59,13 +59,15 @@ export function Hero() {
             Open Source
           </div>
 
-          <TextAnimate
-            animation="blurInUp"
-            by="character"
-            className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-6xl md:text-7xl lg:text-8xl whitespace-nowrap"
-          >
-            Sync. Download. Disappear.
-          </TextAnimate>
+          <h1 className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-6xl md:text-7xl lg:text-8xl text-balance">
+            <TextAnimate
+              animation="blurInUp"
+              by="character"
+              className="text-inherit"
+            >
+              Sync. Download. Disappear.
+            </TextAnimate>
+          </h1>
           
           <TextAnimate
             animation="fadeIn"
@@ -76,13 +78,14 @@ export function Hero() {
           </TextAnimate>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center">
-            <Link href="https://chromewebstore.google.com/detail/tuneport/..." target="_blank">
-              <ShimmerButton className="shadow-2xl h-12 px-8">
+            <div className="flex flex-col items-center gap-2">
+              <ShimmerButton className="shadow-2xl h-12 px-8 opacity-80 pointer-events-none">
                 <span className="whitespace-pre-wrap text-center text-base font-semibold leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg">
-                  Add to Chrome
+                  Chrome Web Store soon
                 </span>
               </ShimmerButton>
-            </Link>
+              <span className="text-xs text-slate-500">Replace URL when published.</span>
+            </div>
             
             <Link href="https://github.com/Microck/tuneport" target="_blank">
               <Button variant="outline" className="h-12 px-8 border-slate-200 hover:bg-slate-50 text-slate-700 font-medium">
@@ -90,6 +93,11 @@ export function Hero() {
                 Go to GitHub
               </Button>
             </Link>
+          </div>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-600">
+            <Link href="/tutorial" className="hover:text-slate-900">Read the tutorial</Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/research" className="hover:text-slate-900">Read the research</Link>
           </div>
         </div>
 
@@ -116,6 +124,7 @@ export function Hero() {
               loop
               muted
               playsInline
+              aria-label="TunePort demo showing YouTube to Spotify sync"
               className="h-full w-full object-cover rounded-2xl"
             />
             

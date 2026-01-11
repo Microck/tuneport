@@ -2,17 +2,15 @@
 
 import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
 import { Marquee } from "@/components/ui/marquee";
-import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Link2, ScanSearch, ShieldCheck, Zap, FileAudio } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ScanSearch, ShieldCheck, Zap, FileAudio } from "lucide-react";
 
 function InstantSyncBackground() {
   return (
     <div className="flex h-48 w-full items-center justify-center opacity-90">
       <div className="relative flex flex-col items-center gap-2">
         <motion.div
-          className="absolute -inset-4 rounded-full bg-emerald-400/20 blur-xl"
+          className="absolute -inset-4 rounded-full bg-rose-400/20 blur-xl"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.3, 0.6, 0.3],
@@ -23,7 +21,7 @@ function InstantSyncBackground() {
             ease: "easeInOut",
           }}
         />
-        <Zap className="h-16 w-16 text-emerald-500" />
+        <Zap className="h-16 w-16 text-rose-500" />
       </div>
     </div>
   );
@@ -47,7 +45,7 @@ function LosslessAudioBackground() {
                         repeatType: "reverse",
                         ease: "easeInOut",
                     }}
-                    style={{ height: "30px" } as any}
+                    style={{ height: 30 }}
                     />
                 ))}
             </div>
@@ -61,7 +59,7 @@ function SmartMatchingBackground() {
     <div className="flex h-48 w-full flex-col items-center justify-center opacity-90 [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)]">
       <div className="absolute inset-0 z-10 bg-gradient-to-t from-white via-transparent to-transparent dark:from-black" />
       <div className="relative flex w-full flex-col gap-4 overflow-hidden py-4 items-center">
-          <div className="z-20 flex items-center justify-center gap-2 rounded-full bg-emerald-100/80 backdrop-blur-sm px-6 py-2 font-mono text-sm font-bold text-emerald-700 shadow-sm border border-emerald-200/50">
+          <div className="z-20 flex items-center justify-center gap-2 rounded-full bg-rose-100/80 backdrop-blur-sm px-6 py-2 text-sm font-semibold text-rose-700 shadow-sm border border-rose-200/60">
               <ScanSearch className="h-5 w-5" />
               <span>MATCHING...</span>
           </div>
@@ -108,8 +106,8 @@ const features = [
     Icon: Zap,
     name: "Instant Sync",
     description: "Right-click any video to add it to your playlist. Zero friction.",
-    href: "#how-it-works",
-    cta: "See how",
+    href: "/tutorial",
+    cta: "Start tutorial",
     className: "col-span-3 lg:col-span-1 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
     background: <InstantSyncBackground />,
   },
@@ -126,8 +124,8 @@ const features = [
     Icon: ScanSearch,
     name: "Smart Matching",
     description: "Fuzzy matching algorithm handles 'Official Video' and 'Lyrics' noise automatically.",
-    href: "#",
-    cta: "Learn more",
+    href: "/tutorial",
+    cta: "See tutorial",
     className: "col-span-3 lg:col-span-2 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
     background: <SmartMatchingBackground />,
   },
@@ -144,7 +142,7 @@ const features = [
 
 export function Features() {
   return (
-    <section className="container mx-auto py-24 px-4 sm:px-6">
+    <section className="container mx-auto py-24 px-4 sm:px-6" id="features">
       <div className="mx-auto max-w-2xl text-center mb-16">
         <h2 className="text-3xl font-bold tracking-tighter text-slate-900 sm:text-4xl md:text-5xl">
             Built for Speed & Quality
