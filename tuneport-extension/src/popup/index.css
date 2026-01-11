@@ -2,6 +2,20 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+html, body {
+  width: 380px;
+  min-height: 520px;
+  max-height: 600px;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+#app {
+  min-height: 520px;
+}
+
 @layer base {
   :root {
     --background: 0 0% 98%;
