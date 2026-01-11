@@ -2,7 +2,7 @@
 
 import React, { forwardRef, useRef } from "react";
 import Image from "next/image";
-import { FileAudio } from "lucide-react";
+import { FileAudio, Link } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -58,21 +58,21 @@ export function Flow() {
       </div>
 
       <div
-        className="relative flex min-h-[300px] w-full items-center justify-center overflow-hidden rounded-lg border bg-white/50 md:shadow-xl mt-12 py-12"
+        className="relative flex min-h-[200px] w-full items-center justify-center overflow-hidden rounded-xl bg-white/50 mt-12 py-12"
         ref={containerRef}
       >
         <div className="flex size-full flex-col max-w-2xl items-stretch justify-between gap-12 px-4">
           <div className="flex flex-row items-center justify-between">
             <div className="flex flex-col items-center gap-2">
-              <Circle ref={div1Ref}>
-                <YouTubeIcon className="size-6 text-[#FF0000]" />
+              <Circle ref={div1Ref} className="size-14 border-none shadow-lg">
+                <YouTubeIcon className="size-7 text-[#FF0000]" />
               </Circle>
               <span className="text-sm font-medium text-slate-700">Detect</span>
             </div>
             
             <div className="flex flex-col items-center gap-2">
-              <Circle ref={div4Ref} className="size-16 border-emerald-100 bg-emerald-50">
-                 <div className="relative h-10 w-10">
+              <Circle ref={div4Ref} className="size-20 border-none shadow-xl bg-gradient-to-br from-emerald-50 to-white">
+                 <div className="relative h-12 w-12">
                   <Image 
                     src="/logo.png" 
                     fill 
@@ -81,20 +81,20 @@ export function Flow() {
                   />
                 </div>
               </Circle>
-              <span className="text-sm font-medium text-slate-700">TunePort</span>
+              <span className="text-sm font-bold text-slate-900">TunePort</span>
             </div>
 
             <div className="flex flex-col items-center gap-2">
-              <Circle ref={div2Ref}>
-                <SpotifyIcon className="size-6 text-[#1DB954]" />
+              <Circle ref={div2Ref} className="size-14 border-none shadow-lg">
+                <SpotifyIcon className="size-7 text-[#1DB954]" />
               </Circle>
               <span className="text-sm font-medium text-slate-700">Match</span>
             </div>
           </div>
           <div className="flex flex-row items-center justify-center">
              <div className="flex flex-col items-center gap-2">
-              <Circle ref={div3Ref}>
-                <FileAudio className="size-6 text-emerald-500" />
+              <Circle ref={div3Ref} className="size-14 border-none shadow-lg">
+                <FileAudio className="size-7 text-emerald-500" />
               </Circle>
               <span className="text-sm font-medium text-slate-700">Sync & Download</span>
             </div>
@@ -105,47 +105,53 @@ export function Flow() {
           containerRef={containerRef}
           fromRef={div1Ref}
           toRef={div4Ref}
-          pathColor="rgba(200, 200, 200, 0.5)"
+          pathColor="rgba(200, 200, 200, 0.3)"
           gradientStartColor="#FF0000"
           gradientStopColor="#10B981"
+          pathWidth={3}
           delay={0}
         />
         <AnimatedBeam
           containerRef={containerRef}
           fromRef={div4Ref}
           toRef={div2Ref}
-          pathColor="rgba(200, 200, 200, 0.5)"
+          pathColor="rgba(200, 200, 200, 0.3)"
           gradientStartColor="#10B981"
           gradientStopColor="#1DB954"
+          pathWidth={3}
           delay={0.5}
         />
          <AnimatedBeam
           containerRef={containerRef}
           fromRef={div4Ref}
           toRef={div3Ref}
-          pathColor="rgba(200, 200, 200, 0.5)"
+          pathColor="rgba(200, 200, 200, 0.3)"
           gradientStartColor="#10B981"
           gradientStopColor="#10B981"
+          pathWidth={3}
           delay={1}
         />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 text-center">
-        <div className="space-y-2">
-            <h3 className="font-bold text-xl text-slate-900">1. Detect</h3>
-            <p className="text-slate-500">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 text-center">
+        <div className="space-y-3 px-4">
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600 font-bold">1</div>
+            <h3 className="font-bold text-lg text-slate-900">Detect</h3>
+            <p className="text-slate-500 text-sm leading-relaxed">
                 TunePort automatically identifies the video you're watching on YouTube.
             </p>
         </div>
-        <div className="space-y-2">
-             <h3 className="font-bold text-xl text-slate-900">2. Match</h3>
-            <p className="text-slate-500">
+        <div className="space-y-3 px-4">
+             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 font-bold">2</div>
+             <h3 className="font-bold text-lg text-slate-900">Match</h3>
+            <p className="text-slate-500 text-sm leading-relaxed">
                 Our smart algorithms find the exact match on Spotify, filtering out covers and remixes.
             </p>
         </div>
-        <div className="space-y-2">
-             <h3 className="font-bold text-xl text-slate-900">3. Sync & Download</h3>
-            <p className="text-slate-500">
+        <div className="space-y-3 px-4">
+             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 font-bold">3</div>
+             <h3 className="font-bold text-lg text-slate-900">Sync & Download</h3>
+            <p className="text-slate-500 text-sm leading-relaxed">
                 Instantly add to your playlist and download the high-quality audio file simultaneously.
             </p>
         </div>

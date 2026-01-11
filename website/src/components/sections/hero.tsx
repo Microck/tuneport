@@ -51,7 +51,7 @@ export function Hero() {
           <TextAnimate
             animation="blurInUp"
             by="character"
-            className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-6xl md:text-7xl lg:text-8xl"
+            className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-6xl md:text-7xl lg:text-8xl text-balance"
           >
             Sync. Download. Disappear.
           </TextAnimate>
@@ -59,15 +59,15 @@ export function Hero() {
           <TextAnimate
             animation="fadeIn"
             delay={1}
-            className="max-w-[600px] text-lg text-slate-600 sm:text-xl"
+            className="max-w-[600px] text-lg text-slate-600 sm:text-xl text-balance"
           >
             The missing link between YouTube and Spotify.
           </TextAnimate>
 
-          <div className="mt-4 flex gap-4">
+          <div className="mt-8 flex gap-4">
             <Link href="https://github.com/Microck/tuneport/releases" target="_blank">
-              <ShimmerButton className="shadow-2xl">
-                <span className="whitespace-pre-wrap text-center text-sm font-medium leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg">
+              <ShimmerButton className="shadow-2xl h-12 px-8">
+                <span className="whitespace-pre-wrap text-center text-base font-semibold leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg">
                   Add to Chrome
                 </span>
               </ShimmerButton>
