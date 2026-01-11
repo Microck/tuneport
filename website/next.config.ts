@@ -5,8 +5,6 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  basePath: "/tuneport",
-  assetPrefix: "/tuneport/",
 };
 
 export default nextConfig;
