@@ -33,7 +33,7 @@ export function Hero() {
   };
 
   return (
-    <section className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background px-4 py-12 md:py-24">
+    <section className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-[#FAFAFA] px-4 py-12 md:py-24">
       <AnimatedGridPattern
         numSquares={30}
         maxOpacity={0.1}
@@ -41,7 +41,7 @@ export function Hero() {
         repeatDelay={1}
         className={cn(
           "[mask-image:radial-gradient(800px_circle_at_center,white,transparent)]",
-          "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12"
+          "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12 mix-blend-multiply opacity-50"
         )}
       />
 
@@ -51,7 +51,7 @@ export function Hero() {
           <TextAnimate
             animation="blurInUp"
             by="character"
-            className="text-4xl font-bold tracking-tighter text-foreground sm:text-6xl md:text-7xl lg:text-8xl"
+            className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-6xl md:text-7xl lg:text-8xl"
           >
             Sync. Download. Disappear.
           </TextAnimate>
@@ -59,7 +59,7 @@ export function Hero() {
           <TextAnimate
             animation="fadeIn"
             delay={1}
-            className="max-w-[600px] text-lg text-muted-foreground sm:text-xl"
+            className="max-w-[600px] text-lg text-slate-600 sm:text-xl"
           >
             The missing link between YouTube and Spotify.
           </TextAnimate>
@@ -76,30 +76,32 @@ export function Hero() {
         </div>
 
         <div
-          className="relative mt-8 w-full max-w-4xl"
+          className="relative mt-16 w-full max-w-4xl"
           style={{ perspective: "1000px" }}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
         >
+          <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/30 to-rose-500/30 blur-3xl opacity-50 rounded-[3rem]" />
+
           <div
             ref={containerRef}
-            className="relative overflow-hidden rounded-xl border bg-background/50 shadow-2xl transition-transform ease-out will-change-transform"
+            className="relative overflow-hidden rounded-2xl border border-white/60 bg-white/40 shadow-2xl backdrop-blur-xl transition-transform ease-out will-change-transform"
             style={{
               transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
               transitionDuration: "300ms",
             }}
           >
-            <BorderBeam size={250} duration={12} delay={9} />
+            <BorderBeam size={250} duration={12} delay={9} className="opacity-50" />
             <video
               src="/tuneport.mp4"
               autoPlay
               loop
               muted
               playsInline
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover rounded-2xl"
             />
             
-            <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent pointer-events-none" />
           </div>
         </div>
       </div>

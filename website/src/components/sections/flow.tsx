@@ -4,7 +4,6 @@ import React, { forwardRef, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 import { AnimatedBeam } from "@/components/ui/animated-beam";
-import { FileAudio, Music, Youtube, Zap } from "lucide-react";
 
 const Circle = forwardRef<
   HTMLDivElement,
@@ -14,7 +13,7 @@ const Circle = forwardRef<
     <div
       ref={ref}
       className={cn(
-        "z-10 flex size-12 items-center justify-center rounded-full border-2 bg-white p-3 shadow-[0_0_20px_-12px_rgba(0,0,0,0.8)] dark:bg-black",
+        "z-10 flex size-12 items-center justify-center rounded-full border-2 bg-white p-3 shadow-md",
         className,
       )}
     >
@@ -24,6 +23,33 @@ const Circle = forwardRef<
 });
 
 Circle.displayName = "Circle";
+
+const YouTubeIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+  </svg>
+);
+
+const SpotifyIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S16.6 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141 4.32-1.38 9.841-.719 13.44 1.56.541.3.66.96.301 1.441zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 14.82 1.14.54.3.719.96.42 1.56-.3.48-.96.66-1.44.36z"/>
+  </svg>
+);
+
+const TunePortIcon = ({ className }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+    </svg>
+);
+
+const FileIcon = ({ className }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+        <polyline points="14 2 14 8 20 8" />
+        <path d="M12 18v-6" />
+        <path d="m9 15 3 3 3-3" />
+    </svg>
+);
 
 export function Flow() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -35,47 +61,47 @@ export function Flow() {
   return (
     <section className="container py-24 sm:py-32">
       <div className="flex flex-col items-center justify-center gap-4 text-center">
-        <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+        <h2 className="text-3xl font-bold tracking-tighter text-slate-900 md:text-4xl">
           Seamless Integration
         </h2>
-        <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
+        <p className="max-w-[85%] leading-normal text-slate-500 sm:text-lg sm:leading-7">
           How TunePort bridges your streaming services with a single click.
         </p>
       </div>
 
       <div
-        className="relative flex h-[500px] w-full items-center justify-center overflow-hidden rounded-lg border bg-background md:shadow-xl mt-12"
+        className="relative flex h-[500px] w-full items-center justify-center overflow-hidden rounded-lg border bg-white/50 md:shadow-xl mt-12"
         ref={containerRef}
       >
         <div className="flex size-full flex-col max-w-lg max-h-[200px] items-stretch justify-between gap-10">
           <div className="flex flex-row items-center justify-between">
             <div className="flex flex-col items-center gap-2">
               <Circle ref={div1Ref}>
-                <Youtube className="size-6 text-[#FF0000]" />
+                <YouTubeIcon className="size-6 text-[#FF0000]" />
               </Circle>
-              <span className="text-sm font-medium">Detect</span>
+              <span className="text-sm font-medium text-slate-700">Detect</span>
             </div>
             
             <div className="flex flex-col items-center gap-2">
               <Circle ref={div4Ref}>
-                <Zap className="size-6 text-yellow-500 fill-yellow-500" />
+                <TunePortIcon className="size-6 text-amber-500" />
               </Circle>
-              <span className="text-sm font-medium">TunePort</span>
+              <span className="text-sm font-medium text-slate-700">TunePort</span>
             </div>
 
             <div className="flex flex-col items-center gap-2">
               <Circle ref={div2Ref}>
-                <Music className="size-6 text-[#1DB954]" />
+                <SpotifyIcon className="size-6 text-[#1DB954]" />
               </Circle>
-              <span className="text-sm font-medium">Match</span>
+              <span className="text-sm font-medium text-slate-700">Match</span>
             </div>
           </div>
           <div className="flex flex-row items-center justify-center">
              <div className="flex flex-col items-center gap-2">
               <Circle ref={div3Ref}>
-                <FileAudio className="size-6 text-blue-500" />
+                <FileIcon className="size-6 text-blue-500" />
               </Circle>
-              <span className="text-sm font-medium">Sync & Download</span>
+              <span className="text-sm font-medium text-slate-700">Sync & Download</span>
             </div>
           </div>
         </div>
@@ -84,35 +110,44 @@ export function Flow() {
           containerRef={containerRef}
           fromRef={div1Ref}
           toRef={div4Ref}
+          pathColor="rgba(200, 200, 200, 0.5)"
+          gradientStartColor="#FF0000"
+          gradientStopColor="#F59E0B"
         />
         <AnimatedBeam
           containerRef={containerRef}
           fromRef={div4Ref}
           toRef={div2Ref}
+          pathColor="rgba(200, 200, 200, 0.5)"
+          gradientStartColor="#F59E0B"
+          gradientStopColor="#1DB954"
         />
          <AnimatedBeam
           containerRef={containerRef}
           fromRef={div4Ref}
           toRef={div3Ref}
+          pathColor="rgba(200, 200, 200, 0.5)"
+          gradientStartColor="#F59E0B"
+          gradientStopColor="#3B82F6"
         />
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 text-center">
         <div className="space-y-2">
-            <h3 className="font-bold text-xl">1. Detect</h3>
-            <p className="text-muted-foreground">
+            <h3 className="font-bold text-xl text-slate-900">1. Detect</h3>
+            <p className="text-slate-500">
                 TunePort automatically identifies the video you're watching on YouTube.
             </p>
         </div>
         <div className="space-y-2">
-             <h3 className="font-bold text-xl">2. Match</h3>
-            <p className="text-muted-foreground">
+             <h3 className="font-bold text-xl text-slate-900">2. Match</h3>
+            <p className="text-slate-500">
                 Our smart algorithms find the exact match on Spotify, filtering out covers and remixes.
             </p>
         </div>
         <div className="space-y-2">
-             <h3 className="font-bold text-xl">3. Sync & Download</h3>
-            <p className="text-muted-foreground">
+             <h3 className="font-bold text-xl text-slate-900">3. Sync & Download</h3>
+            <p className="text-slate-500">
                 Instantly add to your playlist and download the high-quality audio file simultaneously.
             </p>
         </div>
