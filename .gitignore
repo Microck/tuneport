@@ -33,3 +33,14 @@ MIGRATION.md
 PLAN.md
 TEST_README.md
 FIXES.md
+
+# docs: allow only source and pdf, ignore everything else
+docs/*
+!docs/paper.tex
+!docs/references.bib
+!docs/paper.pdf
+!docs/genloss_diagram.png
+!docs/README_BUILD.md
+!docs/compile.sh
+!docs/compile.bat
+!docs/TEXWORKS_INSTRUCTIONS.md

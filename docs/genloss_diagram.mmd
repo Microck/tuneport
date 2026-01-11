@@ -1,0 +1,9 @@
+graph LR
+    PCM["Original PCM"] -->|Encode| Opus["Opus Stream<br/>(Itag 251)"]
+    Opus -->|Decode| Wav["Decoded Wave"]
+    Wav -->|Re-Encode| MP3["MP3 320kbps<br/>(Bloated & Lossy)"]
+    
+    style PCM fill:#fff,stroke:#000,stroke-width:1px
+    style Opus fill:#fff,stroke:#000,stroke-width:1px
+    style Wav fill:#fff,stroke:#000,stroke-width:1px
+    style MP3 fill:#eee,stroke:#000,stroke-width:2px,stroke-dasharray: 5 5
