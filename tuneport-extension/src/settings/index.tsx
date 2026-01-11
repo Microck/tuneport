@@ -490,7 +490,7 @@ const SpotifyLocalFilesTutorial: React.FC = () => {
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full flex items-center justify-between p-3 bg-tf-gray/30 hover:bg-tf-gray/50 rounded-lg transition-colors"
       >
-        <span className="text-xs font-bold text-tf-slate">How to enable Spotify Local Files</span>
+        <span className="text-xs font-bold text-tf-slate">How to add a custom folder to Spotify</span>
         {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
       </button>
       
@@ -504,19 +504,20 @@ const SpotifyLocalFilesTutorial: React.FC = () => {
           >
             <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-xs space-y-3">
               <p className="text-tf-slate font-medium">
-                Spotify doesn&apos;t scan local files by default. Follow these steps:
+                Local Files is <span className="font-bold text-tf-rose">disabled by default</span> in Spotify. To see your downloads:
               </p>
               <ol className="list-decimal list-inside space-y-2 text-tf-slate-muted">
                 <li>Open the <span className="font-bold text-tf-slate">Spotify desktop app</span></li>
                 <li>Click your profile picture → <span className="font-bold text-tf-slate">Settings</span></li>
-                <li>Scroll to <span className="font-bold text-tf-slate">Library</span></li>
+                <li>Scroll to <span className="font-bold text-tf-slate">Library</span> section</li>
                 <li>Toggle <span className="font-bold text-tf-emerald">Show Local Files</span> ON</li>
-                <li>Under &quot;Show songs from&quot;, enable your <span className="font-bold text-tf-slate">Downloads</span> folder</li>
-                <li>Or click <span className="font-bold text-tf-slate">Add a source</span> and navigate to your Downloads/TunePort folder</li>
+                <li>Click <span className="font-bold text-tf-slate">Add a source</span></li>
+                <li>Navigate to <span className="font-mono text-tf-slate">Downloads → TunePort</span> and select it</li>
               </ol>
-              <p className="text-[10px] text-tf-slate-muted pt-2 border-t border-blue-100">
-                Downloaded files are saved to: <span className="font-mono">Downloads/TunePort/</span>
-              </p>
+              <div className="text-[10px] text-tf-slate-muted pt-2 border-t border-blue-100 space-y-1">
+                <p>Your downloads appear in <span className="font-bold">Your Library → Local Files</span></p>
+                <p>Files are saved to: <span className="font-mono font-bold">Downloads/TunePort/</span></p>
+              </div>
             </div>
           </motion.div>
         )}

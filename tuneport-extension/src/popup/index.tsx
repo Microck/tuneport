@@ -22,7 +22,9 @@ import {
   User,
   Shield,
   Check,
-  AlertCircle
+  AlertCircle,
+  HelpCircle,
+  Trash2
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ChromeMessageService } from '../services/ChromeMessageService';
@@ -166,15 +168,16 @@ interface QualityPreset {
   id: string;
   label: string;
   format: string;
+  description?: string;
   isCustom?: boolean;
 }
 
 const QUALITY_PRESETS: QualityPreset[] = [
-  { id: 'best', label: 'Opus (Best Quality)', format: 'best' },
-  { id: 'opus', label: 'Opus (Native)', format: 'opus' },
-  { id: 'mp3', label: 'MP3 (Re-encoded)', format: 'mp3' },
-  { id: 'ogg', label: 'OGG (Re-encoded)', format: 'ogg' },
-  { id: 'wav', label: 'WAV (Uncompressed)', format: 'wav' },
+  { id: 'best', label: 'Opus (Best)', format: 'best', description: 'Native YouTube quality. ~128kbps Opus, equivalent to MP3 320kbps.' },
+  { id: 'opus', label: 'Opus', format: 'opus', description: 'Same as Best. Direct stream, no re-encoding.' },
+  { id: 'mp3', label: 'MP3', format: 'mp3', description: 'Universal compatibility. Re-encoded from Opus source.' },
+  { id: 'ogg', label: 'OGG Vorbis', format: 'ogg', description: 'Open format. Good for Linux/FOSS applications.' },
+  { id: 'wav', label: 'WAV', format: 'wav', description: 'Uncompressed audio. Large files, lossless from transcode.' },
 ];
 
 const FILE_NAMING_OPTIONS = [
@@ -182,6 +185,169 @@ const FILE_NAMING_OPTIONS = [
   { id: 'title-artist', label: 'Title - Artist' },
   { id: 'title', label: 'Title only' }
 ];
+
+const SpotifyLocalFilesTutorial: React.FC = () => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  return (
+    <div className="space-y-3">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between p-3 bg-tf-gray/30 hover:bg-tf-gray/50 rounded-lg transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <HelpCircle className="w-3.5 h-3.5 text-tf-emerald" />
+          <span className="text-xs font-bold text-tf-slate">How to add a custom folder to Spotify</span>
+        </div>
+        {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+      </button>
+      
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-xs space-y-3">
+              <p className="text-tf-slate font-medium">
+                Local Files is <span className="font-bold text-tf-rose">disabled by default</span> in Spotify. To see your downloads:
+              </p>
+              <ol className="list-decimal list-inside space-y-2 text-tf-slate-muted">
+                <li>Open the <span className="font-bold text-tf-slate">Spotify desktop app</span></li>
+                <li>Click your profile picture → <span className="font-bold text-tf-slate">Settings</span></li>
+                <li>Scroll to <span className="font-bold text-tf-slate">Library</span> section</li>
+                <li>Toggle <span className="font-bold text-tf-emerald">Show Local Files</span> ON</li>
+                <li>Click <span className="font-bold text-tf-slate">Add a source</span></li>
+                <li>Navigate to <span className="font-mono text-tf-slate">Downloads → TunePort</span> and select it</li>
+              </ol>
+              <div className="text-[10px] text-tf-slate-muted pt-2 border-t border-blue-100 space-y-1">
+                <p>Your downloads appear in <span className="font-bold">Your Library → Local Files</span></p>
+                <p>Files are saved to: <span className="font-mono font-bold">Downloads/TunePort/</span></p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const CustomPresetsManager: React.FC<{
+  presets: QualityPreset[];
+  onChange: (presets: QualityPreset[]) => void;
+}> = ({ presets, onChange }) => {
+  const [isAdding, setIsAdding] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newFormat, setNewFormat] = useState('mp3');
+  
+  const MAX_PRESETS = 5;
+  const canAdd = presets.length < MAX_PRESETS;
+  
+  const handleAdd = () => {
+    if (!newName.trim() || !canAdd) return;
+    
+    const newPreset: QualityPreset = {
+      id: `custom-${Date.now()}`,
+      label: newName.trim(),
+      format: newFormat,
+      isCustom: true
+    };
+    
+    onChange([...presets, newPreset]);
+    setNewName('');
+    setNewFormat('mp3');
+    setIsAdding(false);
+  };
+  
+  const handleDelete = (id: string) => {
+    onChange(presets.filter(p => p.id !== id));
+  };
+  
+  return (
+    <div className="space-y-3">
+      <p className="text-[10px] text-tf-slate-muted">
+        Create up to {MAX_PRESETS} custom presets for quick access.
+      </p>
+      
+      {presets.length > 0 && (
+        <div className="space-y-2">
+          {presets.map((preset) => (
+            <div
+              key={preset.id}
+              className="flex items-center justify-between p-3 bg-tf-gray/30 rounded-lg"
+            >
+              <div>
+                <p className="text-xs font-bold text-tf-slate">{preset.label}</p>
+                <p className="text-[10px] text-tf-slate-muted">{preset.format.toUpperCase()}</p>
+              </div>
+              <button
+                onClick={() => handleDelete(preset.id)}
+                className="p-1.5 text-tf-rose hover:bg-tf-rose/10 rounded-lg transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      
+      {isAdding ? (
+        <div className="p-3 bg-tf-gray/30 rounded-lg space-y-3">
+          <input
+            type="text"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Preset name"
+            className="w-full px-3 py-2 bg-white border border-tf-border rounded-lg text-xs focus:outline-none focus:border-tf-emerald"
+            maxLength={20}
+          />
+          <select
+            value={newFormat}
+            onChange={(e) => setNewFormat(e.target.value)}
+            className="w-full px-3 py-2 bg-white border border-tf-border rounded-lg text-xs focus:outline-none focus:border-tf-emerald"
+          >
+            <option value="best">Opus (Best)</option>
+            <option value="opus">Opus</option>
+            <option value="mp3">MP3</option>
+            <option value="ogg">OGG</option>
+            <option value="wav">WAV</option>
+          </select>
+          <div className="flex gap-2">
+            <button
+              onClick={handleAdd}
+              disabled={!newName.trim()}
+              className="flex-1 py-2 bg-tf-emerald text-white text-xs font-bold rounded-lg disabled:opacity-50"
+            >
+              Save
+            </button>
+            <button
+              onClick={() => { setIsAdding(false); setNewName(''); }}
+              className="flex-1 py-2 bg-tf-gray text-tf-slate text-xs font-bold rounded-lg"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => setIsAdding(true)}
+          disabled={!canAdd}
+          className={cn(
+            "w-full flex items-center justify-center gap-2 p-3 rounded-lg text-xs font-bold transition-colors",
+            canAdd
+              ? "bg-tf-emerald/10 text-tf-emerald hover:bg-tf-emerald/20"
+              : "bg-tf-gray text-tf-slate-muted cursor-not-allowed"
+          )}
+        >
+          <Plus className="w-3.5 h-3.5" />
+          {canAdd ? 'Add Custom Preset' : `Maximum ${MAX_PRESETS} presets reached`}
+        </button>
+      )}
+    </div>
+  );
+};
 
 interface SettingsState {
   defaultPlaylist: string;
@@ -526,6 +692,18 @@ export const TunePortPopup: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <AnimatePresence>
+            {savedSuccess && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="flex items-center gap-1 text-[10px] font-bold text-tf-emerald"
+              >
+                <Check className="w-3 h-3" /> Saved
+              </motion.div>
+            )}
+          </AnimatePresence>
           <a 
             href="https://github.com/Microck/tuneport" 
             target="_blank" 
@@ -850,16 +1028,6 @@ export const TunePortPopup: React.FC = () => {
               exit={{ opacity: 0, x: -10 }}
               className="space-y-4"
             >
-              {savedSuccess && (
-                <motion.div 
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-2 text-xs font-bold text-tf-emerald bg-tf-emerald/10 p-2 rounded-lg"
-                >
-                  <Check className="w-3 h-3" /> Saved
-                </motion.div>
-              )}
-
               <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
@@ -916,6 +1084,11 @@ export const TunePortPopup: React.FC = () => {
                     >
                       {allQualityPresets.map(q => <option key={q.id} value={q.id}>{q.label}</option>)}
                     </select>
+                    {allQualityPresets.find(q => q.id === settings.defaultQuality)?.description && (
+                      <p className="text-[9px] text-tf-slate-muted mt-1">
+                        {allQualityPresets.find(q => q.id === settings.defaultQuality)?.description}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-tf-slate mb-1">File Naming</label>
@@ -928,6 +1101,19 @@ export const TunePortPopup: React.FC = () => {
                     </select>
                   </div>
                 </div>
+              </div>
+
+              <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
+                    <Music2 className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-sm font-bold text-tf-slate">Custom Presets</h2>
+                </div>
+                <CustomPresetsManager
+                  presets={settings.customPresets || []}
+                  onChange={(presets) => updateSetting('customPresets', presets)}
+                />
               </div>
 
               <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
@@ -1023,6 +1209,42 @@ export const TunePortPopup: React.FC = () => {
                       <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.showQualityWarnings ? "left-4" : "left-0.5")} />
                     </button>
                   </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-tf-slate">'Not Found' Alerts</p>
+                      <p className="text-[10px] text-tf-slate-muted">Warn if track not found on Spotify</p>
+                    </div>
+                    <button
+                      onClick={() => updateSetting('showNotFoundWarnings', !settings.showNotFoundWarnings)}
+                      className={cn("w-9 h-5 rounded-full transition-all relative", settings.showNotFoundWarnings ? "bg-tf-emerald" : "bg-tf-border")}
+                    >
+                      <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.showNotFoundWarnings ? "left-4" : "left-0.5")} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
+                    <Search className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-sm font-bold text-tf-slate">Track Matching</h2>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-tf-slate mb-1">Fallback Mode</label>
+                  <select
+                    value={settings.spotifyFallbackMode}
+                    onChange={(e) => updateSetting('spotifyFallbackMode', e.target.value as 'auto' | 'ask' | 'never')}
+                    className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
+                  >
+                    <option value="auto">Auto - Use YouTube Music if Spotify fails</option>
+                    <option value="ask">Ask - Prompt before using fallback</option>
+                    <option value="never">Never - Only use Spotify matching</option>
+                  </select>
+                  <p className="text-[9px] text-tf-slate-muted mt-1">
+                    When Spotify can't find a match, try YouTube Music metadata.
+                  </p>
                 </div>
               </div>
 
@@ -1066,6 +1288,16 @@ export const TunePortPopup: React.FC = () => {
                     </div>
                   </div>
                 )}
+              </div>
+
+              <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
+                    <HelpCircle className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-sm font-bold text-tf-slate">Sync with Spotify</h2>
+                </div>
+                <SpotifyLocalFilesTutorial />
               </div>
             </motion.div>
           )}
