@@ -45,7 +45,7 @@ function LosslessAudioBackground() {
             repeatType: "reverse",
             ease: "easeInOut",
           }}
-          style={{ height: 40 }}
+          style={{ height: "40px" } as any}
         />
       ))}
     </div>
@@ -54,7 +54,7 @@ function LosslessAudioBackground() {
 
 function SmartMatchingBackground() {
   return (
-    <div className="flex h-48 w-full flex-col items-center justify-center opacity-60 mask-image-fade">
+    <div className="flex h-48 w-full flex-col items-center justify-center opacity-60 [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)]">
       <div className="absolute inset-0 z-10 bg-gradient-to-t from-white via-transparent to-transparent dark:from-black" />
       <div className="relative flex w-full flex-col gap-2 overflow-hidden py-4">
           <Marquee className="[--duration:20s]" pauseOnHover reverse>

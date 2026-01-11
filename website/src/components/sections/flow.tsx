@@ -108,6 +108,7 @@ export function Flow() {
           pathColor="rgba(200, 200, 200, 0.5)"
           gradientStartColor="#FF0000"
           gradientStopColor="#10B981"
+          delay={0}
         />
         <AnimatedBeam
           containerRef={containerRef}
@@ -116,6 +117,7 @@ export function Flow() {
           pathColor="rgba(200, 200, 200, 0.5)"
           gradientStartColor="#10B981"
           gradientStopColor="#1DB954"
+          delay={0.5}
         />
          <AnimatedBeam
           containerRef={containerRef}
@@ -124,6 +126,7 @@ export function Flow() {
           pathColor="rgba(200, 200, 200, 0.5)"
           gradientStartColor="#10B981"
           gradientStopColor="#10B981"
+          delay={1}
         />
       </div>
       
