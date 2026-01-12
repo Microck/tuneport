@@ -1,7 +1,12 @@
-import Link from "next/link";
 import { Metadata } from "next";
-import { ArrowLeft, Download, MousePointerClick, ListMusic, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, Download, MousePointerClick, ListMusic, ShieldCheck, PlayCircle, Settings, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
+import { TextAnimate } from "@/components/ui/text-animate";
+import { BentoGrid, BentoCard } from "@/components/ui/bento-grid";
+import { ShineBorder } from "@/components/ui/shine-border";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "TunePort Tutorial",
@@ -21,11 +26,22 @@ export const metadata: Metadata = {
 
 export default function TutorialPage() {
   return (
-    <div className="min-h-screen bg-[#FAFAFA] pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-4xl">
-          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="relative min-h-screen bg-white pb-24 pt-24">
+      <AnimatedGridPattern
+        numSquares={30}
+        maxOpacity={0.1}
+        duration={3}
+        repeatDelay={1}
+        className={cn(
+          "[mask-image:radial-gradient(600px_circle_at_center,white,transparent)]",
+          "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12",
+        )}
+      />
+
+      <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <Link href="/">
-              <Button variant="ghost" className="gap-2 pl-0 hover:bg-transparent hover:text-rose-600">
+              <Button variant="ghost" className="gap-2 pl-0 text-slate-600 hover:bg-transparent hover:text-rose-600">
                 <ArrowLeft className="h-4 w-4" />
                 Back to Home
               </Button>
@@ -33,92 +49,122 @@ export default function TutorialPage() {
             <div className="flex flex-col items-start sm:items-end gap-1">
               <Button className="h-10 px-5" disabled data-placeholder="webstore-url">Chrome Web Store soon</Button>
             </div>
-          </div>
+        </div>
 
-        <section className="bg-white/95 border border-slate-100 rounded-2xl p-8 md:p-10 shadow-md">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+        <div className="relative mb-16 text-center">
+            <div className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-800 backdrop-blur-md mb-6">
+                Getting Started
+            </div>
+            
+          <TextAnimate animation="blurInUp" by="word" className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-5xl md:text-6xl mb-6">
             TunePort Tutorial
-          </h1>
-          <p className="mt-3 text-lg text-slate-600">
-            From YouTube to Spotify in four steps. No accounts, no friction.
+          </TextAnimate>
+          
+          <p className="mx-auto max-w-2xl text-lg text-slate-600 leading-relaxed">
+             From YouTube to Spotify in four steps. No accounts, no friction, purely local.
           </p>
+        </div>
 
-          <h2 className="mt-8 text-xl font-semibold text-slate-900">Before you start</h2>
-          <ul className="mt-3 list-disc pl-5 text-sm text-slate-600">
-            <li>Install the extension from the Chrome Web Store once published.</li>
-            <li>Log into Spotify in your browser.</li>
-            <li>Open a YouTube music video with a clear title.</li>
-          </ul>
-
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
-            <div className="rounded-xl border border-slate-100 p-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-100 text-rose-600">
-                  <Download className="h-5 w-5" />
+        <div className="relative mb-16 rounded-2xl bg-white/50 p-1 backdrop-blur-sm">
+            <ShineBorder shineColor={["#3B82F6", "#8B5CF6"]} className="rounded-2xl" borderWidth={1.5}>
+                <div className="rounded-xl bg-white/80 p-8 shadow-sm">
+                    <h3 className="mb-4 text-lg font-semibold text-slate-900 flex items-center gap-2">
+                        <CheckCircle className="h-5 w-5 text-blue-600" />
+                        Prerequisites
+                    </h3>
+                    <ul className="grid gap-3 sm:grid-cols-3">
+                        <li className="flex items-center gap-2 text-slate-600 text-sm">
+                            <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
+                            Chrome Extension installed
+                        </li>
+                        <li className="flex items-center gap-2 text-slate-600 text-sm">
+                            <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
+                            Logged into Spotify (Web)
+                        </li>
+                        <li className="flex items-center gap-2 text-slate-600 text-sm">
+                            <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
+                            YouTube video open
+                        </li>
+                    </ul>
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900">1. Install</h3>
-              </div>
-              <p className="mt-3 text-sm text-slate-600">
-                Install TunePort from the Chrome Web Store. Pin it to your toolbar for quick access.
-              </p>
-            </div>
+            </ShineBorder>
+        </div>
 
-            <div className="rounded-xl border border-slate-100 p-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                  <MousePointerClick className="h-5 w-5" />
+        <div className="mb-20">
+             <BentoGrid className="lg:auto-rows-[20rem]">
+                <BentoCard
+                    name="1. Install"
+                    className="col-span-3 lg:col-span-1"
+                    background={<div className="absolute inset-0 bg-gradient-to-br from-rose-50 to-transparent opacity-50" />}
+                    Icon={Download}
+                    description="Install TunePort from the Chrome Web Store and pin it to your toolbar for instant access."
+                    href="#"
+                    cta="Install Now"
+                />
+                <BentoCard
+                    name="2. Detect"
+                    className="col-span-3 lg:col-span-1"
+                    background={<div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-50" />}
+                    Icon={MousePointerClick}
+                    description="Right-click any YouTube video and select 'Add to TunePort'. We automatically parse the metadata."
+                    href="#"
+                    cta="See Demo"
+                />
+                <BentoCard
+                    name="3. Match"
+                    className="col-span-3 lg:col-span-1"
+                    background={<div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-50" />}
+                    Icon={ListMusic}
+                    description="Our fuzzy matching algorithm finds the exact track on Spotify, filtering out covers and remixes."
+                    href="#"
+                    cta="How it works"
+                />
+                <BentoCard
+                    name="4. Sync & Download"
+                    className="col-span-3"
+                    background={<div className="absolute inset-0 bg-gradient-to-r from-slate-50 to-slate-100 opacity-50" />}
+                    Icon={ShieldCheck}
+                    description="One click adds the track to your chosen Spotify playlist AND downloads the high-quality Opus file to your local drive. Best of both worlds."
+                    href="#"
+                    cta="Start Syncing"
+                />
+            </BentoGrid>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 md:p-10">
+            <h2 className="mb-6 text-xl font-bold text-slate-900 flex items-center gap-2">
+                <Settings className="h-5 w-5 text-slate-700" />
+                Troubleshooting
+            </h2>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-2">
+                    <h3 className="font-semibold text-slate-900">Track not found?</h3>
+                    <p className="text-sm text-slate-600">Ensure the YouTube video title contains both the Artist and Track Name clearly. Remixes with complex titles might need manual adjustment.</p>
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900">2. Detect</h3>
-              </div>
-              <p className="mt-3 text-sm text-slate-600">
-                Open any YouTube video. Right-click and choose “Add to TunePort.”
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-100 p-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                  <ListMusic className="h-5 w-5" />
+                <div className="space-y-2">
+                    <h3 className="font-semibold text-slate-900">No Context Menu?</h3>
+                    <p className="text-sm text-slate-600">If the &quot;Add to TunePort&quot; option doesn&apos;t appear, try refreshing the YouTube page once after installation.</p>
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900">3. Match</h3>
-              </div>
-              <p className="mt-3 text-sm text-slate-600">
-                TunePort finds the best match on Spotify, filtering out covers and remixes automatically.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-100 p-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700">
-                  <ShieldCheck className="h-5 w-5" />
+                <div className="space-y-2">
+                    <h3 className="font-semibold text-slate-900">Download Failed?</h3>
+                    <p className="text-sm text-slate-600">Check your internet connection. Downloads are processed locally in your browser.</p>
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900">4. Sync</h3>
-              </div>
-              <p className="mt-3 text-sm text-slate-600">
-                Add to your playlist and download the audio in one step. Everything runs locally.
-              </p>
             </div>
-          </div>
+        </div>
 
-          <h2 className="mt-10 text-xl font-semibold text-slate-900">Troubleshooting</h2>
-          <ul className="mt-3 list-disc pl-5 text-sm text-slate-600">
-            <li>Make sure the YouTube title includes artist and track name.</li>
-            <li>Refresh the page if the context menu item doesn’t appear.</li>
-            <li>Use the tutorial steps to re-run matching for tough titles.</li>
-          </ul>
-
-          <div className="mt-10 flex flex-col sm:flex-row gap-4">
+        <div className="mt-16 flex flex-col gap-4 sm:flex-row sm:justify-center">
             <Link href="/research">
-              <Button variant="outline" className="h-11 px-6">Read the research</Button>
-            </Link>
-            <Link href="https://github.com/Microck/tuneport" target="_blank">
-              <Button variant="outline" className="h-11 px-6">Open Source on GitHub</Button>
+              <Button variant="outline" size="lg" className="w-full sm:w-auto gap-2">
+                  <PlayCircle className="h-4 w-4" />
+                  Read the Research
+              </Button>
             </Link>
             <Link href="/">
-              <Button variant="ghost" className="h-11 px-6">Back to home</Button>
+              <Button variant="ghost" size="lg" className="w-full sm:w-auto gap-2">
+                  Back to Home
+              </Button>
             </Link>
-          </div>
-        </section>
+        </div>
       </div>
     </div>
   );

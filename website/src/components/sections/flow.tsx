@@ -2,7 +2,7 @@
 
 import React, { forwardRef, useRef } from "react";
 import Image from "next/image";
-import { FileAudio, Link } from "lucide-react";
+import { FileAudio } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -47,7 +47,7 @@ export function Flow() {
   const div4Ref = useRef<HTMLDivElement>(null);
 
   return (
-    <section className="container py-24 sm:py-32" id="how-it-works">
+    <section className="container mx-auto py-24 sm:py-32" id="how-it-works">
       <div className="flex flex-col items-center justify-center gap-4 text-center">
         <h2 className="text-3xl font-bold tracking-tighter text-slate-900 md:text-4xl">
           Seamless Integration
@@ -94,7 +94,7 @@ export function Flow() {
           <div className="flex justify-center pt-4 sm:pt-0">
              <div className="flex flex-col items-center gap-2">
               <Circle ref={div3Ref} className="size-14 border-none shadow-lg">
-                <FileAudio className="size-7 text-emerald-600" />
+                <FileAudio className="size-7 text-black" />
               </Circle>
               <span className="text-sm font-medium text-slate-700">Sync & Download</span>
             </div>
@@ -127,7 +127,7 @@ export function Flow() {
           toRef={div3Ref}
           pathColor="rgba(148, 163, 184, 0.65)"
           gradientStartColor="#E11D48"
-          gradientStopColor="#10B981"
+          gradientStopColor="#000000"
           pathWidth={4}
           delay={1}
         />
@@ -138,7 +138,7 @@ export function Flow() {
             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600 font-bold">1</div>
             <h3 className="font-bold text-lg text-slate-900">Detect</h3>
             <p className="text-slate-500 text-sm leading-relaxed">
-                TunePort automatically identifies the video you're watching on YouTube.
+                TunePort automatically identifies the video you&apos;re watching on YouTube.
             </p>
         </div>
         <div className="space-y-3 px-4">

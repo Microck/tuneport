@@ -37,10 +37,10 @@ function LosslessAudioBackground() {
                     key={i}
                     className="w-3 rounded-full bg-emerald-500"
                     animate={{
-                        height: [20, 40 + Math.random() * 30, 20],
+                        height: [20, 40 + (i % 3) * 15, 20],
                     }}
                     transition={{
-                        duration: 0.8 + Math.random() * 0.5,
+                        duration: 0.8 + (i % 4) * 0.2,
                         repeat: Infinity,
                         repeatType: "reverse",
                         ease: "easeInOut",

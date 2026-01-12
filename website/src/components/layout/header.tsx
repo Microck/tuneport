@@ -12,10 +12,10 @@ export function Header() {
   const pathname = usePathname();
 
   const linkClassName = (active: boolean) =>
-    `flex items-center gap-2 text-sm font-medium transition-colors ${active ? "text-rose-600" : "text-slate-600 hover:text-slate-900"}`;
+    `flex items-center gap-2 text-sm font-medium transition-colors ${active ? "text-slate-900" : "text-slate-600 hover:text-slate-900"}`;
 
   const mobileLinkClassName = (active: boolean) =>
-    `flex items-center gap-2 text-sm font-medium ${active ? "text-rose-600" : "text-slate-700"}`;
+    `flex items-center gap-2 text-sm font-medium ${active ? "text-slate-900" : "text-slate-700"}`;
 
 
 
