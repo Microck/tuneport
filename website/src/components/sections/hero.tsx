@@ -52,7 +52,7 @@ export function Hero() {
       <div className="z-10 flex w-full max-w-5xl flex-col items-center gap-8 text-center">
         
           <div className="flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2 rounded-full border border-rose-100 bg-rose-50/50 px-3 py-1 text-sm font-medium text-rose-600 backdrop-blur-sm" data-animate="text">
+          <div className="flex items-center gap-2 rounded-full border border-rose-100 bg-rose-50/50 px-3 py-1 text-sm font-medium text-rose-600 backdrop-blur-sm" data-animate="text" data-animate-variant="slide-down">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
@@ -62,7 +62,7 @@ export function Hero() {
             </AnimatedGradientText>
           </div>
 
-          <h1 className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-6xl md:text-7xl lg:text-8xl text-balance break-keep hyphens-none" data-animate="text">
+          <h1 className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-6xl md:text-7xl lg:text-8xl text-balance break-keep hyphens-none">
             <TextAnimate
               animation="blurInUp"
               by="text"
@@ -76,12 +76,11 @@ export function Hero() {
             animation="fadeIn"
             delay={1}
             className="max-w-[600px] text-lg text-slate-600 sm:text-xl text-balance"
-            data-animate="text"
           >
             The missing link between YouTube and Spotify.
           </TextAnimate>
 
-          <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center" data-animate="text">
+          <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center">
             <div className="flex flex-col items-center gap-2">
               <ShimmerButton className="shadow-2xl h-12 px-8 opacity-80 pointer-events-none" data-placeholder="webstore-url" data-animate="button">
                 <span className="whitespace-pre-wrap text-center text-base font-semibold leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg">
@@ -97,7 +96,7 @@ export function Hero() {
               </Button>
             </Link>
           </div>
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-600" data-animate="text">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-600" data-animate="text" data-animate-variant="fade">
             <Link href="/tutorial" className="hover:text-slate-900">Read the tutorial</Link>
             <span className="text-slate-300">•</span>
             <Link href="/research" className="hover:text-slate-900">Read the research</Link>

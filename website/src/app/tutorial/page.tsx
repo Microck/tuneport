@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 
 export default function TutorialPage() {
   return (
-    <div className="relative min-h-screen bg-white pb-24 pt-24">
+    <div className="relative min-h-screen bg-white pb-12 pt-20">
       <AnimatedGridPattern
         numSquares={30}
         maxOpacity={0.1}
@@ -39,40 +39,40 @@ export default function TutorialPage() {
       />
 
       <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" data-animate="text">
+        <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <Link href="/">
               <Button variant="ghost" className="gap-2 pl-0 text-slate-600 hover:bg-transparent hover:text-rose-600" data-animate="button">
                 <ArrowLeft className="h-4 w-4" />
                 Back to Home
               </Button>
             </Link>
-            <div className="flex flex-col items-start sm:items-end gap-1" data-animate="text">
+            <div className="flex flex-col items-start sm:items-end gap-1">
               <Button className="h-10 px-5" disabled data-placeholder="webstore-url" data-animate="button">Chrome Web Store soon</Button>
             </div>
         </div>
 
-        <div className="relative mb-16 text-center" data-animate="text">
-            <div className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-800 backdrop-blur-md mb-6" data-animate="text">
+        <div className="relative mb-10 text-center">
+            <div className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-800 backdrop-blur-md mb-6" data-animate="text" data-animate-variant="slide-down">
                 Getting Started
             </div>
             
-          <TextAnimate animation="blurInUp" by="word" className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-5xl md:text-6xl mb-6" data-animate="text">
+          <TextAnimate animation="blurInUp" by="word" className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-5xl md:text-6xl mb-6">
             TunePort Tutorial
           </TextAnimate>
           
-          <p className="mx-auto max-w-2xl text-lg text-slate-600 leading-relaxed" data-animate="text">
+          <p className="mx-auto max-w-2xl text-lg text-slate-600 leading-relaxed" data-animate="text" data-animate-variant="fade">
              From YouTube to Spotify in four steps. No accounts, no friction, purely local.
           </p>
         </div>
 
-        <div className="relative mb-16 rounded-2xl bg-white/50 p-1 backdrop-blur-sm" data-animate="text">
+        <div className="relative mb-10 rounded-2xl bg-white/50 p-1 backdrop-blur-sm">
             <ShineBorder shineColor={["#3B82F6", "#8B5CF6"]} className="rounded-2xl" borderWidth={1.5}>
                 <div className="rounded-xl bg-white/80 p-8 shadow-sm">
-                    <h3 className="mb-4 text-lg font-semibold text-slate-900 flex items-center gap-2" data-animate="text">
+                    <h3 className="mb-4 text-lg font-semibold text-slate-900 flex items-center gap-2" data-animate="text" data-animate-variant="slide-up">
                         <CheckCircle className="h-5 w-5 text-blue-600" />
                         Prerequisites
                     </h3>
-                    <ul className="grid gap-3 sm:grid-cols-3" data-animate="text">
+                    <ul className="grid gap-3 sm:grid-cols-3">
                         <li className="flex items-center gap-2 text-slate-600 text-sm">
                             <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
                             Chrome Extension installed
@@ -90,8 +90,8 @@ export default function TutorialPage() {
             </ShineBorder>
         </div>
 
-        <div className="mb-20">
-             <BentoGrid className="lg:auto-rows-[20rem]">
+        <div className="mb-10">
+             <BentoGrid className="lg:auto-rows-[18rem]">
                 <BentoCard
                     name="1. Install"
                     className="col-span-3 lg:col-span-1"
@@ -131,28 +131,28 @@ export default function TutorialPage() {
             </BentoGrid>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 md:p-10" data-animate="text">
-            <h2 className="mb-6 text-xl font-bold text-slate-900 flex items-center gap-2" data-animate="text">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 md:p-10">
+            <h2 className="mb-6 text-xl font-bold text-slate-900 flex items-center gap-2" data-animate="text" data-animate-variant="slide-left">
                 <Settings className="h-5 w-5 text-slate-700" />
                 Troubleshooting
             </h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <div className="space-y-2">
-                    <h3 className="font-semibold text-slate-900">Track not found?</h3>
-                    <p className="text-sm text-slate-600">Ensure the YouTube video title contains both the Artist and Track Name clearly. Remixes with complex titles might need manual adjustment.</p>
+                    <h3 className="font-semibold text-slate-900" data-animate="text" data-animate-variant="fade">Track not found?</h3>
+                    <p className="text-sm text-slate-600" data-animate="text" data-animate-variant="fade">Ensure the YouTube video title contains both the Artist and Track Name clearly. Remixes with complex titles might need manual adjustment.</p>
                 </div>
                 <div className="space-y-2">
-                    <h3 className="font-semibold text-slate-900">No Context Menu?</h3>
-                    <p className="text-sm text-slate-600">If the &quot;Add to TunePort&quot; option doesn&apos;t appear, try refreshing the YouTube page once after installation.</p>
+                    <h3 className="font-semibold text-slate-900" data-animate="text" data-animate-variant="slide-up">No Context Menu?</h3>
+                    <p className="text-sm text-slate-600" data-animate="text" data-animate-variant="fade">If the &quot;Add to TunePort&quot; option doesn&apos;t appear, try refreshing the YouTube page once after installation.</p>
                 </div>
                 <div className="space-y-2">
-                    <h3 className="font-semibold text-slate-900">Download Failed?</h3>
-                    <p className="text-sm text-slate-600">Check your internet connection. Downloads are processed locally in your browser.</p>
+                    <h3 className="font-semibold text-slate-900" data-animate="text" data-animate-variant="slide-down">Download Failed?</h3>
+                    <p className="text-sm text-slate-600" data-animate="text" data-animate-variant="fade">Check your internet connection. Downloads are processed locally in your browser.</p>
                 </div>
             </div>
         </div>
 
-        <div className="mt-16 flex flex-col gap-4 sm:flex-row sm:justify-center" data-animate="text">
+        <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
             <Link href="/research">
               <Button variant="outline" size="lg" className="w-full sm:w-auto gap-2" data-animate="button">
                   <PlayCircle className="h-4 w-4" />

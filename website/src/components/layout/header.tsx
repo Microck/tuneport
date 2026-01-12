@@ -24,7 +24,7 @@ export function Header() {
       <div className="flex items-center gap-2">
         <Link href="/" className="flex items-center gap-2">
           <Image src="/logo.png" width={32} height={32} alt="TunePort" className="h-8 w-8" />
-          <span className="text-lg font-bold text-slate-900" data-animate="text">TunePort</span>
+          <span className="text-lg font-bold text-slate-900">TunePort</span>
         </Link>
       </div>
 
@@ -34,14 +34,14 @@ export function Header() {
           className={linkClassName(pathname === "/")}
         >
           <Sparkles className="h-4 w-4" />
-          <span data-animate="text">Features</span>
+          Features
         </Link>
         <Link
           href="/#how-it-works"
           className={linkClassName(pathname === "/")}
         >
           <Route className="h-4 w-4" />
-          <span data-animate="text">How it Works</span>
+          How it Works
         </Link>
         <Link
           href="/research"
@@ -49,7 +49,7 @@ export function Header() {
           className={linkClassName(pathname === "/research")}
         >
           <BookOpen className="h-4 w-4" />
-          <span data-animate="text">Research</span>
+          Research
         </Link>
         <Link
           href="/tutorial"
@@ -57,7 +57,7 @@ export function Header() {
           className={linkClassName(pathname === "/tutorial")}
         >
           <ListChecks className="h-4 w-4" />
-          <span data-animate="text">Tutorial</span>
+          Tutorial
         </Link>
       </nav>
 
@@ -87,7 +87,7 @@ export function Header() {
               onClick={() => setMobileOpen(false)}
             >
           <Sparkles className="h-4 w-4" />
-          <span data-animate="text">Features</span>
+          Features
             </Link>
             <Link
               href="/#how-it-works"
@@ -95,7 +95,7 @@ export function Header() {
               onClick={() => setMobileOpen(false)}
             >
           <Route className="h-4 w-4" />
-          <span data-animate="text">How it Works</span>
+          How it Works
             </Link>
             <Link
               href="/research"
@@ -103,7 +103,7 @@ export function Header() {
               onClick={() => setMobileOpen(false)}
             >
           <BookOpen className="h-4 w-4" />
-          <span data-animate="text">Research</span>
+          Research
             </Link>
             <Link
               href="/tutorial"
@@ -111,7 +111,7 @@ export function Header() {
               onClick={() => setMobileOpen(false)}
             >
           <ListChecks className="h-4 w-4" />
-          <span data-animate="text">Tutorial</span>
+          Tutorial
             </Link>
             <div className="pt-2">
               <Button size="sm" className="w-full" disabled data-placeholder="webstore-url">

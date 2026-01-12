@@ -22,15 +22,57 @@ export function GsapProvider({ children }: GsapProviderProps) {
         const textTargets = gsap.utils.toArray<HTMLElement>("[data-animate='text']");
         const buttonTargets = gsap.utils.toArray<HTMLElement>("[data-animate='button']");
 
+        const getTextAnimation = (variant: string | undefined) => {
+          switch (variant) {
+            case "slide-up":
+              return {
+                from: { opacity: 0, y: 20 },
+                to: { opacity: 1, y: 0 },
+              };
+            case "slide-down":
+              return {
+                from: { opacity: 0, y: -20 },
+                to: { opacity: 1, y: 0 },
+              };
+            case "slide-left":
+              return {
+                from: { opacity: 0, x: 20 },
+                to: { opacity: 1, x: 0 },
+              };
+            case "slide-right":
+              return {
+                from: { opacity: 0, x: -20 },
+                to: { opacity: 1, x: 0 },
+              };
+            case "blur-up":
+              return {
+                from: { opacity: 0, y: 18, filter: "blur(6px)" },
+                to: { opacity: 1, y: 0, filter: "blur(0px)" },
+              };
+            case "blur":
+              return {
+                from: { opacity: 0, filter: "blur(6px)" },
+                to: { opacity: 1, filter: "blur(0px)" },
+              };
+            case "fade":
+            default:
+              return {
+                from: { opacity: 0 },
+                to: { opacity: 1 },
+              };
+          }
+        };
+
         textTargets.forEach((target) => {
+          const variant = target.dataset.animateVariant;
+          const { from, to } = getTextAnimation(variant);
+
           gsap.fromTo(
             target,
-            { opacity: 0, y: 18, filter: "blur(6px)" },
+            from,
             {
-              opacity: 1,
-              y: 0,
-              filter: "blur(0px)",
-              duration: 0.6,
+              ...to,
+              duration: 0.55,
               ease: "power3.out",
               scrollTrigger: {
                 trigger: target,

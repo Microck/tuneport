@@ -41,7 +41,7 @@ export default function ResearchPage() {
       />
 
       <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12" data-animate="text">
+        <div className="mb-12">
           <Link href="/">
             <Button variant="ghost" className="gap-2 pl-0 text-slate-600 hover:bg-transparent hover:text-rose-600" data-animate="button">
               <ArrowLeft className="h-4 w-4" />
@@ -50,33 +50,33 @@ export default function ResearchPage() {
           </Link>
         </div>
 
-        <div className="relative mb-16 text-center" data-animate="text">
-            <div className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800 backdrop-blur-md mb-6" data-animate="text">
+        <div className="relative mb-16 text-center">
+            <div className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800 backdrop-blur-md mb-6" data-animate="text" data-animate-variant="slide-down">
                 Technical Analysis
             </div>
             
-          <TextAnimate animation="blurInUp" by="word" className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-5xl md:text-6xl mb-6" data-animate="text">
+          <TextAnimate animation="blurInUp" by="word" className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-5xl md:text-6xl mb-6">
             Generation Loss in Digital Archival
           </TextAnimate>
           
-          <p className="mx-auto max-w-2xl text-lg text-slate-600 leading-relaxed" data-animate="text">
+          <p className="mx-auto max-w-2xl text-lg text-slate-600 leading-relaxed" data-animate="text" data-animate-variant="fade">
              Why transcoding destroys audio fidelity: a technical deep dive into YouTube&apos;s audio infrastructure and the &quot;320kbps&quot; myth.
           </p>
         </div>
 
-        <div className="relative mb-16 rounded-2xl bg-white/50 p-1 backdrop-blur-sm" data-animate="text">
+        <div className="relative mb-16 rounded-2xl bg-white/50 p-1 backdrop-blur-sm">
             <ShineBorder shineColor={["#E11D48", "#10B981"]} className="rounded-2xl" borderWidth={1.5}>
                 <div className="rounded-xl bg-white/80 p-8 shadow-sm">
-                    <h3 className="mb-4 text-lg font-semibold text-slate-900" data-animate="text">Abstract</h3>
-                    <p className="text-slate-600 leading-relaxed" data-animate="text">
+                    <h3 className="mb-4 text-lg font-semibold text-slate-900" data-animate="text" data-animate-variant="slide-up">Abstract</h3>
+                    <p className="text-slate-600 leading-relaxed" data-animate="text" data-animate-variant="fade">
                     User-generated audio on video platforms has become a massive, unplanned music archive. Yet, serious misconceptions persist about the quality of these streams. Commercial converters profit from this confusion, selling &quot;320kbps MP3&quot; tools that cannot mathematically exist given the source material. This research evaluates YouTube&apos;s actual delivery infrastructure, demonstrating that the platform&apos;s standard Opus format provides superior spectral fidelity compared to legacy AAC-LC, and quantifies the degradation introduced by transcoding.
                     </p>
                 </div>
             </ShineBorder>
         </div>
 
-        <div className="mb-20" data-animate="text">
-            <h2 className="mb-8 text-2xl font-bold tracking-tight text-slate-900" data-animate="text">
+        <div className="mb-20">
+            <h2 className="mb-8 text-2xl font-bold tracking-tight text-slate-900" data-animate="text" data-animate-variant="slide-left">
               <AnimatedShinyText className="text-slate-900">Key Findings</AnimatedShinyText>
             </h2>
             <BentoGrid className="lg:grid-rows-1">
@@ -110,101 +110,83 @@ export default function ResearchPage() {
             </BentoGrid>
         </div>
 
-        <div className="relative mb-20 overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 md:p-12 shadow-sm" id="transcoding" data-animate="text">
+        <div className="relative mb-20 overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 md:p-12 shadow-sm" id="transcoding">
             <BorderBeam size={250} duration={12} delay={9} borderWidth={1.5} colorFrom="#E11D48" colorTo="#10B981" />
             
             <div className="relative z-10">
-                <h2 className="mb-6 text-2xl font-bold tracking-tight text-slate-900" data-animate="text">The &quot;320kbps&quot; Myth</h2>
+                <h2 className="mb-6 text-2xl font-bold tracking-tight text-slate-900" data-animate="text" data-animate-variant="slide-right">The &quot;320kbps&quot; Myth</h2>
                 <div className="grid gap-12 lg:grid-cols-2">
                     <div className="space-y-4">
-                        <p className="text-slate-600 leading-relaxed">
+                        <p className="text-slate-600 leading-relaxed" data-animate="text" data-animate-variant="fade">
                             A persistent myth exists among end-users: that &quot;320kbps MP3&quot; represents the gold standard for ripped audio. Commercial &quot;YouTube to MP3&quot; converters exploit this misconception by performing deceptive upsampling.
                         </p>
-                        <p className="text-slate-600 leading-relaxed">
+                        <p className="text-slate-600 leading-relaxed" data-animate="text" data-animate-variant="slide-up">
                             These services decode the ~128kbps source stream and re-encode it at 320kbps, padding the file with null data without restoring missing frequencies.
                         </p>
-                        <div className="mt-6 rounded-lg bg-rose-50 p-4 text-sm text-rose-800 border border-rose-100">
+                        <div className="mt-6 rounded-lg bg-rose-50 p-4 text-sm text-rose-800 border border-rose-100" data-animate="text" data-animate-variant="fade">
                             <strong>Reality Check:</strong> Re-encoding a compressed source (Opus) to another lossy format (MP3) introduces generation loss. The result is strictly worse than the source.
                         </div>
                     </div>
                     
-                    <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/40 p-1 shadow-2xl backdrop-blur-xl">
-                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-rose-500/5" />
-                        <div className="relative overflow-hidden rounded-xl border border-slate-100 bg-white/80 shadow-sm">
-                            <table className="w-full text-left text-sm">
-                                <thead className="bg-slate-900 text-white">
-                                    <tr>
-                                        <th className="px-6 py-4 font-semibold tracking-tight uppercase text-[10px]">Format (Itag)</th>
-                                        <th className="px-6 py-4 font-semibold tracking-tight uppercase text-[10px]">Codec</th>
-                                        <th className="px-6 py-4 font-semibold tracking-tight uppercase text-[10px]">Bitrate</th>
-                                        <th className="px-6 py-4 font-semibold tracking-tight uppercase text-[10px]">Quality</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                    <tr className="group transition-colors hover:bg-emerald-50/30">
-                                        <td className="px-6 py-5 font-mono text-xs text-slate-500">251</td>
-                                        <td className="px-6 py-5">
-                                            <div className="flex items-center gap-2">
-                                                <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
-                                                <span className="font-bold text-slate-900">Opus</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-5 font-medium text-slate-600">130-160k</td>
-                                        <td className="px-6 py-5">
-                                            <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
-                                                Transparent
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr className="group transition-colors hover:bg-slate-50/50">
-                                        <td className="px-6 py-5 font-mono text-xs text-slate-500">140</td>
-                                        <td className="px-6 py-5">
-                                            <div className="flex items-center gap-2 text-slate-400">
-                                                <div className="h-2 w-2 rounded-full bg-slate-300" />
-                                                <span className="font-medium text-slate-600">AAC-LC</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-5 font-medium text-slate-500">128k</td>
-                                        <td className="px-6 py-5">
-                                            <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500">
-                                                Filtered
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr className="group transition-colors hover:bg-amber-50/30">
-                                        <td className="px-6 py-5 font-mono text-xs text-slate-500">141</td>
-                                        <td className="px-6 py-5">
-                                            <div className="flex items-center gap-2">
-                                                <div className="h-2 w-2 rounded-full bg-amber-400" />
-                                                <span className="font-medium text-slate-600">AAC-LC</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-5 font-medium text-slate-500">256k</td>
-                                        <td className="px-6 py-5">
-                                            <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700">
-                                                Premium
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div className="bg-slate-50/80 px-6 py-3 text-[10px] font-bold tracking-widest text-slate-400 text-center border-t border-slate-100 uppercase">
-                                Table 1.1: YouTube Audio Stream Formats
-                            </div>
+                    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white/70 shadow-sm backdrop-blur-sm">
+                        <table className="w-full text-left text-sm">
+                            <thead className="bg-slate-50 text-slate-700">
+                                <tr>
+                                    <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Format (Itag)</th>
+                                    <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Codec</th>
+                                    <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Bitrate</th>
+                                    <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Quality</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                <tr className="hover:bg-slate-50">
+                                    <td className="px-5 py-4 font-mono text-xs text-slate-500">251</td>
+                                    <td className="px-5 py-4 font-semibold text-slate-900">Opus</td>
+                                    <td className="px-5 py-4 text-slate-600">130-160k</td>
+                                    <td className="px-5 py-4">
+                                        <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+                                            Transparent
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr className="hover:bg-slate-50">
+                                    <td className="px-5 py-4 font-mono text-xs text-slate-500">140</td>
+                                    <td className="px-5 py-4 text-slate-600">AAC-LC</td>
+                                    <td className="px-5 py-4 text-slate-600">128k</td>
+                                    <td className="px-5 py-4">
+                                        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500">
+                                            Filtered
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr className="hover:bg-slate-50">
+                                    <td className="px-5 py-4 font-mono text-xs text-slate-500">141</td>
+                                    <td className="px-5 py-4 text-slate-600">AAC-LC</td>
+                                    <td className="px-5 py-4 text-slate-600">256k</td>
+                                    <td className="px-5 py-4">
+                                        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500">
+                                            Premium
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div className="bg-slate-50 px-4 py-2 text-[11px] font-medium uppercase tracking-wide text-slate-400 text-center border-t border-slate-100">
+                            Table 1.1: YouTube Audio Stream Formats
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <article className="prose prose-slate lg:prose-lg max-w-none mb-16" data-animate="text">
-             <h2 className="text-2xl font-bold tracking-tight text-slate-900" id="architecture" data-animate="text">Audio Architecture</h2>
-             <p className="text-slate-600" data-animate="text">
+        <article className="prose prose-slate lg:prose-lg max-w-none mb-16">
+             <h2 className="text-2xl font-bold tracking-tight text-slate-900" id="architecture" data-animate="text" data-animate-variant="slide-up">Audio Architecture</h2>
+             <p className="text-slate-600" data-animate="text" data-animate-variant="fade">
                 YouTube decouples audio and video into separate DASH streams. While the platform accepts lossless uploads (FLAC/PCM), the client is always served a compressed stream. For the vast majority of users, <strong>Opus (Itag 251)</strong> is the highest quality option. It utilizes spectral folding to reconstruct high-frequency content, allowing it to maintain a 20kHz bandwidth even at lower bitrates.
              </p>
 
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900 mt-12" data-animate="text">Validation Methodology</h2>
-            <p className="text-slate-600" data-animate="text">
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 mt-12" data-animate="text" data-animate-variant="slide-down">Validation Methodology</h2>
+            <p className="text-slate-600" data-animate="text" data-animate-variant="fade">
             To distinguish between true high-fidelity audio and upscaled transcoding, spectral analysis is required.
             </p>
             <ul className="grid gap-4 sm:grid-cols-2 list-none pl-0 mt-6">
@@ -219,7 +201,7 @@ export default function ResearchPage() {
             </ul>
         </article>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:justify-center" data-animate="text">
+        <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
             <Link href="https://github.com/Microck/tuneport/blob/main/docs/archival_and_transcoding.pdf" target="_blank">
               <Button size="lg" className="w-full sm:w-auto gap-2 bg-slate-900 text-white hover:bg-slate-800" data-animate="button">
                   <Download className="h-4 w-4" />

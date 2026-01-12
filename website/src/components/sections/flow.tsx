@@ -48,11 +48,11 @@ export function Flow() {
 
   return (
     <section className="container mx-auto py-24 sm:py-32" id="how-it-works">
-      <div className="flex flex-col items-center justify-center gap-4 text-center" data-animate="text">
-        <h2 className="text-3xl font-bold tracking-tighter text-slate-900 md:text-4xl" data-animate="text">
+      <div className="flex flex-col items-center justify-center gap-4 text-center">
+        <h2 className="text-3xl font-bold tracking-tighter text-slate-900 md:text-4xl" data-animate="text" data-animate-variant="slide-right">
           Seamless Integration
         </h2>
-        <p className="max-w-[85%] leading-normal text-slate-500 sm:text-lg sm:leading-7" data-animate="text">
+        <p className="max-w-[85%] leading-normal text-slate-500 sm:text-lg sm:leading-7" data-animate="text" data-animate-variant="fade">
           How TunePort bridges your streaming services with a single click.
         </p>
       </div>
@@ -136,24 +136,24 @@ export function Flow() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 text-center">
         <div className="space-y-3 px-4">
             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600 font-bold">1</div>
-            <h3 className="font-bold text-lg text-slate-900">Detect</h3>
-            <p className="text-slate-500 text-sm leading-relaxed">
-                TunePort automatically identifies the video you&apos;re watching on YouTube.
-            </p>
+             <h3 className="font-bold text-lg text-slate-900" data-animate="text" data-animate-variant="fade">Detect</h3>
+             <p className="text-slate-500 text-sm leading-relaxed" data-animate="text" data-animate-variant="fade">
+                 TunePort automatically identifies the video you&apos;re watching on YouTube.
+             </p>
         </div>
         <div className="space-y-3 px-4">
              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 font-bold">2</div>
-             <h3 className="font-bold text-lg text-slate-900">Match</h3>
-            <p className="text-slate-500 text-sm leading-relaxed">
-                Our smart algorithms find the exact match on Spotify, filtering out covers and remixes.
-            </p>
+              <h3 className="font-bold text-lg text-slate-900" data-animate="text" data-animate-variant="fade">Match</h3>
+             <p className="text-slate-500 text-sm leading-relaxed" data-animate="text" data-animate-variant="fade">
+                 Our smart algorithms find the exact match on Spotify, filtering out covers and remixes.
+             </p>
         </div>
         <div className="space-y-3 px-4">
              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 font-bold">3</div>
-             <h3 className="font-bold text-lg text-slate-900">Sync & Download</h3>
-            <p className="text-slate-500 text-sm leading-relaxed">
-                Instantly add to your playlist and download the high-quality audio file simultaneously.
-            </p>
+              <h3 className="font-bold text-lg text-slate-900" data-animate="text" data-animate-variant="fade">Sync & Download</h3>
+             <p className="text-slate-500 text-sm leading-relaxed" data-animate="text" data-animate-variant="fade">
+                 Instantly add to your playlist and download the high-quality audio file simultaneously.
+             </p>
         </div>
       </div>
     </section>
