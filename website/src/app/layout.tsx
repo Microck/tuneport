@@ -19,8 +19,12 @@ export const metadata: Metadata = {
   keywords: ["TunePort", "YouTube to Spotify", "music sync", "playlist transfer", "Opus audio"],
   metadataBase: new URL("https://tuneflow.micr.dev"),
   icons: {
-    icon: [{ url: "/logo.png", type: "image/png" }],
-    apple: [{ url: "/logo.png", type: "image/png" }],
+    icon: [
+      { url: "/logo.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [
+      { url: "/logo.png", type: "image/png", sizes: "512x512" },
+    ],
   },
   openGraph: {
     title: "TunePort | YouTube to Spotify Sync",

@@ -4,17 +4,17 @@ import { Flow } from "@/components/sections/flow";
 import { Hero } from "@/components/sections/hero";
 
 export const metadata: Metadata = {
-  title: "YouTube to Spotify Sync",
+  title: "TunePort | YouTube to Spotify Sync",
   description: "Sync YouTube to Spotify with zero friction. Match tracks, add to playlists, and download audio locally.",
   openGraph: {
-    title: "YouTube to Spotify Sync",
+    title: "TunePort | YouTube to Spotify Sync",
     description: "Sync YouTube to Spotify with zero friction. Match tracks, add to playlists, and download audio locally.",
     url: "https://tuneflow.micr.dev",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "YouTube to Spotify Sync",
+    title: "TunePort | YouTube to Spotify Sync",
     description: "Sync YouTube to Spotify with zero friction. Match tracks, add to playlists, and download audio locally.",
   },
 };
