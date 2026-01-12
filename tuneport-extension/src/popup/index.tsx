@@ -176,11 +176,12 @@ interface QualityPreset {
 }
 
 const QUALITY_PRESETS: QualityPreset[] = [
-  { id: 'best', label: 'Opus (Best)', format: 'best', description: 'Native YouTube quality. ~128kbps Opus, equivalent to MP3 320kbps.' },
+  { id: 'best', label: 'Opus', format: 'best', description: 'Native YouTube quality. ~128kbps Opus, equivalent to MP3 320kbps.' },
   { id: 'mp3', label: 'MP3', format: 'mp3', description: 'Universal compatibility. Re-encoded from source.' },
   { id: 'ogg', label: 'OGG Vorbis', format: 'ogg', description: 'Open format. Good for Linux/FOSS applications.' },
   { id: 'wav', label: 'WAV', format: 'wav', description: 'Uncompressed audio. Large files.' },
 ];
+
 
 const FILE_NAMING_OPTIONS = [
   { id: 'artist-title', label: 'Artist - Title' },
@@ -310,11 +311,12 @@ const CustomPresetsManager: React.FC<{
             onChange={(e) => setNewFormat(e.target.value)}
             className="w-full px-3 py-2 bg-white border border-tf-border rounded-lg text-xs focus:outline-none focus:border-tf-emerald"
           >
-            <option value="best">Opus (Best)</option>
+            <option value="best">Opus</option>
             <option value="mp3">MP3</option>
             <option value="ogg">OGG</option>
             <option value="wav">WAV</option>
           </select>
+
           <div className="flex gap-2">
             <button
               onClick={handleAdd}
@@ -1086,7 +1088,13 @@ export const TunePortPopup: React.FC = () => {
                     >
                       {allQualityPresets.map(q => <option key={q.id} value={q.id}>{q.label}</option>)}
                     </select>
+                    {allQualityPresets.find(q => q.id === settings.defaultQuality)?.description && (
+                      <p className="text-[10px] text-tf-slate-muted mt-1">
+                        {allQualityPresets.find(q => q.id === settings.defaultQuality)?.description}
+                      </p>
+                    )}
                   </div>
+
                   <div>
                     <label className="block text-[10px] font-bold text-tf-slate mb-1">File Naming</label>
                     <select

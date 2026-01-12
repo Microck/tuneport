@@ -70,7 +70,7 @@ const DEFAULT_SETTINGS: SettingsState = {
 };
 
 const QUALITY_OPTIONS = [
-  { id: 'best', label: 'Opus (Best)', description: 'Native YouTube quality. ~128kbps Opus, equivalent to MP3 320kbps.' },
+  { id: 'best', label: 'Opus', description: 'Native YouTube quality. ~128kbps Opus, equivalent to MP3 320kbps.' },
   { id: 'mp3', label: 'MP3', description: 'Universal compatibility. Re-encoded from source.' },
   { id: 'ogg', label: 'OGG Vorbis', description: 'Open format. Good for Linux/FOSS applications.' },
   { id: 'wav', label: 'WAV', description: 'Uncompressed audio. Large files.' }

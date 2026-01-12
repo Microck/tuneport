@@ -9,6 +9,9 @@ export interface DownloadJobLike {
     enabled: boolean;
     quality?: string;
   };
+  status?: string;
+  progress?: number;
+  currentStep?: string;
   error?: string;
 }
 
@@ -34,6 +37,41 @@ export function applyDownloadFailure(
 
   return {
     updatedJob,
+    notice: {
+      title: 'Download failed',
+      message,
+      type: 'error'
+    }
+  };
+}
+
+export function applyDownloadCompletion(
+  job: DownloadJobLike
+): { updatedJob: DownloadJobLike } {
+  return {
+    updatedJob: {
+      ...job,
+      status: 'completed',
+      progress: 100,
+      currentStep: undefined
+    }
+  };
+}
+
+export function applyDownloadInterruption(
+  job: DownloadJobLike,
+  error?: string
+): { updatedJob: DownloadJobLike; notice: DownloadFailureNotice } {
+  const message = error || 'Unknown error';
+
+  return {
+    updatedJob: {
+      ...job,
+      status: 'failed',
+      progress: 100,
+      currentStep: undefined,
+      error: `Download failed: ${message}`
+    },
     notice: {
       title: 'Download failed',
       message,

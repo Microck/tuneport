@@ -4,7 +4,7 @@ import { DownloadService } from '../services/DownloadService';
 import { LucidaService } from '../services/LucidaService';
 import { AudioFormat } from '../services/CobaltService';
 import { YouTubeMetadataService, YouTubeMusicMetadata } from '../services/YouTubeMetadataService';
-import { applyDownloadFailure } from './download-utils';
+import { applyDownloadCompletion, applyDownloadInterruption } from './download-utils';
 
 
 interface DownloadOptions {
@@ -503,9 +503,9 @@ export class BackgroundService {
         job.status = 'downloading';
         job.currentStep = 'Downloading audio...';
         this.activeJobs.set(jobId, { ...job });
-        
+
         const format = (downloadOptions.format || 'best') as AudioFormat;
-        
+
         const downloadResult = await DownloadService.downloadAudio(
           youtubeUrl,
           metadata.title,
@@ -513,7 +513,7 @@ export class BackgroundService {
           { format, preferLossless: true }
         );
 
-        if (downloadResult.success) {
+        if (downloadResult.success && downloadResult.downloadId !== undefined) {
           job.downloadInfo = {
             enabled: true,
             quality: downloadResult.quality,
@@ -524,21 +524,27 @@ export class BackgroundService {
           if (!downloadResult.isLossless && LucidaService.isEnabled()) {
             console.info('Lossless not available, used YouTube source');
           }
-        } else {
-          job.downloadInfo = {
-            enabled: true,
-            quality: downloadResult.quality,
-            source: downloadResult.source
-          };
 
-          const { updatedJob, notice } = applyDownloadFailure(job, downloadResult);
-          job.error = updatedJob.error;
-          if (notice) {
-            this.showNotification(notice.title, notice.message, notice.type);
-          }
-          console.warn('Download failed:', downloadResult.error);
+          job.progress = 85;
+          this.activeJobs.set(jobId, { ...job });
+          this.monitorDownloadJob(jobId, downloadResult.downloadId, result.duplicate);
+          return job;
         }
 
+        job.downloadInfo = {
+          enabled: true,
+          quality: downloadResult.quality,
+          source: downloadResult.source
+        };
+
+        const { updatedJob, notice } = applyDownloadInterruption(job, downloadResult.error);
+        Object.assign(job, updatedJob);
+        this.activeJobs.set(jobId, { ...job });
+        if (notice) {
+          this.showNotification(notice.title, notice.message, notice.type);
+        }
+        console.warn('Download failed:', downloadResult.error);
+        return job;
       }
 
       job.status = 'completed';
@@ -553,7 +559,7 @@ export class BackgroundService {
           'success'
         );
       } else {
-        const downloadMsg = enableDownload && job.downloadInfo?.filename 
+        const downloadMsg = enableDownload && job.downloadInfo?.filename
           ? ` (Downloaded: ${job.downloadInfo.quality})`
           : '';
         this.showNotification(
@@ -562,6 +568,7 @@ export class BackgroundService {
           'success'
         );
       }
+
 
     } catch (error) {
       job.status = 'failed';
@@ -579,7 +586,78 @@ export class BackgroundService {
     return job;
   }
 
+  private monitorDownloadJob(jobId: string, downloadId: number, duplicate: boolean) {
+    const finalizeSuccess = () => {
+      const job = this.activeJobs.get(jobId);
+      if (!job) return;
+
+      const { updatedJob } = applyDownloadCompletion(job);
+      Object.assign(job, updatedJob);
+      this.activeJobs.set(jobId, { ...job });
+
+      if (duplicate) {
+        this.showNotification(
+          'Already in Playlist',
+          `"${job.trackInfo?.title || 'Track'}" is already in this playlist`,
+          'success'
+        );
+        return;
+      }
+
+      const downloadMsg = job.downloadInfo?.filename
+        ? ` (Downloaded: ${job.downloadInfo.quality})`
+        : '';
+
+      this.showNotification(
+        'Added to Spotify',
+        `"${job.trackInfo?.title || 'Track'}" added to playlist${downloadMsg}`,
+        'success'
+      );
+    };
+
+    const finalizeFailure = (error?: string) => {
+      const job = this.activeJobs.get(jobId);
+      if (!job) return;
+
+      const { updatedJob, notice } = applyDownloadInterruption(job, error);
+      Object.assign(job, updatedJob);
+      this.activeJobs.set(jobId, { ...job });
+
+      if (notice) {
+        this.showNotification(notice.title, notice.message, notice.type);
+      }
+    };
+
+    const listener = (delta: chrome.downloads.DownloadDelta) => {
+      if (delta.id !== downloadId) return;
+
+      if (delta.state?.current === 'complete') {
+        chrome.downloads.onChanged.removeListener(listener);
+        finalizeSuccess();
+      } else if (delta.state?.current === 'interrupted') {
+        chrome.downloads.onChanged.removeListener(listener);
+        finalizeFailure(delta.error?.current);
+      }
+    };
+
+    chrome.downloads.onChanged.addListener(listener);
+
+    chrome.downloads.search({ id: downloadId }, (results) => {
+      const item = results?.[0];
+      if (!item) return;
+
+      if (item.state === 'complete') {
+        chrome.downloads.onChanged.removeListener(listener);
+        finalizeSuccess();
+      } else if (item.state === 'interrupted') {
+        chrome.downloads.onChanged.removeListener(listener);
+        finalizeFailure(item.error);
+      }
+    });
+  }
+
   private async extractYouTubeMetadata(youtubeUrl: string) {
+
     try {
       const videoId = this.extractVideoId(youtubeUrl);
       if (!videoId) {
@@ -1094,28 +1172,33 @@ export class BackgroundService {
           { format: 'best' as AudioFormat, preferLossless: true }
         );
 
-        if (downloadResult.success) {
+        if (downloadResult.success && downloadResult.downloadId !== undefined) {
           job.downloadInfo = {
             enabled: true,
             quality: downloadResult.quality,
             source: downloadResult.source,
             filename: downloadResult.filename
           };
-        } else {
-          job.downloadInfo = {
-            enabled: true,
-            quality: downloadResult.quality,
-            source: downloadResult.source
-          };
-
-          const { updatedJob, notice } = applyDownloadFailure(job, downloadResult);
-          job.error = updatedJob.error;
-          if (notice) {
-            this.showNotification(notice.title, notice.message, notice.type);
-          }
-          console.warn('Download failed:', downloadResult.error);
+          job.progress = 85;
+          this.activeJobs.set(jobId, { ...job });
+          this.monitorDownloadJob(jobId, downloadResult.downloadId, result.duplicate);
+          sendResponse({ success: true });
+          return;
         }
 
+        job.downloadInfo = {
+          enabled: true,
+          quality: downloadResult.quality,
+          source: downloadResult.source
+        };
+
+        const { updatedJob, notice } = applyDownloadInterruption(job, downloadResult.error);
+        Object.assign(job, updatedJob);
+        this.activeJobs.set(jobId, { ...job });
+        if (notice) {
+          this.showNotification(notice.title, notice.message, notice.type);
+        }
+        console.warn('Download failed:', downloadResult.error);
       }
 
       job.status = 'completed';
@@ -1126,6 +1209,7 @@ export class BackgroundService {
       const successMsg = result.duplicate ? 'Already in Playlist' : 'Added to Spotify';
       this.showNotification(successMsg, `"${job.fallbackMetadata.title}" by ${job.fallbackMetadata.artist}`, 'success');
       sendResponse({ success: true });
+
 
     } catch (error) {
       job.status = 'failed';

@@ -1,4 +1,4 @@
-import { applyDownloadFailure } from '../download-utils';
+import { applyDownloadFailure, applyDownloadCompletion, applyDownloadInterruption } from '../download-utils';
 
 describe('applyDownloadFailure', () => {
   test('adds error and notice on failed download', () => {
@@ -39,5 +39,52 @@ describe('applyDownloadFailure', () => {
     const { notice } = applyDownloadFailure(job, result);
 
     expect(notice).toBeUndefined();
+  });
+});
+
+describe('applyDownloadCompletion', () => {
+  test('marks job completed and clears step', () => {
+    const job = {
+      status: 'downloading',
+      progress: 70,
+      currentStep: 'Downloading audio...'
+    };
+
+    const { updatedJob } = applyDownloadCompletion(job);
+
+    expect(updatedJob.status).toBe('completed');
+    expect(updatedJob.progress).toBe(100);
+    expect(updatedJob.currentStep).toBeUndefined();
+  });
+});
+
+describe('applyDownloadInterruption', () => {
+  test('marks job failed with error message', () => {
+    const job = {
+      status: 'downloading',
+      progress: 70,
+      currentStep: 'Downloading audio...'
+    };
+
+    const { updatedJob, notice } = applyDownloadInterruption(job, 'NETWORK_FAILED');
+
+    expect(updatedJob.status).toBe('failed');
+    expect(updatedJob.progress).toBe(100);
+    expect(updatedJob.currentStep).toBeUndefined();
+    expect(updatedJob.error).toBe('Download failed: NETWORK_FAILED');
+    expect(notice).toEqual({
+      title: 'Download failed',
+      message: 'NETWORK_FAILED',
+      type: 'error'
+    });
+  });
+
+  test('uses fallback message when error missing', () => {
+    const job = { status: 'downloading' };
+
+    const { updatedJob, notice } = applyDownloadInterruption(job);
+
+    expect(updatedJob.error).toBe('Download failed: Unknown error');
+    expect(notice?.message).toBe('Unknown error');
   });
 });
