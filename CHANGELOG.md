@@ -1,5 +1,18 @@
 # changelog
 
+## v3.0.0
+
+**release date:** 2026-01-13
+
+download completion now tracks chrome downloads. quality labels cleaned, descriptions restored.
+
+### changes
+
+- **download status**: wait for chrome download completion and mark failures on interruption.
+- **quality labels**: opus label simplified and default quality descriptions shown in popup and settings.
+
+---
+
 ## v2.2.7
 
 **release date:** 2026-01-11
@@ -15,6 +28,7 @@ improved download reliability with self-hosted cobalt instances and authenticate
 ---
 
 ## v2.2.5
+
 
 **release date:** 2026-01-11
 
