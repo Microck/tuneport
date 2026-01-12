@@ -61,14 +61,6 @@ export default function ResearchPage() {
           <p className="mx-auto max-w-2xl text-lg text-slate-600 leading-relaxed">
              Why transcoding destroys audio fidelity: a technical deep dive into YouTube&apos;s audio infrastructure and the &quot;320kbps&quot; myth.
           </p>
-
-          <div className="mt-8 flex items-center justify-center gap-4 text-sm text-slate-500">
-            <p>By 5 aka M. J.</p>
-            <span>•</span>
-            <p>Independent Researcher</p>
-            <span>•</span>
-            <time>Jan 11, 2026</time>
-          </div>
         </div>
 
         <div className="relative mb-16 rounded-2xl bg-white/50 p-1 backdrop-blur-sm">
@@ -133,35 +125,69 @@ export default function ResearchPage() {
                         </div>
                     </div>
                     
-                    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white/50 shadow-sm backdrop-blur-sm">
-                        <table className="w-full text-left text-sm">
-                            <thead className="bg-slate-50 text-slate-900">
-                                <tr>
-                                    <th className="px-4 py-3 font-semibold">Format (Itag)</th>
-                                    <th className="px-4 py-3 font-semibold">Codec</th>
-                                    <th className="px-4 py-3 font-semibold">Bitrate</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                <tr className="bg-emerald-50/50">
-                                    <td className="px-4 py-3 font-mono text-slate-500">251</td>
-                                    <td className="px-4 py-3 font-bold text-emerald-600">Opus</td>
-                                    <td className="px-4 py-3">130-160k</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-3 font-mono text-slate-500">140</td>
-                                    <td className="px-4 py-3">AAC-LC</td>
-                                    <td className="px-4 py-3">128k</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-3 font-mono text-slate-500">141</td>
-                                    <td className="px-4 py-3">AAC-LC</td>
-                                    <td className="px-4 py-3">256k</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div className="bg-slate-50 p-3 text-xs text-slate-500 text-center border-t border-slate-100">
-                            Table 1.1: YouTube Audio Stream Formats
+                    <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/40 p-1 shadow-2xl backdrop-blur-xl">
+                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-rose-500/5" />
+                        <div className="relative overflow-hidden rounded-xl border border-slate-100 bg-white/80 shadow-sm">
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-slate-900 text-white">
+                                    <tr>
+                                        <th className="px-6 py-4 font-semibold tracking-tight uppercase text-[10px]">Format (Itag)</th>
+                                        <th className="px-6 py-4 font-semibold tracking-tight uppercase text-[10px]">Codec</th>
+                                        <th className="px-6 py-4 font-semibold tracking-tight uppercase text-[10px]">Bitrate</th>
+                                        <th className="px-6 py-4 font-semibold tracking-tight uppercase text-[10px]">Quality</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    <tr className="group transition-colors hover:bg-emerald-50/30">
+                                        <td className="px-6 py-5 font-mono text-xs text-slate-500">251</td>
+                                        <td className="px-6 py-5">
+                                            <div className="flex items-center gap-2">
+                                                <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+                                                <span className="font-bold text-slate-900">Opus</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-5 font-medium text-slate-600">130-160k</td>
+                                        <td className="px-6 py-5">
+                                            <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+                                                Transparent
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr className="group transition-colors hover:bg-slate-50/50">
+                                        <td className="px-6 py-5 font-mono text-xs text-slate-500">140</td>
+                                        <td className="px-6 py-5">
+                                            <div className="flex items-center gap-2 text-slate-400">
+                                                <div className="h-2 w-2 rounded-full bg-slate-300" />
+                                                <span className="font-medium text-slate-600">AAC-LC</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-5 font-medium text-slate-500">128k</td>
+                                        <td className="px-6 py-5">
+                                            <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500">
+                                                Filtered
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr className="group transition-colors hover:bg-amber-50/30">
+                                        <td className="px-6 py-5 font-mono text-xs text-slate-500">141</td>
+                                        <td className="px-6 py-5">
+                                            <div className="flex items-center gap-2">
+                                                <div className="h-2 w-2 rounded-full bg-amber-400" />
+                                                <span className="font-medium text-slate-600">AAC-LC</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-5 font-medium text-slate-500">256k</td>
+                                        <td className="px-6 py-5">
+                                            <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+                                                Premium
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div className="bg-slate-50/80 px-6 py-3 text-[10px] font-bold tracking-widest text-slate-400 text-center border-t border-slate-100 uppercase">
+                                Table 1.1: YouTube Audio Stream Formats
+                            </div>
                         </div>
                     </div>
                 </div>
