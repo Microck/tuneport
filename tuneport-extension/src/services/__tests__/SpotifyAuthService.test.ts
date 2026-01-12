@@ -42,7 +42,7 @@ global.chrome = {
 // Mock fetch
 global.fetch = jest.fn();
 
-import { SpotifyAuthService } from '../services/SpotifyAuthService';
+import { SpotifyAuthService } from '../SpotifyAuthService';
 
 describe('SpotifyAuthService', () => {
   beforeEach(() => {

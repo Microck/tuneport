@@ -92,13 +92,14 @@ export default function TutorialPage() {
 
         <div className="mb-10">
              <BentoGrid className="lg:auto-rows-[18rem]">
+                {/* TODO: Update href and description when Chrome Web Store listing is live */}
                 <BentoCard
                     name="1. Install"
                     className="col-span-3 lg:col-span-1"
                     background={<div className="absolute inset-0 bg-gradient-to-br from-rose-50 to-transparent opacity-50" />}
                     Icon={Download}
-                    description="Install TunePort from the Chrome Web Store and pin it to your toolbar for instant access."
-                    href="#"
+                    description="Install TunePort from GitHub Releases and pin it to your toolbar for instant access."
+                    href="https://github.com/Microck/tuneport/releases"
                     cta="Install Now"
                 />
                 <BentoCard
@@ -107,7 +108,7 @@ export default function TutorialPage() {
                     background={<div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-50" />}
                     Icon={MousePointerClick}
                     description="Right-click any YouTube video and select 'Add to TunePort'. We automatically parse the metadata."
-                    href="#"
+                    href="https://github.com/Microck/tuneport#quickstart"
                     cta="See Demo"
                 />
                 <BentoCard
@@ -116,7 +117,7 @@ export default function TutorialPage() {
                     background={<div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-50" />}
                     Icon={ListMusic}
                     description="Our fuzzy matching algorithm finds the exact track on Spotify, filtering out covers and remixes."
-                    href="#"
+                    href="/docs"
                     cta="How it works"
                 />
                 <BentoCard
@@ -125,7 +126,7 @@ export default function TutorialPage() {
                     background={<div className="absolute inset-0 bg-gradient-to-r from-slate-50 to-slate-100 opacity-50" />}
                     Icon={ShieldCheck}
                     description="One click adds the track to your chosen Spotify playlist AND downloads the high-quality Opus file to your local drive. Best of both worlds."
-                    href="#"
+                    href="https://github.com/Microck/tuneport/releases"
                     cta="Start Syncing"
                 />
             </BentoGrid>

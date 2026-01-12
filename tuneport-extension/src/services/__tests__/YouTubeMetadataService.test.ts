@@ -40,7 +40,7 @@ global.chrome = {
   }
 };
 
-import { YouTubeMetadataService } from '../services/YouTubeMetadataService';
+import { YouTubeMetadataService } from '../YouTubeMetadataService';
 
 describe('YouTubeMetadataService', () => {
   describe('extractVideoId', () => {
