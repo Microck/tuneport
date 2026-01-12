@@ -39,40 +39,40 @@ export default function TutorialPage() {
       />
 
       <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" data-animate="text">
             <Link href="/">
-              <Button variant="ghost" className="gap-2 pl-0 text-slate-600 hover:bg-transparent hover:text-rose-600">
+              <Button variant="ghost" className="gap-2 pl-0 text-slate-600 hover:bg-transparent hover:text-rose-600" data-animate="button">
                 <ArrowLeft className="h-4 w-4" />
                 Back to Home
               </Button>
             </Link>
-            <div className="flex flex-col items-start sm:items-end gap-1">
-              <Button className="h-10 px-5" disabled data-placeholder="webstore-url">Chrome Web Store soon</Button>
+            <div className="flex flex-col items-start sm:items-end gap-1" data-animate="text">
+              <Button className="h-10 px-5" disabled data-placeholder="webstore-url" data-animate="button">Chrome Web Store soon</Button>
             </div>
         </div>
 
-        <div className="relative mb-16 text-center">
-            <div className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-800 backdrop-blur-md mb-6">
+        <div className="relative mb-16 text-center" data-animate="text">
+            <div className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-800 backdrop-blur-md mb-6" data-animate="text">
                 Getting Started
             </div>
             
-          <TextAnimate animation="blurInUp" by="word" className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-5xl md:text-6xl mb-6">
+          <TextAnimate animation="blurInUp" by="word" className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-5xl md:text-6xl mb-6" data-animate="text">
             TunePort Tutorial
           </TextAnimate>
           
-          <p className="mx-auto max-w-2xl text-lg text-slate-600 leading-relaxed">
+          <p className="mx-auto max-w-2xl text-lg text-slate-600 leading-relaxed" data-animate="text">
              From YouTube to Spotify in four steps. No accounts, no friction, purely local.
           </p>
         </div>
 
-        <div className="relative mb-16 rounded-2xl bg-white/50 p-1 backdrop-blur-sm">
+        <div className="relative mb-16 rounded-2xl bg-white/50 p-1 backdrop-blur-sm" data-animate="text">
             <ShineBorder shineColor={["#3B82F6", "#8B5CF6"]} className="rounded-2xl" borderWidth={1.5}>
                 <div className="rounded-xl bg-white/80 p-8 shadow-sm">
-                    <h3 className="mb-4 text-lg font-semibold text-slate-900 flex items-center gap-2">
+                    <h3 className="mb-4 text-lg font-semibold text-slate-900 flex items-center gap-2" data-animate="text">
                         <CheckCircle className="h-5 w-5 text-blue-600" />
                         Prerequisites
                     </h3>
-                    <ul className="grid gap-3 sm:grid-cols-3">
+                    <ul className="grid gap-3 sm:grid-cols-3" data-animate="text">
                         <li className="flex items-center gap-2 text-slate-600 text-sm">
                             <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
                             Chrome Extension installed
@@ -131,8 +131,8 @@ export default function TutorialPage() {
             </BentoGrid>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 md:p-10">
-            <h2 className="mb-6 text-xl font-bold text-slate-900 flex items-center gap-2">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 md:p-10" data-animate="text">
+            <h2 className="mb-6 text-xl font-bold text-slate-900 flex items-center gap-2" data-animate="text">
                 <Settings className="h-5 w-5 text-slate-700" />
                 Troubleshooting
             </h2>
@@ -152,15 +152,15 @@ export default function TutorialPage() {
             </div>
         </div>
 
-        <div className="mt-16 flex flex-col gap-4 sm:flex-row sm:justify-center">
+        <div className="mt-16 flex flex-col gap-4 sm:flex-row sm:justify-center" data-animate="text">
             <Link href="/research">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto gap-2">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto gap-2" data-animate="button">
                   <PlayCircle className="h-4 w-4" />
                   Read the Research
               </Button>
             </Link>
             <Link href="/">
-              <Button variant="ghost" size="lg" className="w-full sm:w-auto gap-2">
+              <Button variant="ghost" size="lg" className="w-full sm:w-auto gap-2" data-animate="button">
                   Back to Home
               </Button>
             </Link>

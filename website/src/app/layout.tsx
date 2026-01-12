@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Instrument_Sans } from "next/font/google";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { GsapProvider } from "@/components/gsap-provider";
 import "./globals.css";
 
 const instrumentSans = Instrument_Sans({
@@ -40,11 +41,13 @@ export default function RootLayout({
       <body
         className={`${instrumentSans.variable} antialiased`}
       >
-        <Header />
-        <main className="flex min-h-screen flex-col">
-          {children}
-        </main>
-        <Footer />
+        <GsapProvider>
+          <Header />
+          <main className="flex min-h-screen flex-col">
+            {children}
+          </main>
+          <Footer />
+        </GsapProvider>
       </body>
     </html>
   );

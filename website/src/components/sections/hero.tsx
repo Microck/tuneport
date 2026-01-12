@@ -7,6 +7,7 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { Button } from "@/components/ui/button";
 import { TextAnimate } from "@/components/ui/text-animate";
+import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
 import { cn } from "@/lib/utils";
 import { Github } from "lucide-react";
 
@@ -50,16 +51,18 @@ export function Hero() {
 
       <div className="z-10 flex w-full max-w-5xl flex-col items-center gap-8 text-center">
         
-        <div className="flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2 rounded-full border border-rose-100 bg-rose-50/50 px-3 py-1 text-sm font-medium text-rose-600 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4">
+          <div className="flex items-center gap-2 rounded-full border border-rose-100 bg-rose-50/50 px-3 py-1 text-sm font-medium text-rose-600 backdrop-blur-sm" data-animate="text">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
             </span>
-            Open Source
+            <AnimatedGradientText speed={1.2} colorFrom="#E11D48" colorTo="#10B981">
+              Open Source
+            </AnimatedGradientText>
           </div>
 
-          <h1 className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-6xl md:text-7xl lg:text-8xl text-balance break-keep hyphens-none">
+          <h1 className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-6xl md:text-7xl lg:text-8xl text-balance break-keep hyphens-none" data-animate="text">
             <TextAnimate
               animation="blurInUp"
               by="text"
@@ -73,13 +76,14 @@ export function Hero() {
             animation="fadeIn"
             delay={1}
             className="max-w-[600px] text-lg text-slate-600 sm:text-xl text-balance"
+            data-animate="text"
           >
             The missing link between YouTube and Spotify.
           </TextAnimate>
 
-          <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center">
+          <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center" data-animate="text">
             <div className="flex flex-col items-center gap-2">
-              <ShimmerButton className="shadow-2xl h-12 px-8 opacity-80 pointer-events-none" data-placeholder="webstore-url">
+              <ShimmerButton className="shadow-2xl h-12 px-8 opacity-80 pointer-events-none" data-placeholder="webstore-url" data-animate="button">
                 <span className="whitespace-pre-wrap text-center text-base font-semibold leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg">
                   Chrome Web Store soon
                 </span>
@@ -87,13 +91,13 @@ export function Hero() {
             </div>
             
             <Link href="https://github.com/Microck/tuneport" target="_blank">
-              <Button variant="outline" className="h-12 px-8 border-slate-200 hover:bg-slate-50 text-slate-700 font-medium">
+              <Button variant="outline" className="h-12 px-8 border-slate-200 hover:bg-slate-50 text-slate-700 font-medium" data-animate="button">
                 <Github className="mr-2 h-4 w-4" />
                 Go to GitHub
               </Button>
             </Link>
           </div>
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-600">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-600" data-animate="text">
             <Link href="/tutorial" className="hover:text-slate-900">Read the tutorial</Link>
             <span className="text-slate-300">•</span>
             <Link href="/research" className="hover:text-slate-900">Read the research</Link>

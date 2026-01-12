@@ -48,11 +48,11 @@ export function Flow() {
 
   return (
     <section className="container mx-auto py-24 sm:py-32" id="how-it-works">
-      <div className="flex flex-col items-center justify-center gap-4 text-center">
-        <h2 className="text-3xl font-bold tracking-tighter text-slate-900 md:text-4xl">
+      <div className="flex flex-col items-center justify-center gap-4 text-center" data-animate="text">
+        <h2 className="text-3xl font-bold tracking-tighter text-slate-900 md:text-4xl" data-animate="text">
           Seamless Integration
         </h2>
-        <p className="max-w-[85%] leading-normal text-slate-500 sm:text-lg sm:leading-7">
+        <p className="max-w-[85%] leading-normal text-slate-500 sm:text-lg sm:leading-7" data-animate="text">
           How TunePort bridges your streaming services with a single click.
         </p>
       </div>

@@ -7,6 +7,7 @@ import { TextAnimate } from "@/components/ui/text-animate";
 import { BentoGrid, BentoCard } from "@/components/ui/bento-grid";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { ShineBorder } from "@/components/ui/shine-border";
+import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -40,42 +41,44 @@ export default function ResearchPage() {
       />
 
       <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12">
+        <div className="mb-12" data-animate="text">
           <Link href="/">
-            <Button variant="ghost" className="gap-2 pl-0 text-slate-600 hover:bg-transparent hover:text-rose-600">
+            <Button variant="ghost" className="gap-2 pl-0 text-slate-600 hover:bg-transparent hover:text-rose-600" data-animate="button">
               <ArrowLeft className="h-4 w-4" />
               Back to Home
             </Button>
           </Link>
         </div>
 
-        <div className="relative mb-16 text-center">
-            <div className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800 backdrop-blur-md mb-6">
+        <div className="relative mb-16 text-center" data-animate="text">
+            <div className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800 backdrop-blur-md mb-6" data-animate="text">
                 Technical Analysis
             </div>
             
-          <TextAnimate animation="blurInUp" by="word" className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-5xl md:text-6xl mb-6">
+          <TextAnimate animation="blurInUp" by="word" className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-5xl md:text-6xl mb-6" data-animate="text">
             Generation Loss in Digital Archival
           </TextAnimate>
           
-          <p className="mx-auto max-w-2xl text-lg text-slate-600 leading-relaxed">
+          <p className="mx-auto max-w-2xl text-lg text-slate-600 leading-relaxed" data-animate="text">
              Why transcoding destroys audio fidelity: a technical deep dive into YouTube&apos;s audio infrastructure and the &quot;320kbps&quot; myth.
           </p>
         </div>
 
-        <div className="relative mb-16 rounded-2xl bg-white/50 p-1 backdrop-blur-sm">
+        <div className="relative mb-16 rounded-2xl bg-white/50 p-1 backdrop-blur-sm" data-animate="text">
             <ShineBorder shineColor={["#E11D48", "#10B981"]} className="rounded-2xl" borderWidth={1.5}>
                 <div className="rounded-xl bg-white/80 p-8 shadow-sm">
-                    <h3 className="mb-4 text-lg font-semibold text-slate-900">Abstract</h3>
-                    <p className="text-slate-600 leading-relaxed">
+                    <h3 className="mb-4 text-lg font-semibold text-slate-900" data-animate="text">Abstract</h3>
+                    <p className="text-slate-600 leading-relaxed" data-animate="text">
                     User-generated audio on video platforms has become a massive, unplanned music archive. Yet, serious misconceptions persist about the quality of these streams. Commercial converters profit from this confusion, selling &quot;320kbps MP3&quot; tools that cannot mathematically exist given the source material. This research evaluates YouTube&apos;s actual delivery infrastructure, demonstrating that the platform&apos;s standard Opus format provides superior spectral fidelity compared to legacy AAC-LC, and quantifies the degradation introduced by transcoding.
                     </p>
                 </div>
             </ShineBorder>
         </div>
 
-        <div className="mb-20">
-            <h2 className="mb-8 text-2xl font-bold tracking-tight text-slate-900">Key Findings</h2>
+        <div className="mb-20" data-animate="text">
+            <h2 className="mb-8 text-2xl font-bold tracking-tight text-slate-900" data-animate="text">
+              <AnimatedShinyText className="text-slate-900">Key Findings</AnimatedShinyText>
+            </h2>
             <BentoGrid className="lg:grid-rows-1">
                 <BentoCard
                     name="Opus is King"
@@ -107,11 +110,11 @@ export default function ResearchPage() {
             </BentoGrid>
         </div>
 
-        <div className="relative mb-20 overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 md:p-12 shadow-sm" id="transcoding">
+        <div className="relative mb-20 overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 md:p-12 shadow-sm" id="transcoding" data-animate="text">
             <BorderBeam size={250} duration={12} delay={9} borderWidth={1.5} colorFrom="#E11D48" colorTo="#10B981" />
             
             <div className="relative z-10">
-                <h2 className="mb-6 text-2xl font-bold tracking-tight text-slate-900">The &quot;320kbps&quot; Myth</h2>
+                <h2 className="mb-6 text-2xl font-bold tracking-tight text-slate-900" data-animate="text">The &quot;320kbps&quot; Myth</h2>
                 <div className="grid gap-12 lg:grid-cols-2">
                     <div className="space-y-4">
                         <p className="text-slate-600 leading-relaxed">
@@ -194,14 +197,14 @@ export default function ResearchPage() {
             </div>
         </div>
 
-        <article className="prose prose-slate lg:prose-lg max-w-none mb-16">
-             <h2 className="text-2xl font-bold tracking-tight text-slate-900" id="architecture">Audio Architecture</h2>
-             <p className="text-slate-600">
+        <article className="prose prose-slate lg:prose-lg max-w-none mb-16" data-animate="text">
+             <h2 className="text-2xl font-bold tracking-tight text-slate-900" id="architecture" data-animate="text">Audio Architecture</h2>
+             <p className="text-slate-600" data-animate="text">
                 YouTube decouples audio and video into separate DASH streams. While the platform accepts lossless uploads (FLAC/PCM), the client is always served a compressed stream. For the vast majority of users, <strong>Opus (Itag 251)</strong> is the highest quality option. It utilizes spectral folding to reconstruct high-frequency content, allowing it to maintain a 20kHz bandwidth even at lower bitrates.
              </p>
 
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900 mt-12">Validation Methodology</h2>
-            <p className="text-slate-600">
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 mt-12" data-animate="text">Validation Methodology</h2>
+            <p className="text-slate-600" data-animate="text">
             To distinguish between true high-fidelity audio and upscaled transcoding, spectral analysis is required.
             </p>
             <ul className="grid gap-4 sm:grid-cols-2 list-none pl-0 mt-6">
@@ -216,21 +219,21 @@ export default function ResearchPage() {
             </ul>
         </article>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
+        <div className="flex flex-col gap-4 sm:flex-row sm:justify-center" data-animate="text">
             <Link href="https://github.com/Microck/tuneport/blob/main/docs/archival_and_transcoding.pdf" target="_blank">
-              <Button size="lg" className="w-full sm:w-auto gap-2 bg-slate-900 text-white hover:bg-slate-800">
+              <Button size="lg" className="w-full sm:w-auto gap-2 bg-slate-900 text-white hover:bg-slate-800" data-animate="button">
                   <Download className="h-4 w-4" />
                   Download Full PDF
               </Button>
             </Link>
             <Link href="/tutorial">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto gap-2">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto gap-2" data-animate="button">
                   <BookOpen className="h-4 w-4" />
                   Read Tutorial
               </Button>
             </Link>
             <Link href="https://github.com/Microck/tuneport" target="_blank">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto gap-2">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto gap-2" data-animate="button">
                   <Github className="h-4 w-4" />
                   View Source
               </Button>

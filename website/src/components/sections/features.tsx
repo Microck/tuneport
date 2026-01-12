@@ -143,11 +143,11 @@ const features = [
 export function Features() {
   return (
     <section className="container mx-auto py-24 px-4 sm:px-6" id="features">
-      <div className="mx-auto max-w-2xl text-center mb-16">
-        <h2 className="text-3xl font-bold tracking-tighter text-slate-900 sm:text-4xl md:text-5xl">
+      <div className="mx-auto max-w-2xl text-center mb-16" data-animate="text">
+        <h2 className="text-3xl font-bold tracking-tighter text-slate-900 sm:text-4xl md:text-5xl" data-animate="text">
             Built for Speed & Quality
         </h2>
-        <p className="mt-4 text-lg text-slate-600">
+        <p className="mt-4 text-lg text-slate-600" data-animate="text">
             Everything you need to manage your music library without leaving YouTube.
         </p>
       </div>

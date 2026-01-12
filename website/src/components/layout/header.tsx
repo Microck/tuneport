@@ -24,7 +24,7 @@ export function Header() {
       <div className="flex items-center gap-2">
         <Link href="/" className="flex items-center gap-2">
           <Image src="/logo.png" width={32} height={32} alt="TunePort" className="h-8 w-8" />
-          <span className="text-lg font-bold text-slate-900">TunePort</span>
+          <span className="text-lg font-bold text-slate-900" data-animate="text">TunePort</span>
         </Link>
       </div>
 
@@ -34,14 +34,14 @@ export function Header() {
           className={linkClassName(pathname === "/")}
         >
           <Sparkles className="h-4 w-4" />
-          Features
+          <span data-animate="text">Features</span>
         </Link>
         <Link
           href="/#how-it-works"
           className={linkClassName(pathname === "/")}
         >
           <Route className="h-4 w-4" />
-          How it Works
+          <span data-animate="text">How it Works</span>
         </Link>
         <Link
           href="/research"
@@ -49,7 +49,7 @@ export function Header() {
           className={linkClassName(pathname === "/research")}
         >
           <BookOpen className="h-4 w-4" />
-          Research
+          <span data-animate="text">Research</span>
         </Link>
         <Link
           href="/tutorial"
@@ -57,7 +57,7 @@ export function Header() {
           className={linkClassName(pathname === "/tutorial")}
         >
           <ListChecks className="h-4 w-4" />
-          Tutorial
+          <span data-animate="text">Tutorial</span>
         </Link>
       </nav>
 
@@ -86,32 +86,32 @@ export function Header() {
               className={mobileLinkClassName(pathname === "/")}
               onClick={() => setMobileOpen(false)}
             >
-              <Sparkles className="h-4 w-4" />
-              Features
+          <Sparkles className="h-4 w-4" />
+          <span data-animate="text">Features</span>
             </Link>
             <Link
               href="/#how-it-works"
               className={mobileLinkClassName(pathname === "/")}
               onClick={() => setMobileOpen(false)}
             >
-              <Route className="h-4 w-4" />
-              How it Works
+          <Route className="h-4 w-4" />
+          <span data-animate="text">How it Works</span>
             </Link>
             <Link
               href="/research"
               className={mobileLinkClassName(pathname === "/research")}
               onClick={() => setMobileOpen(false)}
             >
-              <BookOpen className="h-4 w-4" />
-              Research
+          <BookOpen className="h-4 w-4" />
+          <span data-animate="text">Research</span>
             </Link>
             <Link
               href="/tutorial"
               className={mobileLinkClassName(pathname === "/tutorial")}
               onClick={() => setMobileOpen(false)}
             >
-              <ListChecks className="h-4 w-4" />
-              Tutorial
+          <ListChecks className="h-4 w-4" />
+          <span data-animate="text">Tutorial</span>
             </Link>
             <div className="pt-2">
               <Button size="sm" className="w-full" disabled data-placeholder="webstore-url">
