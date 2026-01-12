@@ -99,7 +99,7 @@ export function Hero() {
           <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-600" data-animate="text" data-animate-variant="fade">
             <Link href="/tutorial" className="hover:text-slate-900">Read the tutorial</Link>
             <span className="text-slate-300">•</span>
-            <Link href="/research" className="hover:text-slate-900">Read the docs</Link>
+            <Link href="/docs" className="hover:text-slate-900">Read the docs</Link>
           </div>
         </div>
 

@@ -15,7 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
-      url: "https://tuneflow.micr.dev/research",
+      url: "https://tuneflow.micr.dev/docs",
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,

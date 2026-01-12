@@ -153,7 +153,7 @@ export default function TutorialPage() {
         </div>
 
         <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
-            <Link href="/research">
+            <Link href="/docs">
               <Button variant="outline" size="lg" className="w-full sm:w-auto gap-2" data-animate="button">
                   <PlayCircle className="h-4 w-4" />
                   Read the Docs

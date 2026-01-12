@@ -44,9 +44,9 @@ export function Header() {
           How it Works
         </Link>
         <Link
-          href="/research"
-          aria-current={pathname === "/research" ? "page" : undefined}
-          className={linkClassName(pathname === "/research")}
+          href="/docs"
+          aria-current={pathname === "/docs" ? "page" : undefined}
+          className={linkClassName(pathname === "/docs")}
         >
           <BookOpen className="h-4 w-4" />
           Docs
@@ -98,8 +98,8 @@ export function Header() {
           How it Works
             </Link>
             <Link
-              href="/research"
-              className={mobileLinkClassName(pathname === "/research")}
+              href="/docs"
+              className={mobileLinkClassName(pathname === "/docs")}
               onClick={() => setMobileOpen(false)}
             >
           <BookOpen className="h-4 w-4" />

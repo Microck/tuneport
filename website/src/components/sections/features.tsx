@@ -115,7 +115,7 @@ const features = [
     Icon: FileAudio,
     name: "Lossless Audio",
     description: "Prioritizes FLAC from Lucida (Qobuz/Tidal) or falls back to high-quality Opus.",
-    href: "/research",
+    href: "/docs",
     cta: "Read docs",
     className: "col-span-3 lg:col-span-2 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
     background: <LosslessAudioBackground />,
