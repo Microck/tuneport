@@ -23,7 +23,15 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b border-white/10 bg-white/70 px-4 backdrop-blur-md md:px-6">
       <div className="flex items-center gap-2">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.png" width={32} height={32} alt="TunePort" className="h-8 w-8" />
+          <Image
+            src="/logo.png"
+            width={32}
+            height={32}
+            alt="TunePort"
+            className="h-8 w-8"
+            priority
+            sizes="32px"
+          />
           <span className="text-lg font-bold text-slate-900">TunePort</span>
         </Link>
       </div>

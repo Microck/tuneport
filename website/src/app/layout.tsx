@@ -16,18 +16,30 @@ export const metadata: Metadata = {
     template: "%s | TunePort",
   },
   description: "Sync YouTube to Spotify with zero friction. Match tracks, add to playlists, and download audio locally.",
+  keywords: ["TunePort", "YouTube to Spotify", "music sync", "playlist transfer", "Opus audio"],
   metadataBase: new URL("https://tuneflow.micr.dev"),
+  icons: {
+    icon: [{ url: "/logo.png", type: "image/png" }],
+    apple: [{ url: "/logo.png", type: "image/png" }],
+  },
   openGraph: {
     title: "TunePort | YouTube to Spotify Sync",
     description: "Sync YouTube to Spotify with zero friction. Match tracks, add to playlists, and download audio locally.",
     url: "https://tuneflow.micr.dev",
     siteName: "TunePort",
     type: "website",
+    images: [{
+      url: "/logo.png",
+      width: 512,
+      height: 512,
+      alt: "TunePort logo",
+    }],
   },
   twitter: {
     card: "summary_large_image",
     title: "TunePort | YouTube to Spotify Sync",
     description: "Sync YouTube to Spotify with zero friction. Match tracks, add to playlists, and download audio locally.",
+    images: ["/logo.png"],
   },
 };
 

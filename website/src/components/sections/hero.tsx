@@ -126,6 +126,8 @@ export function Hero() {
               loop
               muted
               playsInline
+              preload="metadata"
+              poster="/logo.png"
               aria-label="TunePort demo showing YouTube to Spotify sync"
               className="h-full w-full object-cover rounded-2xl"
             />
