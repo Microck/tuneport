@@ -24,6 +24,8 @@ import {
 import { cn } from '../lib/utils';
 import { SpotifyAuthService } from '../services/SpotifyAuthService';
 import { ChromeMessageService } from '../services/ChromeMessageService';
+import { DEFAULT_COBALT_INSTANCE } from '../config/defaults';
+
 
 interface SpotifyUser {
   display_name: string;
@@ -61,7 +63,7 @@ const DEFAULT_SETTINGS: SettingsState = {
   enableLosslessSources: false,
   showQualityWarnings: true,
   showNotFoundWarnings: true,
-  cobaltInstance: 'https://cobalt-api.meowing.de',
+  cobaltInstance: DEFAULT_COBALT_INSTANCE,
   lucidaEnabled: false,
   customPresets: [],
   spotifyFallbackMode: 'auto'

@@ -30,6 +30,8 @@ import {
 import { cn } from '../lib/utils';
 import { ChromeMessageService } from '../services/ChromeMessageService';
 import { SpotifyAuthService } from '../services/SpotifyAuthService';
+import { DEFAULT_COBALT_INSTANCE } from '../config/defaults';
+
 
 const ShimmerButton: React.FC<{
   children: React.ReactNode;
@@ -371,7 +373,8 @@ const DEFAULT_SETTINGS: SettingsState = {
   enableLosslessSources: false,
   showQualityWarnings: true,
   showNotFoundWarnings: true,
-  cobaltInstance: 'https://cobalt-api.meowing.de',
+  cobaltInstance: DEFAULT_COBALT_INSTANCE,
+
   lucidaEnabled: false,
   visiblePlaylists: [],
   customPresets: [],

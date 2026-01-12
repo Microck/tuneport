@@ -1,8 +1,13 @@
 module.exports = {
+  preset: 'ts-jest',
   testEnvironment: 'jsdom',
   testMatch: [
     '**/__tests__/**/*.test.{js,jsx,ts,tsx}'
   ],
+  transform: {
+    '^.+\\.(ts|tsx)$': ['ts-jest', { diagnostics: false }]
+  },
+
   collectCoverageFrom: [
     'src/**/*.{js,ts,tsx}',
     '!src/**/*.d.ts',

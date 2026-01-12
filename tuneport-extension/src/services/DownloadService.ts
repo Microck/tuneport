@@ -1,5 +1,7 @@
 import { CobaltService, AudioFormat } from './CobaltService';
 import { LucidaService, LucidaOptions } from './LucidaService';
+import { DEFAULT_COBALT_INSTANCE } from '../config/defaults';
+
 
 export type DownloadSource = 'lucida' | 'cobalt';
 
@@ -19,7 +21,9 @@ export interface DownloadOptions {
   format?: AudioFormat;
   preferLossless?: boolean;
   lucidaOptions?: LucidaOptions;
+  customInstance?: string;
 }
+
 
 export class DownloadService {
   static async getDownloadUrl(
@@ -28,7 +32,8 @@ export class DownloadService {
     artist: string,
     options: DownloadOptions = {}
   ): Promise<DownloadResult> {
-    const { preferLossless = true, format = 'best' } = options;
+    const { preferLossless = true, format = 'best', customInstance } = options;
+
 
     console.log('[DownloadService] getDownloadUrl called:', { youtubeUrl, title, artist, format });
 
@@ -57,8 +62,10 @@ export class DownloadService {
 
     console.log('[DownloadService] Calling Cobalt...');
     const cobaltResult = await CobaltService.getDownloadUrl(youtubeUrl, {
-      format
+      format,
+      customInstance
     });
+
     console.log('[DownloadService] Cobalt result:', cobaltResult);
 
     if (cobaltResult.success && cobaltResult.url) {
@@ -88,8 +95,25 @@ export class DownloadService {
     options: DownloadOptions = {}
   ): Promise<DownloadResult> {
     console.log('[DownloadService] downloadAudio called:', { youtubeUrl, title, artist, options });
-    
-    const result = await this.getDownloadUrl(youtubeUrl, title, artist, options);
+
+    let customInstance = DEFAULT_COBALT_INSTANCE;
+    try {
+      const stored = await chrome.storage.local.get(['tuneport_settings']);
+      const rawInstance = stored?.tuneport_settings?.cobaltInstance;
+      if (typeof rawInstance === 'string' && rawInstance.trim().length > 0) {
+        customInstance = rawInstance.trim();
+      }
+    } catch (error) {
+      console.warn('[DownloadService] Failed to load cobalt instance from settings:', error);
+    }
+
+    await CobaltService.ensureAuthenticated();
+
+    const result = await this.getDownloadUrl(youtubeUrl, title, artist, {
+      ...options,
+      customInstance
+    });
+
     console.log('[DownloadService] getDownloadUrl result:', result);
 
     if (!result.success || !result.url) {

@@ -4,19 +4,19 @@ jest.setTimeout(10000);
 // Mock window.crypto
 Object.defineProperty(global, 'crypto', {
   value: {
-    getRandomValues: (array: Uint8Array) => {
+    getRandomValues: (array) => {
       for (let i = 0; i < array.length; i++) {
         array[i] = Math.floor(Math.random() * 256);
       }
       return array;
     },
     subtle: {
-      digest: async (algorithm: string, data: Uint8Array) => {
-        // Return a fake hash
+      digest: async () => {
         return new Uint8Array(32);
       }
     }
   },
+
   writable: true
 });
 

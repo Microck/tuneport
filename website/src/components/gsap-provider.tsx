@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -17,6 +17,18 @@ export function GsapProvider({ children }: GsapProviderProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
+  useEffect(() => {
+    if (window.location.hash) {
+      const id = window.location.hash.replace("#", "");
+      const element = document.getElementById(id);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+    }
+  }, [pathname]);
+
   useGSAP(
     () => {
       const context = gsap.context(() => {
@@ -24,7 +36,7 @@ export function GsapProvider({ children }: GsapProviderProps) {
         const buttonTargets = gsap.utils.toArray<HTMLElement>("[data-animate='button']");
 
         let smoother: ScrollSmoother | null = null;
-        if (document.querySelector("#smooth-wrapper") && document.querySelector("#smooth-content")) {
+        if (document.querySelector("#smooth-wrapper") && document.querySelector("#smooth-content") && pathname === "/") {
           smoother = ScrollSmoother.create({
             wrapper: "#smooth-wrapper",
             content: "#smooth-content",

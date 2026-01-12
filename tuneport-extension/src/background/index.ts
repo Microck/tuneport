@@ -4,6 +4,8 @@ import { DownloadService } from '../services/DownloadService';
 import { LucidaService } from '../services/LucidaService';
 import { AudioFormat } from '../services/CobaltService';
 import { YouTubeMetadataService, YouTubeMusicMetadata } from '../services/YouTubeMetadataService';
+import { applyDownloadFailure } from './download-utils';
+
 
 interface DownloadOptions {
   format: string;
@@ -525,10 +527,18 @@ export class BackgroundService {
         } else {
           job.downloadInfo = {
             enabled: true,
-            quality: downloadResult.quality
+            quality: downloadResult.quality,
+            source: downloadResult.source
           };
+
+          const { updatedJob, notice } = applyDownloadFailure(job, downloadResult);
+          job.error = updatedJob.error;
+          if (notice) {
+            this.showNotification(notice.title, notice.message, notice.type);
+          }
           console.warn('Download failed:', downloadResult.error);
         }
+
       }
 
       job.status = 'completed';
@@ -1091,7 +1101,21 @@ export class BackgroundService {
             source: downloadResult.source,
             filename: downloadResult.filename
           };
+        } else {
+          job.downloadInfo = {
+            enabled: true,
+            quality: downloadResult.quality,
+            source: downloadResult.source
+          };
+
+          const { updatedJob, notice } = applyDownloadFailure(job, downloadResult);
+          job.error = updatedJob.error;
+          if (notice) {
+            this.showNotification(notice.title, notice.message, notice.type);
+          }
+          console.warn('Download failed:', downloadResult.error);
         }
+
       }
 
       job.status = 'completed';

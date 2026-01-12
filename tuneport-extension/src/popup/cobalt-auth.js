@@ -1,5 +1,5 @@
 /* global chrome, turnstile */
-const COBALT_INSTANCE = 'https://cobalt-api.meowing.de';
+const COBALT_INSTANCE = 'https://cobalt.micr.dev';
 
 async function onTurnstileSuccess(token) {
   const statusEl = document.getElementById('status');
