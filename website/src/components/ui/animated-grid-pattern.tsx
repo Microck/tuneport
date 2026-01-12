@@ -3,11 +3,13 @@
 
 import {
   ComponentPropsWithoutRef,
+  useCallback,
   useEffect,
   useId,
   useRef,
   useState,
 } from "react"
+
 import { motion } from "motion/react"
 
 import { cn } from "@/lib/utils"
@@ -34,25 +36,28 @@ export function AnimatedGridPattern({
   className,
   maxOpacity = 0.5,
   duration = 4,
+  repeatDelay = 0,
   ...props
 }: AnimatedGridPatternProps) {
+
   const id = useId()
   const containerRef = useRef(null)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
 
-  function getPos() {
+  const getPos = useCallback(() => {
     return [
       Math.floor((Math.random() * dimensions.width) / width),
       Math.floor((Math.random() * dimensions.height) / height),
     ]
-  }
+  }, [dimensions.height, dimensions.width, height, width])
 
-  function generateSquares(count: number) {
+  const generateSquares = useCallback((count: number) => {
     return Array.from({ length: count }, (_, i) => ({
       id: i,
       pos: getPos(),
     }))
-  }
+  }, [getPos])
+
 
   const [squares, setSquares] = useState(() => generateSquares(numSquares))
 
@@ -96,6 +101,8 @@ export function AnimatedGridPattern({
       if (containerRef.current) {
         resizeObserver.unobserve(containerRef.current)
       }
+      resizeObserver.disconnect()
+
     }
   }, [containerRef])
 
@@ -135,8 +142,10 @@ export function AnimatedGridPattern({
               duration,
               repeat: 1,
               delay: index * 0.1,
+              repeatDelay,
               repeatType: "reverse",
             }}
+
             onAnimationComplete={() => updateSquarePosition(id)}
             key={`${x}-${y}-${index}`}
             width={width - 1}

@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 export default function ResearchPage() {
   return (
     <div className="min-h-screen bg-[#FAFAFA] pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-4xl">
         <div className="mb-8">
           <Link href="/">
             <Button variant="ghost" className="gap-2 pl-0 hover:bg-transparent hover:text-rose-600">
@@ -32,12 +32,12 @@ export default function ResearchPage() {
           </Link>
         </div>
 
-        <article className="prose prose-slate lg:prose-lg mx-auto bg-white p-8 md:p-12 shadow-sm rounded-2xl border border-slate-100">
+        <article className="prose prose-slate lg:prose-lg mx-auto bg-white/95 p-8 md:p-12 shadow-md rounded-2xl border border-slate-100">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl mb-4">
             Generation Loss in Digital Archival: Why Transcoding Destroys Fidelity
           </h1>
           
-          <div className="flex items-center gap-4 text-sm text-slate-500 mb-8 border-b border-slate-100 pb-8">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500 mb-8 border-b border-slate-100 pb-8">
             <p>By 5 aka M. J.</p>
             <span>•</span>
             <p>Independent Researcher</p>
@@ -63,6 +63,22 @@ export default function ResearchPage() {
               <Button variant="outline" className="h-11 px-6">View Open Source</Button>
             </Link>
             <p className="text-sm text-slate-500">Full paper, code, and reproduction materials are public.</p>
+          </div>
+
+          <h2>Key findings</h2>
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            <div className="rounded-xl border border-slate-100 bg-white/80 p-4">
+              <p className="text-sm font-semibold text-slate-900">Opus is the real standard</p>
+              <p className="mt-2 text-sm text-slate-600">Itag 251 delivers 130–160kbps Opus with a 20kHz bandwidth.</p>
+            </div>
+            <div className="rounded-xl border border-slate-100 bg-white/80 p-4">
+              <p className="text-sm font-semibold text-slate-900">AAC-LC is capped</p>
+              <p className="mt-2 text-sm text-slate-600">Legacy AAC-LC is filtered around 16kHz, losing high‑end detail.</p>
+            </div>
+            <div className="rounded-xl border border-slate-100 bg-white/80 p-4">
+              <p className="text-sm font-semibold text-slate-900">Transcoding is loss</p>
+              <p className="mt-2 text-sm text-slate-600">Upscaling to 320kbps MP3 adds artifacts and inflates size ~250%.</p>
+            </div>
           </div>
 
           <h2>The "320kbps" Myth</h2>

@@ -59,10 +59,10 @@ export function Hero() {
             Open Source
           </div>
 
-          <h1 className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-6xl md:text-7xl lg:text-8xl text-balance">
+          <h1 className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-6xl md:text-7xl lg:text-8xl text-balance break-keep hyphens-none">
             <TextAnimate
               animation="blurInUp"
-              by="character"
+              by="text"
               className="text-inherit"
             >
               Sync. Download. Disappear.
@@ -79,12 +79,11 @@ export function Hero() {
 
           <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center">
             <div className="flex flex-col items-center gap-2">
-              <ShimmerButton className="shadow-2xl h-12 px-8 opacity-80 pointer-events-none">
+              <ShimmerButton className="shadow-2xl h-12 px-8 opacity-80 pointer-events-none" data-placeholder="webstore-url">
                 <span className="whitespace-pre-wrap text-center text-base font-semibold leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg">
                   Chrome Web Store soon
                 </span>
               </ShimmerButton>
-              <span className="text-xs text-slate-500">Replace URL when published.</span>
             </div>
             
             <Link href="https://github.com/Microck/tuneport" target="_blank">

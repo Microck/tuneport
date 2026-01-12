@@ -58,11 +58,11 @@ export function Flow() {
       </div>
 
       <div
-        className="relative flex min-h-[200px] w-full items-center justify-center overflow-hidden rounded-xl bg-white/50 mt-12 py-12"
+        className="relative flex min-h-[320px] w-full items-center justify-center overflow-visible rounded-2xl bg-white/60 mt-12 py-16"
         ref={containerRef}
       >
-        <div className="flex size-full flex-col max-w-2xl items-stretch justify-between gap-12 px-4">
-          <div className="flex flex-row items-center justify-between">
+        <div className="flex w-full max-w-3xl flex-col gap-10 px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 items-center gap-8">
             <div className="flex flex-col items-center gap-2">
               <Circle ref={div1Ref} className="size-14 border-none shadow-lg">
                 <YouTubeIcon className="size-7 text-[#FF0000]" />
@@ -71,8 +71,8 @@ export function Flow() {
             </div>
             
             <div className="flex flex-col items-center gap-2">
-              <Circle ref={div4Ref} className="size-20 border-none shadow-xl bg-gradient-to-br from-emerald-50 to-white">
-                 <div className="relative h-12 w-12">
+              <Circle ref={div4Ref} className="size-16 sm:size-20 border-none shadow-xl bg-gradient-to-br from-rose-50 to-white">
+                 <div className="relative h-10 w-10 sm:h-12 sm:w-12">
                   <Image 
                     src="/logo.png" 
                     fill 
@@ -91,10 +91,10 @@ export function Flow() {
               <span className="text-sm font-medium text-slate-700">Match</span>
             </div>
           </div>
-          <div className="flex flex-row items-center justify-center">
+          <div className="flex justify-center pt-4 sm:pt-0">
              <div className="flex flex-col items-center gap-2">
               <Circle ref={div3Ref} className="size-14 border-none shadow-lg">
-                <FileAudio className="size-7 text-emerald-500" />
+                <FileAudio className="size-7 text-emerald-600" />
               </Circle>
               <span className="text-sm font-medium text-slate-700">Sync & Download</span>
             </div>
@@ -105,30 +105,30 @@ export function Flow() {
           containerRef={containerRef}
           fromRef={div1Ref}
           toRef={div4Ref}
-          pathColor="rgba(200, 200, 200, 0.3)"
+          pathColor="rgba(148, 163, 184, 0.65)"
           gradientStartColor="#FF0000"
-          gradientStopColor="#10B981"
-          pathWidth={3}
+          gradientStopColor="#E11D48"
+          pathWidth={4}
           delay={0}
         />
         <AnimatedBeam
           containerRef={containerRef}
           fromRef={div4Ref}
           toRef={div2Ref}
-          pathColor="rgba(200, 200, 200, 0.3)"
-          gradientStartColor="#10B981"
+          pathColor="rgba(148, 163, 184, 0.65)"
+          gradientStartColor="#E11D48"
           gradientStopColor="#1DB954"
-          pathWidth={3}
+          pathWidth={4}
           delay={0.5}
         />
          <AnimatedBeam
           containerRef={containerRef}
           fromRef={div4Ref}
           toRef={div3Ref}
-          pathColor="rgba(200, 200, 200, 0.3)"
-          gradientStartColor="#10B981"
+          pathColor="rgba(148, 163, 184, 0.65)"
+          gradientStartColor="#E11D48"
           gradientStopColor="#10B981"
-          pathWidth={3}
+          pathWidth={4}
           delay={1}
         />
       </div>

@@ -17,13 +17,7 @@ export function Header() {
   const mobileLinkClassName = (active: boolean) =>
     `flex items-center gap-2 text-sm font-medium ${active ? "text-rose-600" : "text-slate-700"}`;
 
-  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
-    e.preventDefault();
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b border-white/10 bg-white/70 px-4 backdrop-blur-md md:px-6">
@@ -35,22 +29,20 @@ export function Header() {
       </div>
 
       <nav className="hidden gap-6 md:flex">
-        <a 
-          href="#features" 
-          onClick={(e) => scrollToSection(e, "features")}
-          className={linkClassName(false)}
+        <Link
+          href="/#features"
+          className={linkClassName(pathname === "/")}
         >
           <Sparkles className="h-4 w-4" />
           Features
-        </a>
-        <a 
-          href="#how-it-works" 
-          onClick={(e) => scrollToSection(e, "how-it-works")}
-          className={linkClassName(false)}
+        </Link>
+        <Link
+          href="/#how-it-works"
+          className={linkClassName(pathname === "/")}
         >
           <Route className="h-4 w-4" />
           How it Works
-        </a>
+        </Link>
         <Link
           href="/research"
           aria-current={pathname === "/research" ? "page" : undefined}
@@ -71,10 +63,9 @@ export function Header() {
 
       <div className="flex items-center gap-2 md:gap-4">
         <div className="hidden md:flex flex-col items-end gap-1">
-          <Button size="sm" className="font-medium" disabled>
+          <Button size="sm" className="font-medium" disabled data-placeholder="webstore-url">
             Chrome Web Store soon
           </Button>
-          <span className="text-xs text-slate-400">Replace URL when published.</span>
         </div>
         <Button
           variant="ghost"
@@ -90,28 +81,22 @@ export function Header() {
       {mobileOpen && (
         <div className="absolute top-full left-0 right-0 border-b border-slate-100 bg-white/95 backdrop-blur-md md:hidden">
           <div className="flex flex-col gap-3 px-6 py-4">
-            <a
-              href="#features"
-              onClick={(e) => {
-                scrollToSection(e, "features");
-                setMobileOpen(false);
-              }}
-              className={mobileLinkClassName(false)}
+            <Link
+              href="/#features"
+              className={mobileLinkClassName(pathname === "/")}
+              onClick={() => setMobileOpen(false)}
             >
               <Sparkles className="h-4 w-4" />
               Features
-            </a>
-            <a
-              href="#how-it-works"
-              onClick={(e) => {
-                scrollToSection(e, "how-it-works");
-                setMobileOpen(false);
-              }}
-              className={mobileLinkClassName(false)}
+            </Link>
+            <Link
+              href="/#how-it-works"
+              className={mobileLinkClassName(pathname === "/")}
+              onClick={() => setMobileOpen(false)}
             >
               <Route className="h-4 w-4" />
               How it Works
-            </a>
+            </Link>
             <Link
               href="/research"
               className={mobileLinkClassName(pathname === "/research")}
@@ -129,10 +114,9 @@ export function Header() {
               Tutorial
             </Link>
             <div className="pt-2">
-              <Button size="sm" className="w-full" disabled>
+              <Button size="sm" className="w-full" disabled data-placeholder="webstore-url">
                 Chrome Web Store soon
               </Button>
-              <span className="mt-2 block text-xs text-slate-400">Replace URL when published.</span>
             </div>
           </div>
         </div>

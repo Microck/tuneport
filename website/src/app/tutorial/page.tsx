@@ -23,26 +23,32 @@ export default function TutorialPage() {
   return (
     <div className="min-h-screen bg-[#FAFAFA] pt-24 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">
-        <div className="mb-8 flex items-center justify-between">
-          <Link href="/">
-            <Button variant="ghost" className="gap-2 pl-0 hover:bg-transparent hover:text-rose-600">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Button>
-          </Link>
-          <div className="flex flex-col items-end gap-1">
-            <Button className="h-10 px-5" disabled>Chrome Web Store soon</Button>
-            <span className="text-xs text-slate-500">Replace URL when published.</span>
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <Link href="/">
+              <Button variant="ghost" className="gap-2 pl-0 hover:bg-transparent hover:text-rose-600">
+                <ArrowLeft className="h-4 w-4" />
+                Back to Home
+              </Button>
+            </Link>
+            <div className="flex flex-col items-start sm:items-end gap-1">
+              <Button className="h-10 px-5" disabled data-placeholder="webstore-url">Chrome Web Store soon</Button>
+            </div>
           </div>
-        </div>
 
-        <section className="bg-white border border-slate-100 rounded-2xl p-8 md:p-10 shadow-sm">
+        <section className="bg-white/95 border border-slate-100 rounded-2xl p-8 md:p-10 shadow-md">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
             TunePort Tutorial
           </h1>
           <p className="mt-3 text-lg text-slate-600">
             From YouTube to Spotify in four steps. No accounts, no friction.
           </p>
+
+          <h2 className="mt-8 text-xl font-semibold text-slate-900">Before you start</h2>
+          <ul className="mt-3 list-disc pl-5 text-sm text-slate-600">
+            <li>Install the extension from the Chrome Web Store once published.</li>
+            <li>Log into Spotify in your browser.</li>
+            <li>Open a YouTube music video with a clear title.</li>
+          </ul>
 
           <div className="mt-10 grid gap-6 md:grid-cols-2">
             <div className="rounded-xl border border-slate-100 p-6">
@@ -93,6 +99,13 @@ export default function TutorialPage() {
               </p>
             </div>
           </div>
+
+          <h2 className="mt-10 text-xl font-semibold text-slate-900">Troubleshooting</h2>
+          <ul className="mt-3 list-disc pl-5 text-sm text-slate-600">
+            <li>Make sure the YouTube title includes artist and track name.</li>
+            <li>Refresh the page if the context menu item doesn’t appear.</li>
+            <li>Use the tutorial steps to re-run matching for tough titles.</li>
+          </ul>
 
           <div className="mt-10 flex flex-col sm:flex-row gap-4">
             <Link href="/research">
