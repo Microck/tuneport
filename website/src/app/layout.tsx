@@ -42,11 +42,15 @@ export default function RootLayout({
         className={`${instrumentSans.variable} antialiased`}
       >
         <GsapProvider>
-          <Header />
-          <main className="flex min-h-screen flex-col">
-            {children}
-          </main>
-          <Footer />
+          <div id="smooth-wrapper">
+            <div id="smooth-content">
+              <Header />
+              <main className="flex min-h-screen flex-col">
+                {children}
+              </main>
+              <Footer />
+            </div>
+          </div>
         </GsapProvider>
       </body>
     </html>

@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 
 export default function ResearchPage() {
   return (
-    <div className="relative min-h-screen bg-white pb-24 pt-24">
+    <div className="relative bg-white pb-24 pt-24 overflow-hidden">
       <AnimatedGridPattern
         numSquares={30}
         maxOpacity={0.1}

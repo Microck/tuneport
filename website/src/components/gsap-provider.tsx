@@ -4,9 +4,10 @@ import { useRef } from "react";
 import { usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { useGSAP } from "@gsap/react";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
 type GsapProviderProps = {
   children: React.ReactNode;
@@ -21,6 +22,17 @@ export function GsapProvider({ children }: GsapProviderProps) {
       const context = gsap.context(() => {
         const textTargets = gsap.utils.toArray<HTMLElement>("[data-animate='text']");
         const buttonTargets = gsap.utils.toArray<HTMLElement>("[data-animate='button']");
+
+        let smoother: ScrollSmoother | null = null;
+        if (document.querySelector("#smooth-wrapper") && document.querySelector("#smooth-content")) {
+          smoother = ScrollSmoother.create({
+            wrapper: "#smooth-wrapper",
+            content: "#smooth-content",
+            smooth: 1,
+            smoothTouch: 0.1,
+            normalizeScroll: true,
+          });
+        }
 
         const getTextAnimation = (variant: string | undefined) => {
           switch (variant) {
@@ -128,6 +140,7 @@ export function GsapProvider({ children }: GsapProviderProps) {
         return () => {
           cleanups.forEach((cleanup) => cleanup());
           ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+          smoother?.kill();
         };
       }, containerRef);
 

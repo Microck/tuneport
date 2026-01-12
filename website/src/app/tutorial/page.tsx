@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 
 export default function TutorialPage() {
   return (
-    <div className="relative min-h-screen bg-white pb-12 pt-20">
+    <div className="relative bg-white pb-12 pt-20 overflow-hidden">
       <AnimatedGridPattern
         numSquares={30}
         maxOpacity={0.1}
