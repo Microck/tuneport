@@ -156,7 +156,7 @@ export default function TutorialPage() {
             <Link href="/research">
               <Button variant="outline" size="lg" className="w-full sm:w-auto gap-2" data-animate="button">
                   <PlayCircle className="h-4 w-4" />
-                  Read the Research
+                  Read the Docs
               </Button>
             </Link>
             <Link href="/">

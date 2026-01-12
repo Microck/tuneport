@@ -11,18 +11,18 @@ import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Generation Loss Research",
-  description: "Why transcoding destroys audio fidelity: a technical analysis of YouTube's delivery infrastructure.",
+  title: "TunePort Docs",
+  description: "Technical documentation on YouTube audio streams and transcoding behavior.",
   openGraph: {
-    title: "Generation Loss Research",
-    description: "Why transcoding destroys audio fidelity: a technical analysis of YouTube's delivery infrastructure.",
+    title: "TunePort Docs",
+    description: "Technical documentation on YouTube audio streams and transcoding behavior.",
     url: "https://tuneflow.micr.dev/research",
     type: "article",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Generation Loss Research",
-    description: "Why transcoding destroys audio fidelity: a technical analysis of YouTube's delivery infrastructure.",
+    title: "TunePort Docs",
+    description: "Technical documentation on YouTube audio streams and transcoding behavior.",
   },
 };
 
@@ -132,7 +132,7 @@ export default function ResearchPage() {
                         <table className="w-full text-left text-sm">
                             <thead className="bg-slate-50 text-slate-700">
                                 <tr>
-                                    <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Format (Itag)</th>
+                                    <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Format (ITAG)</th>
                                     <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Codec</th>
                                     <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Bitrate</th>
                                     <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">Quality</th>
@@ -141,31 +141,66 @@ export default function ResearchPage() {
                             <tbody className="divide-y divide-slate-100">
                                 <tr className="hover:bg-slate-50">
                                     <td className="px-5 py-4 font-mono text-xs text-slate-500">251</td>
-                                    <td className="px-5 py-4 font-semibold text-slate-900">Opus</td>
-                                    <td className="px-5 py-4 text-slate-600">130-160k</td>
+                                    <td className="px-5 py-4">
+                                        <div className="font-semibold text-slate-900">Opus</div>
+                                        <div className="text-xs text-slate-400">.webm</div>
+                                    </td>
+                                    <td className="px-5 py-4 text-slate-600">130–160 kbps</td>
                                     <td className="px-5 py-4">
                                         <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
-                                            Transparent
+                                            Standard Best
                                         </span>
                                     </td>
                                 </tr>
                                 <tr className="hover:bg-slate-50">
                                     <td className="px-5 py-4 font-mono text-xs text-slate-500">140</td>
-                                    <td className="px-5 py-4 text-slate-600">AAC-LC</td>
-                                    <td className="px-5 py-4 text-slate-600">128k</td>
+                                    <td className="px-5 py-4">
+                                        <div className="text-slate-600 font-medium">AAC-LC</div>
+                                        <div className="text-xs text-slate-400">.m4a</div>
+                                    </td>
+                                    <td className="px-5 py-4 text-slate-600">128 kbps</td>
                                     <td className="px-5 py-4">
                                         <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500">
-                                            Filtered
+                                            Legacy Default
                                         </span>
                                     </td>
                                 </tr>
                                 <tr className="hover:bg-slate-50">
                                     <td className="px-5 py-4 font-mono text-xs text-slate-500">141</td>
-                                    <td className="px-5 py-4 text-slate-600">AAC-LC</td>
-                                    <td className="px-5 py-4 text-slate-600">256k</td>
                                     <td className="px-5 py-4">
-                                        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500">
-                                            Premium
+                                        <div className="text-slate-600 font-medium">AAC-LC</div>
+                                        <div className="text-xs text-slate-400">.m4a</div>
+                                    </td>
+                                    <td className="px-5 py-4 text-slate-600">256 kbps</td>
+                                    <td className="px-5 py-4">
+                                        <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
+                                            Premium Only
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr className="hover:bg-slate-50">
+                                    <td className="px-5 py-4 font-mono text-xs text-slate-500">380</td>
+                                    <td className="px-5 py-4">
+                                        <div className="text-slate-600 font-medium">EC-3</div>
+                                        <div className="text-xs text-slate-400">.m4a</div>
+                                    </td>
+                                    <td className="px-5 py-4 text-slate-600">384 kbps</td>
+                                    <td className="px-5 py-4">
+                                        <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+                                            Surround 5.1
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr className="hover:bg-slate-50">
+                                    <td className="px-5 py-4 font-mono text-xs text-slate-500">250</td>
+                                    <td className="px-5 py-4">
+                                        <div className="text-slate-600 font-medium">Opus</div>
+                                        <div className="text-xs text-slate-400">.webm</div>
+                                    </td>
+                                    <td className="px-5 py-4 text-slate-600">60–80 kbps</td>
+                                    <td className="px-5 py-4">
+                                        <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-700">
+                                            Mobile
                                         </span>
                                     </td>
                                 </tr>

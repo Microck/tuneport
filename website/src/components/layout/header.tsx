@@ -49,7 +49,7 @@ export function Header() {
           className={linkClassName(pathname === "/research")}
         >
           <BookOpen className="h-4 w-4" />
-          Research
+          Docs
         </Link>
         <Link
           href="/tutorial"
@@ -103,7 +103,7 @@ export function Header() {
               onClick={() => setMobileOpen(false)}
             >
           <BookOpen className="h-4 w-4" />
-          Research
+          Docs
             </Link>
             <Link
               href="/tutorial"
