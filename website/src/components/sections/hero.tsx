@@ -66,9 +66,16 @@ export function Hero() {
             <TextAnimate
               animation="blurInUp"
               by="text"
-              className="text-inherit"
+              className="text-inherit hidden sm:block"
             >
               Sync. Download. Disappear.
+            </TextAnimate>
+            <TextAnimate
+              animation="blurInUp"
+              by="text"
+              className="text-inherit sm:hidden"
+            >
+              {"Sync. Download.\nDisappear."}
             </TextAnimate>
           </h1>
           

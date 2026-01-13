@@ -165,6 +165,19 @@ export class CobaltService {
       console.log('[CobaltService] Response status:', response.status);
 
       if (!response.ok) {
+        let errorMessage = `Cobalt request failed: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          console.log('[CobaltService] Error response body:', errorData);
+          if (errorData?.error?.code) {
+            errorMessage = this.formatError(errorData.error.code, errorData.error.context);
+          } else if (errorData?.text) {
+            errorMessage = errorData.text;
+          }
+        } catch {
+          console.log('[CobaltService] Could not parse error response body');
+        }
+
         if (response.status === 401) {
           return {
             success: false,
@@ -183,7 +196,7 @@ export class CobaltService {
         }
         return {
           success: false,
-          error: `Cobalt request failed: ${response.status}`,
+          error: errorMessage,
           source: 'cobalt',
           quality: this.getActualYouTubeQuality(format)
         };

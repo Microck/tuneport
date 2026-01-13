@@ -25,12 +25,13 @@ import {
   Check,
   AlertCircle,
   HelpCircle,
-  Trash2
+  Trash2,
+  Terminal
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ChromeMessageService } from '../services/ChromeMessageService';
 import { SpotifyAuthService } from '../services/SpotifyAuthService';
-import { DEFAULT_COBALT_INSTANCE } from '../config/defaults';
+import { DEFAULT_COBALT_INSTANCE, DEFAULT_YTDLP_INSTANCE } from '../config/defaults';
 
 
 const ShimmerButton: React.FC<{
@@ -361,6 +362,9 @@ interface SettingsState {
   showQualityWarnings: boolean;
   showNotFoundWarnings: boolean;
   cobaltInstance: string;
+  downloadProvider: 'cobalt' | 'yt-dlp';
+  ytDlpInstance: string;
+  ytDlpToken: string;
   lucidaEnabled: boolean;
   visiblePlaylists: string[];
   customPresets: QualityPreset[];
@@ -376,6 +380,9 @@ const DEFAULT_SETTINGS: SettingsState = {
   showQualityWarnings: true,
   showNotFoundWarnings: true,
   cobaltInstance: DEFAULT_COBALT_INSTANCE,
+  downloadProvider: 'cobalt',
+  ytDlpInstance: DEFAULT_YTDLP_INSTANCE,
+  ytDlpToken: '',
 
   lucidaEnabled: false,
   visiblePlaylists: [],
@@ -401,6 +408,8 @@ export const TunePortPopup: React.FC = () => {
   const [showPlaylistDropdown, setShowPlaylistDropdown] = useState(false);
   const [selectedPlaylist, setSelectedPlaylist] = useState<any | null>(null);
   const [playlistSearch, setPlaylistSearch] = useState('');
+  const [debugLogs, setDebugLogs] = useState<Array<{ time: string; message: string; type: 'info' | 'error' | 'warn' }>>([]);
+  const [showDebugConsole, setShowDebugConsole] = useState(false);
 
   const logoUrl = useMemo(() => chrome.runtime.getURL('assets/logo.png'), []);
 
@@ -410,9 +419,32 @@ export const TunePortPopup: React.FC = () => {
     getCurrentUrl();
     loadSettings();
     
-    const interval = setInterval(loadJobs, 2000);
+    const interval = setInterval(() => {
+      loadJobs();
+      if (activeTab === 'activity' && showDebugConsole) {
+        loadDebugLogs();
+      }
+    }, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [activeTab, showDebugConsole]);
+
+  const loadDebugLogs = async () => {
+    try {
+      const response = await ChromeMessageService.sendMessage({ type: 'GET_DEBUG_LOGS' });
+      if (response.logs) setDebugLogs(response.logs);
+    } catch (error) {
+      console.error('Failed to load debug logs:', error);
+    }
+  };
+
+  const clearDebugLogs = async () => {
+    try {
+      await ChromeMessageService.sendMessage({ type: 'CLEAR_DEBUG_LOGS' });
+      setDebugLogs([]);
+    } catch (error) {
+      console.error('Failed to clear debug logs:', error);
+    }
+  };
 
   const loadSettings = async () => {
     try {
@@ -1023,6 +1055,62 @@ export const TunePortPopup: React.FC = () => {
                   </div>
                 ))
               )}
+
+              <div className="mt-4">
+                <button
+                  onClick={() => {
+                    setShowDebugConsole(!showDebugConsole);
+                    if (!showDebugConsole) loadDebugLogs();
+                  }}
+                  className="w-full flex items-center justify-between p-3 bg-tf-gray/30 hover:bg-tf-gray/50 rounded-lg transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <Terminal className="w-3.5 h-3.5 text-tf-slate-muted" />
+                    <span className="text-xs font-bold text-tf-slate">Debug Console</span>
+                  </div>
+                  {showDebugConsole ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                </button>
+                
+                <AnimatePresence>
+                  {showDebugConsole && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="mt-2 p-3 bg-gray-900 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] text-gray-400 font-mono">{debugLogs.length} entries</span>
+                          <button
+                            onClick={clearDebugLogs}
+                            className="text-[10px] text-gray-400 hover:text-white transition-colors font-mono"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                        <div className="max-h-48 overflow-y-auto space-y-1 font-mono text-[9px]">
+                          {debugLogs.length === 0 ? (
+                            <p className="text-gray-500">No logs yet. Try downloading something.</p>
+                          ) : (
+                            debugLogs.slice().reverse().map((log, i) => (
+                              <div key={i} className={cn(
+                                "py-0.5",
+                                log.type === 'error' ? 'text-red-400' :
+                                log.type === 'warn' ? 'text-yellow-400' :
+                                'text-gray-300'
+                              )}>
+                                <span className="text-gray-500">{new Date(log.time).toLocaleTimeString()}</span>{' '}
+                                {log.message}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </motion.div>
           ) : (
             <motion.div

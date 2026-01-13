@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { BookOpen, ListChecks, Menu, Route, Sparkles, X } from "lucide-react";
+import { BookOpen, ListChecks, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Header() {
@@ -37,20 +37,6 @@ export function Header() {
       </div>
 
       <nav className="hidden gap-6 md:flex">
-        <Link
-          href="/#features"
-          className={linkClassName(pathname === "/")}
-        >
-          <Sparkles className="h-4 w-4" />
-          Features
-        </Link>
-        <Link
-          href="/#how-it-works"
-          className={linkClassName(pathname === "/")}
-        >
-          <Route className="h-4 w-4" />
-          How it Works
-        </Link>
         <Link
           href="/docs"
           aria-current={pathname === "/docs" ? "page" : undefined}
@@ -89,22 +75,6 @@ export function Header() {
       {mobileOpen && (
         <div className="absolute top-full left-0 right-0 border-b border-slate-100 bg-white/95 backdrop-blur-md md:hidden">
           <div className="flex flex-col gap-3 px-6 py-4">
-            <Link
-              href="/#features"
-              className={mobileLinkClassName(pathname === "/")}
-              onClick={() => setMobileOpen(false)}
-            >
-          <Sparkles className="h-4 w-4" />
-          Features
-            </Link>
-            <Link
-              href="/#how-it-works"
-              className={mobileLinkClassName(pathname === "/")}
-              onClick={() => setMobileOpen(false)}
-            >
-          <Route className="h-4 w-4" />
-          How it Works
-            </Link>
             <Link
               href="/docs"
               className={mobileLinkClassName(pathname === "/docs")}

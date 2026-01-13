@@ -51,6 +51,19 @@ export class BackgroundService {
   private isContextMenuCreated = false;
   private spotifyToken: string | null = null;
   private activeJobs: Map<string, AddTrackJob> = new Map();
+  private debugLogs: Array<{ time: string; message: string; type: 'info' | 'error' | 'warn' }> = [];
+  private readonly MAX_DEBUG_LOGS = 100;
+
+  private log(message: string, type: 'info' | 'error' | 'warn' = 'info') {
+    const entry = { time: new Date().toISOString(), message, type };
+    this.debugLogs.push(entry);
+    if (this.debugLogs.length > this.MAX_DEBUG_LOGS) {
+      this.debugLogs.shift();
+    }
+    if (type === 'error') console.error(message);
+    else if (type === 'warn') console.warn(message);
+    else console.log(message);
+  }
 
   constructor() {
     this.initializeService();
@@ -147,7 +160,9 @@ export class BackgroundService {
     }
 
     try {
-      await chrome.contextMenus.removeAll();
+      await new Promise<void>((resolve) => {
+        chrome.contextMenus.removeAll(() => resolve());
+      });
 
       chrome.contextMenus.create({
         id: 'tuneport-main',
@@ -197,7 +212,9 @@ export class BackgroundService {
       const playlists: SpotifyPlaylist[] = data.items || [];
       const settings = await this.getSettings();
 
-      await chrome.contextMenus.removeAll();
+      await new Promise<void>((resolve) => {
+        chrome.contextMenus.removeAll(() => resolve());
+      });
       this.isContextMenuCreated = false;
       await this.createContextMenu();
 
@@ -337,6 +354,13 @@ export class BackgroundService {
         break;
       case 'GET_ACTIVE_JOBS':
         sendResponse({ jobs: Array.from(this.activeJobs.values()) });
+        break;
+      case 'GET_DEBUG_LOGS':
+        sendResponse({ logs: this.debugLogs });
+        break;
+      case 'CLEAR_DEBUG_LOGS':
+        this.debugLogs = [];
+        sendResponse({ success: true });
         break;
       case 'GET_JOB_STATUS':
         this.handleGetJobStatus(message.jobId, sendResponse);
@@ -505,6 +529,7 @@ export class BackgroundService {
         this.activeJobs.set(jobId, { ...job });
 
         const format = (downloadOptions.format || 'best') as AudioFormat;
+        this.log(`[Download] Starting download: ${youtubeUrl}, format: ${format}`);
 
         const downloadResult = await DownloadService.downloadAudio(
           youtubeUrl,
@@ -512,6 +537,8 @@ export class BackgroundService {
           metadata.artist,
           { format, preferLossless: true }
         );
+
+        this.log(`[Download] Result: success=${downloadResult.success}, source=${downloadResult.source}, quality=${downloadResult.quality}${downloadResult.error ? ', error=' + downloadResult.error : ''}`);
 
         if (downloadResult.success && downloadResult.downloadId !== undefined) {
           job.downloadInfo = {
@@ -543,7 +570,7 @@ export class BackgroundService {
         if (notice) {
           this.showNotification(notice.title, notice.message, notice.type);
         }
-        console.warn('Download failed:', downloadResult.error);
+        this.log(`[Download] Failed: ${downloadResult.error}`, 'error');
         return job;
       }
 

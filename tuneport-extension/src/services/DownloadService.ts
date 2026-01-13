@@ -1,9 +1,10 @@
 import { CobaltService, AudioFormat } from './CobaltService';
+import { YtDlpService } from './YtDlpService';
 import { LucidaService, LucidaOptions } from './LucidaService';
-import { DEFAULT_COBALT_INSTANCE } from '../config/defaults';
+import { DEFAULT_COBALT_INSTANCE, DEFAULT_YTDLP_INSTANCE } from '../config/defaults';
 
 
-export type DownloadSource = 'lucida' | 'cobalt';
+export type DownloadSource = 'lucida' | 'cobalt' | 'yt-dlp';
 
 export interface DownloadResult {
   success: boolean;
@@ -22,6 +23,9 @@ export interface DownloadOptions {
   preferLossless?: boolean;
   lucidaOptions?: LucidaOptions;
   customInstance?: string;
+  downloadProvider?: 'cobalt' | 'yt-dlp';
+  ytDlpInstance?: string;
+  ytDlpToken?: string;
 }
 
 
@@ -32,7 +36,14 @@ export class DownloadService {
     artist: string,
     options: DownloadOptions = {}
   ): Promise<DownloadResult> {
-    const { preferLossless = true, format = 'best', customInstance } = options;
+    const {
+      preferLossless = true,
+      format = 'best',
+      customInstance,
+      downloadProvider = 'cobalt',
+      ytDlpInstance,
+      ytDlpToken
+    } = options;
 
 
     console.log('[DownloadService] getDownloadUrl called:', { youtubeUrl, title, artist, format });
@@ -58,6 +69,18 @@ export class DownloadService {
         };
       }
       console.log('[DownloadService] Lucida failed, falling back to Cobalt');
+    }
+
+    if (downloadProvider === 'yt-dlp') {
+      console.log('[DownloadService] Calling yt-dlp...');
+      const ytDlpResult = await YtDlpService.getDownloadUrl(youtubeUrl, {
+        format,
+        instance: ytDlpInstance || DEFAULT_YTDLP_INSTANCE,
+        token: ytDlpToken
+      });
+
+      console.log('[DownloadService] yt-dlp result:', ytDlpResult);
+      return ytDlpResult;
     }
 
     console.log('[DownloadService] Calling Cobalt...');
@@ -97,21 +120,46 @@ export class DownloadService {
     console.log('[DownloadService] downloadAudio called:', { youtubeUrl, title, artist, options });
 
     let customInstance = DEFAULT_COBALT_INSTANCE;
+    let downloadProvider: 'cobalt' | 'yt-dlp' = 'cobalt';
+    let ytDlpInstance = DEFAULT_YTDLP_INSTANCE;
+    let ytDlpToken: string | undefined;
+
     try {
       const stored = await chrome.storage.local.get(['tuneport_settings']);
       const rawInstance = stored?.tuneport_settings?.cobaltInstance;
+      const rawProvider = stored?.tuneport_settings?.downloadProvider;
+      const rawYtDlpInstance = stored?.tuneport_settings?.ytDlpInstance;
+      const rawYtDlpToken = stored?.tuneport_settings?.ytDlpToken;
+
       if (typeof rawInstance === 'string' && rawInstance.trim().length > 0) {
         customInstance = rawInstance.trim();
       }
+
+      if (rawProvider === 'yt-dlp') {
+        downloadProvider = 'yt-dlp';
+      }
+
+      if (typeof rawYtDlpInstance === 'string' && rawYtDlpInstance.trim().length > 0) {
+        ytDlpInstance = rawYtDlpInstance.trim();
+      }
+
+      if (typeof rawYtDlpToken === 'string' && rawYtDlpToken.trim().length > 0) {
+        ytDlpToken = rawYtDlpToken.trim();
+      }
     } catch (error) {
-      console.warn('[DownloadService] Failed to load cobalt instance from settings:', error);
+      console.warn('[DownloadService] Failed to load download settings:', error);
     }
 
-    await CobaltService.ensureAuthenticated();
+    if (downloadProvider === 'cobalt') {
+      await CobaltService.ensureAuthenticated();
+    }
 
     const result = await this.getDownloadUrl(youtubeUrl, title, artist, {
       ...options,
-      customInstance
+      customInstance,
+      downloadProvider,
+      ytDlpInstance,
+      ytDlpToken
     });
 
     console.log('[DownloadService] getDownloadUrl result:', result);
