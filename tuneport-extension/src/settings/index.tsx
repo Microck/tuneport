@@ -309,14 +309,26 @@ export const SettingsPage: React.FC = () => {
                 value={settings.downloadProvider}
                 onChange={(v) => updateSetting('downloadProvider', v as 'cobalt' | 'yt-dlp')}
                 options={[
-                  { id: 'cobalt', label: 'Cobalt' },
-                  { id: 'yt-dlp', label: 'yt-dlp (self-hosted)' }
+                  { id: 'yt-dlp', label: 'yt-dlp (Default)' },
+                  { id: 'cobalt', label: 'Cobalt' }
                 ]}
               />
               {settings.downloadProvider === 'yt-dlp' ? (
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-[10px] font-bold text-tf-slate mb-1">yt-dlp instance URL</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-[10px] font-bold text-tf-slate">yt-dlp instance URL</label>
+                      <a 
+                        href="https://github.com/Microck/tuneport/tree/main/yt-dlp-service" 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-[9px] text-tf-emerald hover:underline cursor-pointer"
+                        title="Learn how to self-host your own instance"
+                      >
+                        <HelpCircle className="w-3 h-3" />
+                        How to self-host
+                      </a>
+                    </div>
                     <input
                       type="text"
                       value={settings.ytDlpInstance}
@@ -325,21 +337,22 @@ export const SettingsPage: React.FC = () => {
                       placeholder="https://yt.micr.dev"
                     />
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-tf-slate mb-1">
-                      yt-dlp API token
-                      {(!settings.ytDlpInstance || settings.ytDlpInstance.includes('yt.micr.dev')) && 
-                        <span className="text-tf-emerald ml-1 font-normal">(Optional - default provided)</span>
-                      }
-                    </label>
-                    <input
-                      type="password"
-                      value={settings.ytDlpToken}
-                      onChange={(e) => updateSetting('ytDlpToken', e.target.value)}
-                      className="w-full px-3 py-2 text-xs border border-tf-border rounded-lg bg-white"
-                      placeholder={(!settings.ytDlpInstance || settings.ytDlpInstance.includes('yt.micr.dev')) ? "Using built-in token" : "Bearer token"}
-                    />
-                  </div>
+                  
+                  {/* Only show token input if NOT using the default instance */}
+                  {!(!settings.ytDlpInstance || settings.ytDlpInstance.includes('yt.micr.dev')) && (
+                    <div>
+                      <label className="block text-[10px] font-bold text-tf-slate mb-1">
+                        yt-dlp API token
+                      </label>
+                      <input
+                        type="password"
+                        value={settings.ytDlpToken}
+                        onChange={(e) => updateSetting('ytDlpToken', e.target.value)}
+                        className="w-full px-3 py-2 text-xs border border-tf-border rounded-lg bg-white"
+                        placeholder="Bearer token"
+                      />
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div>

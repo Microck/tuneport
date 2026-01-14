@@ -175,8 +175,14 @@ export class DownloadService {
     }
 
     try {
-      const filename = result.filename || this.generateFilename(title, artist, result.quality);
-      const sanitizedFilename = this.sanitizeFilename(filename);
+      // Prioritize generating consistent filenames from metadata over server filenames (which might be random hashes)
+      // Exception: Lucida returns correct filenames
+      let filename = result.filename;
+      if (!filename || result.source === 'yt-dlp' || result.source === 'cobalt') {
+        filename = this.generateFilename(title, artist, result.quality);
+      }
+      
+      const sanitizedFilename = this.sanitizeFilename(filename!);
       const fullPath = `TunePort/${sanitizedFilename}`;
       
       console.log('[DownloadService] Starting chrome.downloads.download:', {

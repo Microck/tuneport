@@ -1,5 +1,18 @@
 # changelog
 
+## v3.0.4
+
+**release date:** 2026-01-14
+
+ui improvements for download provider selection and filename fixes.
+
+### changes
+
+- **filename fix**: forced downloads to use consistent "artist - title" format instead of server-generated hashes.
+- **settings ui**: simplified provider selection (yt-dlp default vs cobalt), added self-host tooltip, and hid api token field for default instance.
+
+---
+
 ## v3.0.2
 
 **release date:** 2026-01-14
