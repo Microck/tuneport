@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { BookOpen, ListChecks, Menu, X } from "lucide-react";
+import { BookOpen, ListChecks, Menu, X, Server } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Header() {
@@ -53,6 +53,14 @@ export function Header() {
           <ListChecks className="h-4 w-4" />
           Tutorial
         </Link>
+        <Link
+          href="/self-host"
+          aria-current={pathname === "/self-host" ? "page" : undefined}
+          className={linkClassName(pathname === "/self-host")}
+        >
+          <Server className="h-4 w-4" />
+          Self-Host
+        </Link>
       </nav>
 
       <div className="flex items-center gap-2 md:gap-4">
@@ -90,6 +98,14 @@ export function Header() {
             >
           <ListChecks className="h-4 w-4" />
           Tutorial
+            </Link>
+            <Link
+              href="/self-host"
+              className={mobileLinkClassName(pathname === "/self-host")}
+              onClick={() => setMobileOpen(false)}
+            >
+          <Server className="h-4 w-4" />
+          Self-Host
             </Link>
             <div className="pt-2">
               <Button size="sm" className="w-full" disabled data-placeholder="webstore-url">
