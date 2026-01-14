@@ -24,22 +24,30 @@ describe('DownloadService.downloadAudio', () => {
     } as unknown as typeof chrome;
   });
 
-  test('defaults to cobalt.micr.dev when setting missing', async () => {
+  test('defaults to yt-dlp when setting missing', async () => {
     jest.spyOn(LucidaService, 'isEnabled').mockReturnValue(false);
-    const ensureAuthSpy = jest.spyOn(CobaltService, 'ensureAuthenticated').mockResolvedValue(true);
-    const cobaltSpy = jest.spyOn(CobaltService, 'getDownloadUrl').mockResolvedValue({
+    jest.spyOn(CobaltService, 'ensureAuthenticated').mockResolvedValue(true);
+    jest.spyOn(CobaltService, 'getDownloadUrl').mockResolvedValue({
       success: false,
       source: 'cobalt',
       quality: 'Opus ~128k',
       error: 'fail'
     });
 
+    const ytDlpSpy = jest.spyOn(YtDlpService, 'getDownloadUrl').mockResolvedValue({
+      success: false,
+      source: 'yt-dlp',
+      quality: 'Opus ~128k',
+      isLossless: false,
+      error: 'fail'
+    });
+
     await DownloadService.downloadAudio('https://youtube.com/watch?v=test', 'title', 'artist', { format: 'best' });
 
-    expect(ensureAuthSpy).toHaveBeenCalled();
-    expect(cobaltSpy).toHaveBeenCalledWith('https://youtube.com/watch?v=test', {
+    expect(ytDlpSpy).toHaveBeenCalledWith('https://youtube.com/watch?v=test', {
       format: 'best',
-      customInstance: 'https://cobalt.micr.dev'
+      instance: 'https://yt.micr.dev',
+      token: undefined
     });
   });
 
@@ -59,6 +67,7 @@ describe('DownloadService.downloadAudio', () => {
       success: false,
       source: 'yt-dlp',
       quality: 'Opus ~128k',
+      isLossless: false,
       error: 'fail'
     });
 

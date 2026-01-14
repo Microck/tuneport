@@ -40,7 +40,7 @@ export class DownloadService {
       preferLossless = true,
       format = 'best',
       customInstance,
-      downloadProvider = 'cobalt',
+      downloadProvider = 'yt-dlp',
       ytDlpInstance,
       ytDlpToken
     } = options;
@@ -68,7 +68,8 @@ export class DownloadService {
           isLossless: true
         };
       }
-      console.log('[DownloadService] Lucida failed, falling back to Cobalt');
+      console.log('[DownloadService] Lucida failed, falling back to download provider');
+
     }
 
     if (downloadProvider === 'yt-dlp') {
@@ -120,7 +121,7 @@ export class DownloadService {
     console.log('[DownloadService] downloadAudio called:', { youtubeUrl, title, artist, options });
 
     let customInstance = DEFAULT_COBALT_INSTANCE;
-    let downloadProvider: 'cobalt' | 'yt-dlp' = 'cobalt';
+    let downloadProvider: 'cobalt' | 'yt-dlp' = 'yt-dlp';
     let ytDlpInstance = DEFAULT_YTDLP_INSTANCE;
     let ytDlpToken: string | undefined;
 
@@ -135,8 +136,8 @@ export class DownloadService {
         customInstance = rawInstance.trim();
       }
 
-      if (rawProvider === 'yt-dlp') {
-        downloadProvider = 'yt-dlp';
+      if (rawProvider === 'yt-dlp' || rawProvider === 'cobalt') {
+        downloadProvider = rawProvider;
       }
 
       if (typeof rawYtDlpInstance === 'string' && rawYtDlpInstance.trim().length > 0) {

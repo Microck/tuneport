@@ -80,7 +80,8 @@ load the `tuneport-extension/dist` folder in chrome as an unpacked extension.
 ### building
 
 ```bash
-# build for chrome web store (restricted features)
+# build for chrome (restricted features)
+
 npm run build:webstore
 
 # build for github release (full features)

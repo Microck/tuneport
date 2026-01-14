@@ -67,7 +67,7 @@ const DEFAULT_SETTINGS: SettingsState = {
   showQualityWarnings: true,
   showNotFoundWarnings: true,
   cobaltInstance: DEFAULT_COBALT_INSTANCE,
-  downloadProvider: 'cobalt',
+  downloadProvider: 'yt-dlp',
   ytDlpInstance: DEFAULT_YTDLP_INSTANCE,
   ytDlpToken: '',
   lucidaEnabled: false,
