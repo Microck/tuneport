@@ -1366,7 +1366,7 @@ export const TunePortPopup: React.FC = () => {
                             <div className="flex items-center justify-between mb-1">
                               <label className="block text-[10px] font-bold text-tf-slate">yt-dlp instance URL</label>
                               <a 
-                                href="https://github.com/Microck/tuneport/tree/main/yt-dlp-service" 
+                                href="https://tuneport.micr.dev/self-host" 
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-1 text-[9px] text-tf-emerald hover:underline cursor-pointer"
