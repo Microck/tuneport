@@ -32,15 +32,19 @@ jobs:
     - name: Build GitHub Version
       run: npm run build:github
 
-    - name: Build WebStore Version
-      run: npm run build:webstore
+    - name: Build Chrome Version
+      run: npm run build:chrome
+
+    - name: Build Firefox Version
+      run: npm run build:firefox
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         files: |
           tuneport-extension/tuneport-github-*.zip
-          tuneport-extension/tuneport-webstore-*.zip
+          tuneport-extension/tuneport-chrome-*.zip
+          tuneport-extension/tuneport-firefox-*.zip
         draft: false
         prerelease: false
         generate_release_notes: true
