@@ -1,5 +1,18 @@
 # changelog
 
+## v3.0.1
+
+**release date:** 2026-01-14
+
+default download provider is now yt-dlp (self-hosted). chrome build label renamed; firefox build documented.
+
+### changes
+
+- **download provider**: default to yt-dlp, keep cobalt available via settings.
+- **build targets**: rename webstore build to chrome (keep alias).
+
+---
+
 ## v3.0.0
 
 **release date:** 2026-01-13

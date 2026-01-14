@@ -8,9 +8,11 @@ const ROOT_DIR = path.join(__dirname, '..');
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
 const BUILD_DIR = path.join(ROOT_DIR, 'build');
 
-const BUILD_TYPE = process.argv[2] || 'github';
+const BUILD_TYPE_RAW = process.argv[2] || 'github';
+const BUILD_TYPE = BUILD_TYPE_RAW === 'webstore' ? 'chrome' : BUILD_TYPE_RAW;
 
 console.log(`Building TunePort for: ${BUILD_TYPE.toUpperCase()}`);
+
 
 function cleanDirs() {
   if (fs.existsSync(BUILD_DIR)) {
@@ -32,7 +34,8 @@ function modifyManifest() {
   const manifestPath = path.join(BUILD_DIR, 'manifest.json');
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 
-  if (BUILD_TYPE === 'webstore') {
+  if (BUILD_TYPE === 'chrome') {
+
     manifest.name = 'TunePort - YouTube to Spotify';
     manifest.description = 'Add YouTube videos to your Spotify playlists with one click';
     
@@ -91,7 +94,8 @@ function modifyManifest() {
 }
 
 function createDefaultSettings() {
-  const settingsContent = BUILD_TYPE === 'webstore' 
+  const settingsContent = BUILD_TYPE === 'chrome' 
+
     ? { lucida_enabled: false }
     : { lucida_enabled: true };
 
