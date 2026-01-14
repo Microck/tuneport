@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  yt-dlp:
+    build: .
+    ports:
+      - "3001:5000"
+    volumes:
+      - ./data:/data
+      - ./config:/config
+    restart: unless-stopped
+    environment:
+      - YTDLP_TOKEN=your_secure_token_here
+      - TOKEN_TTL_SECONDS=900
+      - PUBLIC_BASE_URL=http://localhost:3001
+      - COOKIE_PATH=/config/cookies.txt
