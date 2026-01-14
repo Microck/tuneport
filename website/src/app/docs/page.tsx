@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, FileAudio, Music2, AlertTriangle, Download, Github, BookOpen } from "lucide-react";
+import { ArrowLeft, FileAudio, Music2, AlertTriangle, Download, Github, BookOpen, Code2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { TextAnimate } from "@/components/ui/text-animate";
@@ -235,6 +235,24 @@ export default function DocsPage() {
             </li>
           </ul>
         </article>
+
+        <div className="mb-20">
+          <h2 className="mb-8 text-2xl font-bold tracking-tight text-slate-900" data-animate="text" data-animate-variant="slide-left">
+            <AnimatedShinyText className="text-slate-900">Technical Details</AnimatedShinyText>
+          </h2>
+          <div className="grid gap-6 md:grid-cols-1">
+             <Link href="/docs/how-it-works" className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 shadow-sm transition-all hover:shadow-md hover:border-slate-300">
+               <div className="mb-4 inline-flex rounded-lg bg-indigo-50 p-3 text-indigo-600 group-hover:bg-indigo-100 transition-colors">
+                 <Code2 className="h-6 w-6" />
+               </div>
+               <h3 className="mb-2 text-xl font-bold text-slate-900">How It Works</h3>
+               <p className="text-slate-600">Deep dive into the sanitization regex, fuzzy matching algorithms, and metadata pipeline.</p>
+               <div className="mt-4 flex items-center text-sm font-medium text-indigo-600 group-hover:translate-x-1 transition-transform">
+                 Read Documentation <ArrowRight className="ml-1 h-4 w-4" />
+               </div>
+             </Link>
+          </div>
+        </div>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
           <Link href="https://github.com/Microck/tuneport/blob/main/docs/archival_and_transcoding.pdf" target="_blank">
