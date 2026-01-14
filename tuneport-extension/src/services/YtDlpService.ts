@@ -20,6 +20,14 @@ export class YtDlpService {
     const { format, instance, token } = options;
     const endpoint = new URL('/download', instance).toString();
 
+    console.log('[YtDlpService] Request details:', {
+      endpoint,
+      instance,
+      hasToken: !!token,
+      tokenLength: token?.length || 0,
+      format
+    });
+
     const headers: Record<string, string> = {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
@@ -27,6 +35,9 @@ export class YtDlpService {
 
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
+      console.log('[YtDlpService] Using auth header: Bearer <token>');
+    } else {
+      console.log('[YtDlpService] WARNING: No token provided');
     }
 
     try {

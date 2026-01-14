@@ -2,6 +2,7 @@ import { DownloadService } from '../DownloadService';
 import { CobaltService } from '../CobaltService';
 import { YtDlpService } from '../YtDlpService';
 import { LucidaService } from '../LucidaService';
+import { DEFAULT_YTDLP_TOKEN } from '../../config/defaults';
 
 describe('DownloadService.downloadAudio', () => {
   beforeEach(() => {
@@ -47,7 +48,7 @@ describe('DownloadService.downloadAudio', () => {
     expect(ytDlpSpy).toHaveBeenCalledWith('https://youtube.com/watch?v=test', {
       format: 'best',
       instance: 'https://yt.micr.dev',
-      token: undefined
+      token: DEFAULT_YTDLP_TOKEN
     });
   });
 

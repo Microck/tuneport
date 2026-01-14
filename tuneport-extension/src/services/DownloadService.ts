@@ -1,7 +1,7 @@
 import { CobaltService, AudioFormat } from './CobaltService';
 import { YtDlpService } from './YtDlpService';
 import { LucidaService, LucidaOptions } from './LucidaService';
-import { DEFAULT_COBALT_INSTANCE, DEFAULT_YTDLP_INSTANCE } from '../config/defaults';
+import { DEFAULT_COBALT_INSTANCE, DEFAULT_YTDLP_INSTANCE, DEFAULT_YTDLP_TOKEN } from '../config/defaults';
 
 
 export type DownloadSource = 'lucida' | 'cobalt' | 'yt-dlp';
@@ -74,10 +74,14 @@ export class DownloadService {
 
     if (downloadProvider === 'yt-dlp') {
       console.log('[DownloadService] Calling yt-dlp...');
+      const effectiveInstance = ytDlpInstance || DEFAULT_YTDLP_INSTANCE;
+      // Use default token only when using the default instance and no custom token is set
+      const effectiveToken = ytDlpToken || (effectiveInstance === DEFAULT_YTDLP_INSTANCE ? DEFAULT_YTDLP_TOKEN : undefined);
+      
       const ytDlpResult = await YtDlpService.getDownloadUrl(youtubeUrl, {
         format,
-        instance: ytDlpInstance || DEFAULT_YTDLP_INSTANCE,
-        token: ytDlpToken
+        instance: effectiveInstance,
+        token: effectiveToken
       });
 
       console.log('[DownloadService] yt-dlp result:', ytDlpResult);

@@ -1,5 +1,18 @@
 # changelog
 
+## v3.0.2
+
+**release date:** 2026-01-14
+
+fixed yt-dlp authentication for default instance. downloads now work out of the box.
+
+### changes
+
+- **yt-dlp auth**: added default api token for the bundled yt-dlp instance. no configuration required.
+- **server fixes**: upgraded yt-dlp service to python 3.12, added deno for js challenge solving, fixed cookie handling.
+
+---
+
 ## v3.0.1
 
 **release date:** 2026-01-14

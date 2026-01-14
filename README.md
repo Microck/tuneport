@@ -108,8 +108,8 @@ graph TD
     subgraph Download Pipeline
     BG -->|If Enabled| DL[Download Service]
     DL -->|1. Try Lossless| Lucida[Lucida API]
-    Lucida -.->|Fallback| Cobalt[Cobalt API]
-    Cobalt -->|Audio Stream| Disk[chrome.downloads]
+    Lucida -.->|Fallback| YtDlp[yt-dlp API]
+    YtDlp -->|Audio Stream| Disk[chrome.downloads]
     end
     
     Add -->|Success| Notify[Notification]
@@ -122,7 +122,7 @@ graph TD
 click the tuneport icon in the toolbar and hit "connect spotify". the token refreshes automatically.
 
 **"download failed"**
-ensure the cobalt instance URL in settings is reachable. default: `https://cobalt.micr.dev`. downloads may require a one-time verification via the "verify download access" popup.
+the default download provider is yt-dlp (self-hosted at `https://yt.micr.dev`). if downloads fail, check your internet connection. you can also switch to cobalt in settings if needed.
 
 **"track not found"**
 the matching algorithm requires a clean title format (e.g., "Artist - Title"). heavy remix/mashup titles may fail confidence checks.
