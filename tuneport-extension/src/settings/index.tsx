@@ -326,13 +326,18 @@ export const SettingsPage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-tf-slate mb-1">yt-dlp API token</label>
+                    <label className="block text-[10px] font-bold text-tf-slate mb-1">
+                      yt-dlp API token
+                      {(!settings.ytDlpInstance || settings.ytDlpInstance.includes('yt.micr.dev')) && 
+                        <span className="text-tf-emerald ml-1 font-normal">(Optional - default provided)</span>
+                      }
+                    </label>
                     <input
                       type="password"
                       value={settings.ytDlpToken}
                       onChange={(e) => updateSetting('ytDlpToken', e.target.value)}
                       className="w-full px-3 py-2 text-xs border border-tf-border rounded-lg bg-white"
-                      placeholder="Bearer token"
+                      placeholder={(!settings.ytDlpInstance || settings.ytDlpInstance.includes('yt.micr.dev')) ? "Using built-in token" : "Bearer token"}
                     />
                   </div>
                 </div>

@@ -1333,15 +1333,57 @@ export const TunePortPopup: React.FC = () => {
                         <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.lucidaEnabled ? "left-4" : "left-0.5")} />
                       </button>
                     </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-tf-slate mb-1">Cobalt Instance</label>
-                      <input
-                        type="text"
-                        value={settings.cobaltInstance}
-                        onChange={(e) => updateSetting('cobaltInstance', e.target.value)}
-                        placeholder="https://cobalt-api.meowing.de"
-                        className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
-                      />
+                    <div className="pt-2 border-t border-tf-border/50">
+                      <label className="block text-[10px] font-bold text-tf-slate mb-1">Download Provider</label>
+                      <select
+                        value={settings.downloadProvider}
+                        onChange={(e) => updateSetting('downloadProvider', e.target.value as 'cobalt' | 'yt-dlp')}
+                        className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald mb-3"
+                      >
+                        <option value="cobalt">Cobalt</option>
+                        <option value="yt-dlp">yt-dlp (Self-hosted)</option>
+                      </select>
+
+                      {settings.downloadProvider === 'yt-dlp' ? (
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-[10px] font-bold text-tf-slate mb-1">yt-dlp instance URL</label>
+                            <input
+                              type="text"
+                              value={settings.ytDlpInstance}
+                              onChange={(e) => updateSetting('ytDlpInstance', e.target.value)}
+                              className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
+                              placeholder="https://yt.micr.dev"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-tf-slate mb-1">
+                              yt-dlp API token
+                              {(!settings.ytDlpInstance || settings.ytDlpInstance.includes('yt.micr.dev')) && 
+                                <span className="text-tf-emerald ml-1 font-normal">(Optional)</span>
+                              }
+                            </label>
+                            <input
+                              type="password"
+                              value={settings.ytDlpToken}
+                              onChange={(e) => updateSetting('ytDlpToken', e.target.value)}
+                              className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
+                              placeholder={(!settings.ytDlpInstance || settings.ytDlpInstance.includes('yt.micr.dev')) ? "Using built-in token" : "Bearer token"}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <label className="block text-[10px] font-bold text-tf-slate mb-1">Cobalt Instance</label>
+                          <input
+                            type="text"
+                            value={settings.cobaltInstance}
+                            onChange={(e) => updateSetting('cobaltInstance', e.target.value)}
+                            placeholder="https://cobalt.micr.dev"
+                            className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
