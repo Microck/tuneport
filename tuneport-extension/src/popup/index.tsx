@@ -369,6 +369,7 @@ interface SettingsState {
   visiblePlaylists: string[];
   customPresets: QualityPreset[];
   spotifyFallbackMode: 'auto' | 'ask' | 'never';
+  enableDebugConsole: boolean;
 }
 
 const DEFAULT_SETTINGS: SettingsState = {
@@ -387,7 +388,8 @@ const DEFAULT_SETTINGS: SettingsState = {
   lucidaEnabled: false,
   visiblePlaylists: [],
   customPresets: [],
-  spotifyFallbackMode: 'auto'
+  spotifyFallbackMode: 'auto',
+  enableDebugConsole: false
 };
 
 export const TunePortPopup: React.FC = () => {
@@ -1056,61 +1058,63 @@ export const TunePortPopup: React.FC = () => {
                 ))
               )}
 
-              <div className="mt-4">
-                <button
-                  onClick={() => {
-                    setShowDebugConsole(!showDebugConsole);
-                    if (!showDebugConsole) loadDebugLogs();
-                  }}
-                  className="w-full flex items-center justify-between p-3 bg-tf-gray/30 hover:bg-tf-gray/50 rounded-lg transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <Terminal className="w-3.5 h-3.5 text-tf-slate-muted" />
-                    <span className="text-xs font-bold text-tf-slate">Debug Console</span>
-                  </div>
-                  {showDebugConsole ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                </button>
-                
-                <AnimatePresence>
-                  {showDebugConsole && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="mt-2 p-3 bg-gray-900 rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] text-gray-400 font-mono">{debugLogs.length} entries</span>
-                          <button
-                            onClick={clearDebugLogs}
-                            className="text-[10px] text-gray-400 hover:text-white transition-colors font-mono"
-                          >
-                            Clear
-                          </button>
+              {settings.enableDebugConsole && (
+                <div className="mt-4">
+                  <button
+                    onClick={() => {
+                      setShowDebugConsole(!showDebugConsole);
+                      if (!showDebugConsole) loadDebugLogs();
+                    }}
+                    className="w-full flex items-center justify-between p-3 bg-tf-gray/30 hover:bg-tf-gray/50 rounded-lg transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Terminal className="w-3.5 h-3.5 text-tf-slate-muted" />
+                      <span className="text-xs font-bold text-tf-slate">Debug Console</span>
+                    </div>
+                    {showDebugConsole ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  </button>
+                  
+                  <AnimatePresence>
+                    {showDebugConsole && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-2 p-3 bg-gray-900 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-[10px] text-gray-400 font-mono">{debugLogs.length} entries</span>
+                            <button
+                              onClick={clearDebugLogs}
+                              className="text-[10px] text-gray-400 hover:text-white transition-colors font-mono"
+                            >
+                              Clear
+                            </button>
+                          </div>
+                          <div className="max-h-48 overflow-y-auto space-y-1 font-mono text-[9px]">
+                            {debugLogs.length === 0 ? (
+                              <p className="text-gray-500">No logs yet. Try downloading something.</p>
+                            ) : (
+                              debugLogs.slice().reverse().map((log, i) => (
+                                <div key={i} className={cn(
+                                  "py-0.5",
+                                  log.type === 'error' ? 'text-red-400' :
+                                  log.type === 'warn' ? 'text-yellow-400' :
+                                  'text-gray-300'
+                                )}>
+                                  <span className="text-gray-500">{new Date(log.time).toLocaleTimeString()}</span>{' '}
+                                  {log.message}
+                                </div>
+                              ))
+                            )}
+                          </div>
                         </div>
-                        <div className="max-h-48 overflow-y-auto space-y-1 font-mono text-[9px]">
-                          {debugLogs.length === 0 ? (
-                            <p className="text-gray-500">No logs yet. Try downloading something.</p>
-                          ) : (
-                            debugLogs.slice().reverse().map((log, i) => (
-                              <div key={i} className={cn(
-                                "py-0.5",
-                                log.type === 'error' ? 'text-red-400' :
-                                log.type === 'warn' ? 'text-yellow-400' :
-                                'text-gray-300'
-                              )}>
-                                <span className="text-gray-500">{new Date(log.time).toLocaleTimeString()}</span>{' '}
-                                {log.message}
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
             </motion.div>
           ) : (
             <motion.div
@@ -1321,6 +1325,18 @@ export const TunePortPopup: React.FC = () => {
                 </button>
                 {showAdvanced && (
                   <div className="mt-3 space-y-3">
+                    <div className="flex items-center justify-between p-2 bg-tf-gray/30 border border-tf-border rounded-lg">
+                      <div>
+                        <p className="text-xs font-bold text-tf-slate">Debug Console</p>
+                        <p className="text-[10px] text-tf-slate-muted">Show logs in Activity tab</p>
+                      </div>
+                      <button
+                        onClick={() => updateSetting('enableDebugConsole', !settings.enableDebugConsole)}
+                        className={cn("w-9 h-5 rounded-full transition-all relative", settings.enableDebugConsole ? "bg-tf-emerald" : "bg-tf-border")}
+                      >
+                        <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.enableDebugConsole ? "left-4" : "left-0.5")} />
+                      </button>
+                    </div>
                     <div className="flex items-center justify-between p-2 bg-amber-50/50 border border-amber-200/50 rounded-lg">
                       <div>
                         <p className="text-xs font-bold text-tf-slate">Lossless Sources</p>

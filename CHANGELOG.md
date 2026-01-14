@@ -1,5 +1,20 @@
 # changelog
 
+## v3.0.5
+
+**release date:** 2026-01-14
+
+improved metadata, smarter filenames, and flexible playlist sync.
+
+### changes
+
+- **metadata**: downloads now include full id3 metadata (artist, title, album art) embedded in the file.
+- **filenames**: fixed "artist - artist - title" duplication issue in downloaded files.
+- **smart sync**: if a track isn't found on spotify but download is enabled, it now downloads the local file instead of failing.
+- **debug console**: hidden by default in activity tab; added toggle in settings > advanced.
+
+---
+
 ## v3.0.4
 
 **release date:** 2026-01-14

@@ -100,7 +100,10 @@ async def _run_ytdlp(url: str, fmt: str, output_prefix: str) -> Path:
         '--no-playlist', '--remote-components', 'ejs:github',
         '--no-part',
         '--cookies', COOKIE_PATH,
-        '--output', f'{output_prefix}.%(ext)s'
+        '--output', f'{output_prefix}.%(ext)s',
+        '--add-metadata',
+        '--embed-thumbnail',
+        '--parse-metadata', 'title:%(title)s', # Ensure clean title if possible
     ]
 
     if fmt == 'best':

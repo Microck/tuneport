@@ -273,10 +273,18 @@ export class DownloadService {
     const ext = quality.toLowerCase().includes('flac') ? 'flac' : 
                 quality.toLowerCase().includes('opus') ? 'opus' : 'mp3';
     
-    if (artist) {
-      return `${sanitize(artist)} - ${sanitize(title)}.${ext}`;
+    let cleanTitle = sanitize(title);
+    const cleanArtist = sanitize(artist);
+
+    if (cleanArtist && cleanTitle.toLowerCase().startsWith(cleanArtist.toLowerCase())) {
+      cleanTitle = cleanTitle.substring(cleanArtist.length).trim();
+      cleanTitle = cleanTitle.replace(/^[\s-:]+/, '');
     }
-    return `${sanitize(title)}.${ext}`;
+    
+    if (cleanArtist) {
+      return `${cleanArtist} - ${cleanTitle}.${ext}`;
+    }
+    return `${cleanTitle}.${ext}`;
   }
 
   static shouldShowLosslessWarning(result: DownloadResult): boolean {

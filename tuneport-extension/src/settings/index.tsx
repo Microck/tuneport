@@ -56,6 +56,7 @@ interface SettingsState {
   lucidaEnabled: boolean;
   customPresets: QualityPreset[];
   spotifyFallbackMode: 'auto' | 'ask' | 'never';
+  enableDebugConsole: boolean;
 }
 
 const DEFAULT_SETTINGS: SettingsState = {
@@ -72,7 +73,8 @@ const DEFAULT_SETTINGS: SettingsState = {
   ytDlpToken: '',
   lucidaEnabled: false,
   customPresets: [],
-  spotifyFallbackMode: 'auto'
+  spotifyFallbackMode: 'auto',
+  enableDebugConsole: false
 };
 
 const QUALITY_OPTIONS = [
@@ -426,6 +428,14 @@ export const SettingsPage: React.FC = () => {
                   className="overflow-hidden"
                 >
                   <div className="space-y-4 pt-2 pb-2">
+                    <div className="bg-tf-gray/30 border border-tf-border rounded-xl p-3">
+                      <ToggleField
+                        label="Enable Debug Console"
+                        description="Show technical logs in the Activity tab"
+                        value={settings.enableDebugConsole}
+                        onChange={(v) => updateSetting('enableDebugConsole', v)}
+                      />
+                    </div>
                     <div className="bg-amber-50/50 border border-amber-200/50 rounded-xl p-3">
                       <ToggleField
                         label="Enable Lossless Sources"

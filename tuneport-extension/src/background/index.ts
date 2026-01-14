@@ -456,72 +456,75 @@ export class BackgroundService {
       const searchResults = await this.searchOnSpotify(metadata.title, metadata.artist, metadata.duration);
       job.progress = 50;
 
-      if (!searchResults.exactMatch) {
+      let spotifyMatchFound = !!searchResults.exactMatch;
+
+      if (!spotifyMatchFound) {
         // Try YouTube Music fallback
         const settings = await this.getSettings();
         const fallbackMode = settings.spotifyFallbackMode || 'auto';
         
-        if (fallbackMode === 'never') {
+        if (fallbackMode !== 'never') {
+          const videoId = this.extractVideoId(youtubeUrl);
+          if (videoId) {
+            job.currentStep = 'Trying YouTube Music metadata...';
+            this.activeJobs.set(jobId, { ...job });
+            
+            const musicMetadata = await YouTubeMetadataService.fetchMusicMetadata(videoId);
+            
+            if (musicMetadata) {
+              console.log('[TunePort BG] Found YouTube Music metadata:', musicMetadata);
+              
+              if (fallbackMode === 'ask') {
+                // Set job to awaiting_fallback and wait for user confirmation
+                job.status = 'awaiting_fallback';
+                job.fallbackMetadata = musicMetadata;
+                job.currentStep = 'Waiting for confirmation...';
+                this.activeJobs.set(jobId, { ...job });
+                return job; // Return early, user will confirm/reject via message
+              }
+              
+              // Auto mode - try searching with new metadata
+              job.currentStep = 'Searching Spotify with new metadata...';
+              this.activeJobs.set(jobId, { ...job });
+              
+              const fallbackResults = await this.searchOnSpotify(
+                musicMetadata.title,
+                musicMetadata.artist,
+                metadata.duration
+              );
+              
+              if (fallbackResults.exactMatch) {
+                searchResults.exactMatch = fallbackResults.exactMatch;
+                job.trackInfo = {
+                  title: musicMetadata.title,
+                  artist: musicMetadata.artist,
+                  spotifyTrack: fallbackResults.exactMatch
+                };
+                spotifyMatchFound = true;
+              }
+            }
+          }
+        }
+
+        if (!spotifyMatchFound && !enableDownload) {
           throw new Error('Could not find matching track on Spotify');
         }
-        
-        const videoId = this.extractVideoId(youtubeUrl);
-        if (!videoId) {
-          throw new Error('Could not find matching track on Spotify');
-        }
-        
-        job.currentStep = 'Trying YouTube Music metadata...';
-        this.activeJobs.set(jobId, { ...job });
-        
-        const musicMetadata = await YouTubeMetadataService.fetchMusicMetadata(videoId);
-        
-        if (!musicMetadata) {
-          throw new Error('Could not find matching track on Spotify');
-        }
-        
-        console.log('[TunePort BG] Found YouTube Music metadata:', musicMetadata);
-        
-        if (fallbackMode === 'ask') {
-          // Set job to awaiting_fallback and wait for user confirmation
-          job.status = 'awaiting_fallback';
-          job.fallbackMetadata = musicMetadata;
-          job.currentStep = 'Waiting for confirmation...';
-          this.activeJobs.set(jobId, { ...job });
-          return job; // Return early, user will confirm/reject via message
-        }
-        
-        // Auto mode - try searching with new metadata
-        job.currentStep = 'Searching Spotify with new metadata...';
-        this.activeJobs.set(jobId, { ...job });
-        
-        const fallbackResults = await this.searchOnSpotify(
-          musicMetadata.title,
-          musicMetadata.artist,
-          metadata.duration
-        );
-        
-        if (!fallbackResults.exactMatch) {
-          throw new Error('Could not find matching track on Spotify (tried YouTube Music fallback)');
-        }
-        
-        // Use the fallback match
-        searchResults.exactMatch = fallbackResults.exactMatch;
-        job.trackInfo = {
-          title: musicMetadata.title,
-          artist: musicMetadata.artist,
-          spotifyTrack: fallbackResults.exactMatch
-        };
       }
 
-      job.trackInfo.spotifyTrack = searchResults.exactMatch;
+      let result = { added: false, duplicate: false };
 
-      job.status = 'adding';
-      job.progress = 60;
-      job.currentStep = 'Adding to playlist...';
-      this.activeJobs.set(jobId, { ...job });
+      if (spotifyMatchFound) {
+        job.trackInfo!.spotifyTrack = searchResults.exactMatch;
+        job.status = 'adding';
+        job.progress = 60;
+        job.currentStep = 'Adding to playlist...';
+        this.activeJobs.set(jobId, { ...job });
 
-      const result = await this.addToPlaylist(playlistId, searchResults.exactMatch.uri);
-      job.progress = 70;
+        result = await this.addToPlaylist(playlistId, searchResults.exactMatch.uri);
+        job.progress = 70;
+      } else {
+        console.log('[TunePort BG] Spotify match failed, proceeding to download logic');
+      }
 
       if (enableDownload && downloadOptions) {
         job.status = 'downloading';
@@ -554,7 +557,7 @@ export class BackgroundService {
 
           job.progress = 85;
           this.activeJobs.set(jobId, { ...job });
-          this.monitorDownloadJob(jobId, downloadResult.downloadId, result.duplicate);
+          this.monitorDownloadJob(jobId, downloadResult.downloadId, result.duplicate, spotifyMatchFound);
           return job;
         }
 
@@ -613,7 +616,7 @@ export class BackgroundService {
     return job;
   }
 
-  private monitorDownloadJob(jobId: string, downloadId: number, duplicate: boolean) {
+  private monitorDownloadJob(jobId: string, downloadId: number, duplicate: boolean, spotifyMatchFound: boolean) {
     const finalizeSuccess = () => {
       const job = this.activeJobs.get(jobId);
       if (!job) return;
@@ -626,6 +629,15 @@ export class BackgroundService {
         this.showNotification(
           'Already in Playlist',
           `"${job.trackInfo?.title || 'Track'}" is already in this playlist`,
+          'success'
+        );
+        return;
+      }
+
+      if (!spotifyMatchFound) {
+        this.showNotification(
+          'Downloaded (Local File)',
+          `"${job.trackInfo?.title || 'Track'}" not found on Spotify. Saved to Downloads.`,
           'success'
         );
         return;
@@ -1208,7 +1220,7 @@ export class BackgroundService {
           };
           job.progress = 85;
           this.activeJobs.set(jobId, { ...job });
-          this.monitorDownloadJob(jobId, downloadResult.downloadId, result.duplicate);
+          this.monitorDownloadJob(jobId, downloadResult.downloadId, result.duplicate, true);
           sendResponse({ success: true });
           return;
         }
