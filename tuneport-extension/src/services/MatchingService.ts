@@ -233,8 +233,8 @@ export class MatchingService {
    * Determine confidence level based on match score
    */
   static getConfidenceLevel(score: number): 'high' | 'medium' | 'low' {
-    if (score >= 0.8) return 'high';
-    if (score >= 0.5) return 'medium';
+    if (score >= 0.85) return 'high';
+    if (score >= 0.7) return 'medium';
     return 'low';
   }
 
@@ -242,6 +242,6 @@ export class MatchingService {
    * Check if a match score meets the threshold for auto-adding
    */
   static isAutoAddable(score: number): boolean {
-    return score >= 0.5;
+    return score >= 0.7;
   }
 }
