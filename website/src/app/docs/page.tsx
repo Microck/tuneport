@@ -64,11 +64,10 @@ export default function DocsPage() {
 
         {/* --- Part 1: Audio Quality & Transcoding --- */}
         
-        <div className="relative mb-16 rounded-2xl bg-slate-950 p-1 backdrop-blur-sm overflow-hidden border border-slate-800 shadow-2xl">
-          <Meteors number={30} />
-          <div className="relative z-10 rounded-xl bg-slate-950/80 p-8">
-            <h3 className="mb-4 text-lg font-semibold text-emerald-400" data-animate="text" data-animate-variant="slide-up">Abstract</h3>
-            <p className="text-slate-300 leading-relaxed" data-animate="text" data-animate-variant="fade">
+        <div className="relative mb-16 rounded-2xl bg-white p-1 backdrop-blur-sm overflow-hidden border border-slate-200 shadow-sm">
+          <div className="relative z-10 rounded-xl bg-white/80 p-8">
+            <h3 className="mb-4 text-lg font-semibold text-emerald-600" data-animate="text" data-animate-variant="slide-up">Abstract</h3>
+            <p className="text-slate-600 leading-relaxed" data-animate="text" data-animate-variant="fade">
               User-generated audio on video platforms has become a massive, unplanned music archive. Yet, serious misconceptions persist about the quality of these streams. Commercial converters profit from this confusion, selling &quot;320kbps MP3&quot; tools that cannot mathematically exist given the source material. This research evaluates YouTube&apos;s actual delivery infrastructure, demonstrating that the platform&apos;s standard Opus format provides superior spectral fidelity compared to legacy AAC-LC, and quantifies the degradation introduced by transcoding.
             </p>
           </div>
@@ -194,16 +193,16 @@ export default function DocsPage() {
               </p>
             </div>
 
-            <ShineBorder shineColor={["#6366f1", "#8b5cf6"]} className="relative overflow-hidden rounded-xl bg-slate-950 p-6 text-slate-50 shadow-xl">
+            <ShineBorder shineColor={["#6366f1", "#8b5cf6"]} className="relative overflow-hidden rounded-xl bg-white p-6 text-slate-900 shadow-sm border border-slate-200">
               <div className="font-mono text-sm space-y-4">
                 <div>
                   <div className="text-slate-500 mb-1 text-xs uppercase tracking-wider">Input</div>
-                  <div className="text-red-300">"The Weeknd - Blinding Lights (Official Audio) [HD]"</div>
+                  <div className="text-red-600 bg-red-50 p-2 rounded border border-red-100">"The Weeknd - Blinding Lights (Official Audio) [HD]"</div>
                 </div>
-                <div className="h-px bg-slate-800" />
+                <div className="h-px bg-slate-100" />
                 <div>
                   <div className="text-slate-500 mb-1 text-xs uppercase tracking-wider">Sanitized</div>
-                  <div className="text-emerald-300">"The Weeknd - Blinding Lights"</div>
+                  <div className="text-emerald-600 bg-emerald-50 p-2 rounded border border-emerald-100">"The Weeknd - Blinding Lights"</div>
                 </div>
               </div>
             </ShineBorder>
@@ -275,17 +274,17 @@ export default function DocsPage() {
                 </div>
               </div>
               
-              <div className="bg-slate-900 rounded-xl p-5 font-mono text-xs text-slate-300 leading-relaxed shadow-inner">
-                <div className="flex gap-2 mb-2 border-b border-slate-800 pb-2">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 font-mono text-xs text-slate-600 leading-relaxed shadow-sm">
+                <div className="flex gap-2 mb-2 border-b border-slate-200 pb-2">
                   <span className="text-red-400">●</span>
                   <span className="text-yellow-400">●</span>
                   <span className="text-green-400">●</span>
                 </div>
-                <span className="text-emerald-400">$</span> yt-dlp \<br/>
-                &nbsp;&nbsp;<span className="text-indigo-400">--extract-audio</span> \<br/>
-                &nbsp;&nbsp;<span className="text-indigo-400">--audio-format</span> best \<br/>
-                &nbsp;&nbsp;<span className="text-amber-400">--add-metadata</span> \<br/>
-                &nbsp;&nbsp;<span className="text-amber-400">--embed-thumbnail</span>
+                <span className="text-emerald-600">$</span> yt-dlp \<br/>
+                &nbsp;&nbsp;<span className="text-indigo-600">--extract-audio</span> \<br/>
+                &nbsp;&nbsp;<span className="text-indigo-600">--audio-format</span> best \<br/>
+                &nbsp;&nbsp;<span className="text-amber-600">--add-metadata</span> \<br/>
+                &nbsp;&nbsp;<span className="text-amber-600">--embed-thumbnail</span>
               </div>
             </div>
           </div>
