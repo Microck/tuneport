@@ -10,6 +10,8 @@ class TestYtDlpArgs(unittest.TestCase):
         self.assertIn('/data/abc.%(ext)s', args)
         self.assertNotIn('--download-sections', args)
         self.assertIn('--convert-thumbnails', args)
+        self.assertIn('--extract-audio', args)
+        self.assertIn('--audio-format', args)
         self.assertNotIn('--postprocessor-args', args)
 
     def test_build_args_with_segments(self):
