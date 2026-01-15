@@ -32,7 +32,7 @@ import { cn } from '../lib/utils';
 import { ChromeMessageService } from '../services/ChromeMessageService';
 import { SpotifyAuthService } from '../services/SpotifyAuthService';
 import { DEFAULT_COBALT_INSTANCE, DEFAULT_YTDLP_INSTANCE } from '../config/defaults';
-import { parseDescriptionSegments, parseManualSegments, Segment } from '../services/SegmentParser';
+import { parseDescriptionSegments, parseManualMultiSegments, parseManualSingleSegments, Segment, SegmentMode } from '../services/SegmentParser';
 
 
 const ShimmerButton: React.FC<{
@@ -407,6 +407,7 @@ export const TunePortPopup: React.FC = () => {
   const [enableDownload, setEnableDownload] = useState(true);
   const [segmentsEnabled, setSegmentsEnabled] = useState(false);
   const [segmentMode, setSegmentMode] = useState<'auto' | 'manual'>('auto');
+  const [manualSegmentMode, setManualSegmentMode] = useState<SegmentMode>('multiple');
   const [segmentInput, setSegmentInput] = useState('');
   const [detectedSegments, setDetectedSegments] = useState<Segment[]>([]);
   const [manualSegments, setManualSegments] = useState<Segment[]>([]);
@@ -636,11 +637,17 @@ export const TunePortPopup: React.FC = () => {
     }
   };
 
-  const handleManualSegmentsChange = (value: string) => {
-    setSegmentInput(value);
-    const segments = parseManualSegments(value);
+  const parseManualInput = (value: string, mode: SegmentMode) => {
+    const segments = mode === 'single'
+      ? parseManualSingleSegments(value)
+      : parseManualMultiSegments(value);
     setManualSegments(segments);
     updateSelectedSegments(segments);
+  };
+
+  const handleManualSegmentsChange = (value: string) => {
+    setSegmentInput(value);
+    parseManualInput(value, manualSegmentMode);
   };
 
   const formatTimestamp = (value: number) => {
@@ -712,16 +719,20 @@ export const TunePortPopup: React.FC = () => {
         ? activeSegments.filter((_, index) => selectedSegmentIndexes.includes(index))
         : [];
       const segmentsPayload = selectedSegments.length > 0 ? selectedSegments : undefined;
+      const segmentModePayload = segmentsEnabled && segmentsAllowed
+        ? (segmentMode === 'auto' ? 'multiple' : manualSegmentMode)
+        : undefined;
 
       const response = await ChromeMessageService.sendMessage({
         type: 'ADD_TRACK_TO_PLAYLIST',
         data: { 
-          youtubeUrl: currentUrl, 
+          youtubeUrl: currentUrl,
           playlistId,
           download: enableDownload,
           downloadOptions: enableDownload ? {
             format: quality.format,
-            segments: segmentsPayload
+            segments: segmentsPayload,
+            segmentMode: segmentsPayload ? segmentModePayload : undefined
           } : undefined
         }
       });
@@ -1022,10 +1033,39 @@ export const TunePortPopup: React.FC = () => {
                             </div>
                           ) : (
                             <div className="space-y-2">
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => {
+                                    setManualSegmentMode('single');
+                                    parseManualInput(segmentInput, 'single');
+                                  }}
+                                  className={cn(
+                                    "flex-1 py-2 rounded-lg text-[10px] font-bold",
+                                    manualSegmentMode === 'single' ? "bg-tf-emerald/10 text-tf-emerald" : "bg-tf-gray text-tf-slate-muted"
+                                  )}
+                                >
+                                  Single
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setManualSegmentMode('multiple');
+                                    parseManualInput(segmentInput, 'multiple');
+                                  }}
+                                  className={cn(
+                                    "flex-1 py-2 rounded-lg text-[10px] font-bold",
+                                    manualSegmentMode === 'multiple' ? "bg-tf-emerald/10 text-tf-emerald" : "bg-tf-gray text-tf-slate-muted"
+                                  )}
+                                >
+                                  Multiple
+                                </button>
+                              </div>
+
                               <textarea
                                 value={segmentInput}
                                 onChange={(e) => handleManualSegmentsChange(e.target.value)}
-                                placeholder="3:24-5:47 theme\n6:14-8:28 closing"
+                                placeholder={manualSegmentMode === 'single'
+                                  ? "0:00-1:23\n1:33-2:20"
+                                  : "3:24-5:47 theme\n6:14-8:28 closing"}
                                 className="w-full min-h-[72px] p-2 text-[10px] rounded-lg border border-tf-border bg-tf-gray/30 focus:outline-none focus:border-tf-emerald"
                               />
 
@@ -1044,7 +1084,11 @@ export const TunePortPopup: React.FC = () => {
                                   ))}
                                 </div>
                               ) : (
-                                <p className="text-[9px] text-tf-slate-muted">Paste ranges like 0:00-2:22 Title.</p>
+                                <p className="text-[9px] text-tf-slate-muted">
+                                  {manualSegmentMode === 'single'
+                                    ? 'Add ranges to keep. Gaps are removed.'
+                                    : 'Paste ranges like 0:00-2:22 Title.'}
+                                </p>
                               )}
                             </div>
                           )}

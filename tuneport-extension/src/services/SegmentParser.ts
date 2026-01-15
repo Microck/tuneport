@@ -1,3 +1,5 @@
+export type SegmentMode = 'single' | 'multiple';
+
 export interface Segment {
   start: number;
   end?: number;
@@ -53,7 +55,7 @@ export const parseDescriptionSegments = (input: string): Segment[] => {
   return withImplicitEnds(segments);
 };
 
-export const parseManualSegments = (input: string): Segment[] => {
+export const parseManualMultiSegments = (input: string): Segment[] => {
   const lines = input.split(/\r?\n/);
   const segments: Segment[] = [];
 
@@ -81,6 +83,27 @@ export const parseManualSegments = (input: string): Segment[] => {
     const title = cleanTitle(line.slice(titleStartIndex));
 
     segments.push({ start, end, title: title || undefined });
+  }
+
+  return segments;
+};
+
+export const parseManualSingleSegments = (input: string): Segment[] => {
+  const lines = input.split(/\r?\n/);
+  const segments: Segment[] = [];
+
+  for (const line of lines) {
+    const matches = line.match(TIMESTAMP_REGEX) || [];
+    if (matches.length < 2) continue;
+
+    for (let index = 0; index + 1 < matches.length; index += 2) {
+      const start = parseTimestamp(matches[index]);
+      const end = parseTimestamp(matches[index + 1]);
+      if (start === null || end === null) continue;
+      if (end <= start) continue;
+
+      segments.push({ start, end });
+    }
   }
 
   return segments;

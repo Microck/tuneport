@@ -1,12 +1,19 @@
 import { AudioFormat, CobaltService } from './CobaltService';
 import { DownloadResult } from './DownloadService';
-import { Segment } from './SegmentParser';
+import { Segment, SegmentMode } from './SegmentParser';
+
+export interface YtDlpMetadata {
+  title: string;
+  artist: string;
+}
 
 export interface YtDlpOptions {
   format: AudioFormat;
   instance: string;
   token?: string;
   segments?: Segment[];
+  segmentMode?: SegmentMode;
+  metadata?: YtDlpMetadata;
 }
 
 
@@ -50,7 +57,10 @@ export class YtDlpService {
         body: JSON.stringify({
           url: youtubeUrl,
           format,
-          segments: options.segments
+          segments: options.segments,
+          segment_mode: options.segmentMode,
+          title: options.metadata?.title,
+          artist: options.metadata?.artist
         })
 
       });

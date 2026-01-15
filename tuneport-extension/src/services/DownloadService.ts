@@ -2,7 +2,8 @@ import { CobaltService, AudioFormat } from './CobaltService';
 import { YtDlpService } from './YtDlpService';
 import { LucidaService, LucidaOptions } from './LucidaService';
 import { DEFAULT_COBALT_INSTANCE, DEFAULT_YTDLP_INSTANCE, DEFAULT_YTDLP_TOKEN } from '../config/defaults';
-import { Segment } from './SegmentParser';
+import { Segment, SegmentMode } from './SegmentParser';
+import { resolveSegmentMetadata } from './SegmentMetadata';
 
 
 
@@ -31,6 +32,7 @@ export interface DownloadOptions {
   ytDlpInstance?: string;
   ytDlpToken?: string;
   segments?: Segment[];
+  segmentMode?: SegmentMode;
 }
 
 
@@ -87,7 +89,8 @@ export class DownloadService {
       const ytDlpResult = await YtDlpService.getDownloadUrl(youtubeUrl, {
         format,
         instance: effectiveInstance,
-        token: effectiveToken
+        token: effectiveToken,
+        metadata: { title, artist }
       });
 
       console.log('[DownloadService] yt-dlp result:', ytDlpResult);
@@ -162,9 +165,24 @@ export class DownloadService {
     }
 
     const normalizedSegments = this.normalizeSegments(options.segments);
+    const segmentMode: SegmentMode = options.segmentMode || 'multiple';
     const effectiveYtDlpToken = ytDlpToken || (ytDlpInstance === DEFAULT_YTDLP_INSTANCE ? DEFAULT_YTDLP_TOKEN : undefined);
 
     if (normalizedSegments.length > 0) {
+      if (segmentMode === 'single') {
+        return await this.downloadMergedSegments(
+          youtubeUrl,
+          title,
+          artist,
+          normalizedSegments,
+          {
+            format: (options.format || 'best') as AudioFormat,
+            ytDlpInstance,
+            ytDlpToken: effectiveYtDlpToken
+          }
+        );
+      }
+
       return await this.downloadSegments(
         youtubeUrl,
         title,
@@ -321,11 +339,19 @@ export class DownloadService {
     let lastQuality = CobaltService.getQualityLabel(options.format);
 
     for (const segment of segments) {
+      const resolvedMetadata = segment.title
+        ? resolveSegmentMetadata(segment.title, artist)
+        : null;
+      const metadata = resolvedMetadata
+        ? { title: resolvedMetadata.title, artist: resolvedMetadata.artist }
+        : { title, artist };
+
       const ytDlpResult = await YtDlpService.getDownloadUrl(youtubeUrl, {
         format: options.format,
         instance: options.ytDlpInstance,
         token: options.ytDlpToken,
-        segments: [segment]
+        segments: [segment],
+        metadata
       });
 
       if (!ytDlpResult.success || !ytDlpResult.url) {
@@ -378,6 +404,64 @@ export class DownloadService {
       downloadIds,
       filenames,
       filename: filenames.length === 1 ? filenames[0] : undefined
+    };
+  }
+
+  private static async downloadMergedSegments(
+    youtubeUrl: string,
+    title: string,
+    artist: string,
+    segments: Segment[],
+    options: {
+      format: AudioFormat;
+      ytDlpInstance: string;
+      ytDlpToken?: string;
+    }
+  ): Promise<DownloadResult> {
+    const ytDlpResult = await YtDlpService.getDownloadUrl(youtubeUrl, {
+      format: options.format,
+      instance: options.ytDlpInstance,
+      token: options.ytDlpToken,
+      segments,
+      segmentMode: 'single',
+      metadata: { title, artist }
+    });
+
+    if (!ytDlpResult.success || !ytDlpResult.url) {
+      return {
+        success: false,
+        source: 'yt-dlp',
+        quality: ytDlpResult.quality || CobaltService.getQualityLabel(options.format),
+        isLossless: false,
+        error: ytDlpResult.error || 'Download failed'
+      };
+    }
+
+    const filename = this.generateFilename(title, artist, ytDlpResult.quality || CobaltService.getQualityLabel(options.format));
+    const sanitizedFilename = this.sanitizeFilename(filename);
+    const fullPath = `TunePort/${sanitizedFilename}`;
+
+    const downloadId = await chrome.downloads.download({
+      url: ytDlpResult.url,
+      filename: fullPath,
+      saveAs: false
+    });
+
+    if (downloadId === undefined) {
+      const lastError = chrome.runtime.lastError;
+      return {
+        ...ytDlpResult,
+        success: false,
+        error: lastError?.message || 'Failed to start download - no download ID returned'
+      };
+    }
+
+    this.monitorDownload(downloadId);
+
+    return {
+      ...ytDlpResult,
+      filename: sanitizedFilename,
+      downloadId
     };
   }
 

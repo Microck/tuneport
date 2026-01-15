@@ -1,4 +1,4 @@
-import { parseDescriptionSegments, parseManualSegments } from '../SegmentParser';
+import { parseDescriptionSegments, parseManualMultiSegments, parseManualSingleSegments } from '../SegmentParser';
 
 describe('SegmentParser', () => {
   test('parses description timestamps into segments', () => {
@@ -17,13 +17,13 @@ describe('SegmentParser', () => {
     ]);
   });
 
-  test('parses manual ranges with explicit end', () => {
+  test('parses manual multi ranges with explicit end', () => {
     const input = [
       '3:24-5:47 theme',
       '6:14 to 8:28 closing'
     ].join('\n');
 
-    const segments = parseManualSegments(input);
+    const segments = parseManualMultiSegments(input);
 
     expect(segments).toEqual([
       { start: 204, end: 347, title: 'theme' },
@@ -31,13 +31,27 @@ describe('SegmentParser', () => {
     ]);
   });
 
-  test('parses manual single timestamp without end', () => {
+  test('parses manual multi single timestamp without end', () => {
     const input = '1:02:03 intro';
 
-    const segments = parseManualSegments(input);
+    const segments = parseManualMultiSegments(input);
 
     expect(segments).toEqual([
       { start: 3723, end: undefined, title: 'intro' }
+    ]);
+  });
+
+  test('parses manual single ranges', () => {
+    const input = [
+      '0:00-1:00',
+      '1:10-2:20'
+    ].join('\n');
+
+    const segments = parseManualSingleSegments(input);
+
+    expect(segments).toEqual([
+      { start: 0, end: 60 },
+      { start: 70, end: 140 }
     ]);
   });
 });

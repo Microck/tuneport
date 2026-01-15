@@ -5,7 +5,7 @@ import { LucidaService } from '../services/LucidaService';
 import { AudioFormat } from '../services/CobaltService';
 import { YouTubeMetadataService, YouTubeMusicMetadata } from '../services/YouTubeMetadataService';
 import { applyDownloadCompletion, applyDownloadInterruption } from './download-utils';
-import { Segment } from '../services/SegmentParser';
+import { Segment, SegmentMode } from '../services/SegmentParser';
 import { addSegmentsToSpotify, SegmentSummary } from '../services/SegmentSpotify';
 
 
@@ -13,6 +13,7 @@ import { addSegmentsToSpotify, SegmentSummary } from '../services/SegmentSpotify
 interface DownloadOptions {
   format: string;
   segments?: Segment[];
+  segmentMode?: SegmentMode;
 }
 
 interface AddTrackJob {
@@ -468,10 +469,11 @@ export class BackgroundService {
       const matchThreshold = settings.matchThreshold ?? 0.7;
 
       const segmentCandidates = downloadOptions?.segments || [];
+      const segmentMode = downloadOptions?.segmentMode || 'multiple';
       let spotifyMatchFound = false;
       let result = { added: false, duplicate: false };
 
-      if (segmentCandidates.length > 0) {
+      if (segmentCandidates.length > 0 && segmentMode === 'multiple') {
         job.currentStep = 'Searching Spotify for segments...';
         this.activeJobs.set(jobId, { ...job });
 
@@ -584,13 +586,14 @@ export class BackgroundService {
 
         const format = (downloadOptions.format || 'best') as AudioFormat;
         const segments = downloadOptions.segments;
+        const segmentMode = downloadOptions.segmentMode;
         this.log(`[Download] Starting download: ${youtubeUrl}, format: ${format}`);
 
         const downloadResult = await DownloadService.downloadAudio(
           youtubeUrl,
           metadata.title,
           metadata.artist,
-          { format, preferLossless: true, segments }
+          { format, preferLossless: true, segments, segmentMode }
         );
 
         this.log(`[Download] Result: success=${downloadResult.success}, source=${downloadResult.source}, quality=${downloadResult.quality}${downloadResult.error ? ', error=' + downloadResult.error : ''}`);
@@ -1305,12 +1308,13 @@ export class BackgroundService {
 
         const format = (job.downloadOptions?.format || 'best') as AudioFormat;
         const segments = job.downloadOptions?.segments;
+        const segmentMode = job.downloadOptions?.segmentMode;
 
         const downloadResult = await DownloadService.downloadAudio(
           job.youtubeUrl,
           job.fallbackMetadata.title,
           job.fallbackMetadata.artist,
-          { format, preferLossless: true, segments }
+          { format, preferLossless: true, segments, segmentMode }
         );
 
         const downloadIds = downloadResult.downloadIds

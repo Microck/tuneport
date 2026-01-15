@@ -3,8 +3,9 @@ import time
 import uuid
 import asyncio
 import logging
+import shlex
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Literal
 
 from fastapi import FastAPI, HTTPException, Header
 from fastapi.responses import FileResponse
@@ -33,6 +34,9 @@ class DownloadRequest(BaseModel):
     url: str
     format: str = 'best'
     segments: Optional[list[SegmentRequest]] = None
+    segment_mode: Optional[Literal['single', 'multiple']] = None
+    title: Optional[str] = None
+    artist: Optional[str] = None
 
 class DownloadResponse(BaseModel):
     status: str
@@ -127,7 +131,27 @@ def _format_section(segment: SegmentRequest | dict) -> str:
     return f"*{start}-{end}"
 
 
-def build_ytdlp_args(url: str, fmt: str, output_prefix: str, segments: Optional[list[SegmentRequest]]) -> list[str]:
+def _clean_metadata(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+    trimmed = value.strip()
+    return trimmed if trimmed else None
+
+
+def _build_metadata_args(title: Optional[str], artist: Optional[str]) -> Optional[str]:
+    parts = []
+    clean_title = _clean_metadata(title)
+    clean_artist = _clean_metadata(artist)
+    if clean_title:
+        parts.extend(['-metadata', f'title={clean_title}'])
+    if clean_artist:
+        parts.extend(['-metadata', f'artist={clean_artist}'])
+    if not parts:
+        return None
+    return 'ffmpeg:' + ' '.join(shlex.quote(part) for part in parts)
+
+
+def build_ytdlp_args(url: str, fmt: str, output_prefix: str, segments: Optional[list[SegmentRequest]], title: Optional[str], artist: Optional[str], write_thumbnail: bool = False) -> list[str]:
     output_template = f"{output_prefix}.%(ext)s"
     args = [
         'yt-dlp',
@@ -136,14 +160,22 @@ def build_ytdlp_args(url: str, fmt: str, output_prefix: str, segments: Optional[
         '--cookies', COOKIE_PATH,
         '--add-metadata',
         '--embed-thumbnail',
+        '--convert-thumbnails', 'jpg',
         '--parse-metadata', 'title:%(title)s',
     ]
+
+    if write_thumbnail:
+        args.append('--write-thumbnail')
 
     if segments:
         output_template = f"{output_prefix}.%(section_start)s-%(section_end)s.%(ext)s"
         for segment in segments:
             args.extend(['--download-sections', _format_section(segment)])
         args.append('--force-keyframes-at-cuts')
+
+    metadata_args = _build_metadata_args(title, artist)
+    if metadata_args:
+        args.extend(['--postprocessor-args', metadata_args])
 
     args.extend(['--output', output_template])
 
@@ -156,8 +188,100 @@ def build_ytdlp_args(url: str, fmt: str, output_prefix: str, segments: Optional[
     return args
 
 
-async def _run_ytdlp(url: str, fmt: str, output_prefix: str, segments: Optional[list[SegmentRequest]]) -> Path:
-    args = build_ytdlp_args(url, fmt, output_prefix, segments)
+def _is_thumbnail(path: Path) -> bool:
+    return path.suffix.lower() in {'.jpg', '.jpeg', '.png', '.webp'}
+
+
+def _escape_concat_path(path: Path) -> str:
+    return str(path).replace("'", "'\\''")
+
+
+def _find_thumbnail(output_prefix: str) -> Optional[Path]:
+    base = Path(output_prefix).name
+    for ext in ('*.jpg', '*.jpeg', '*.png', '*.webp'):
+        matches = sorted(DATA_DIR.glob(f"{base}*{ext}"))
+        if matches:
+            return matches[0]
+    return None
+
+
+async def _merge_segments(output_prefix: str, segment_files: list[Path], title: Optional[str], artist: Optional[str]) -> Path:
+    if not segment_files:
+        raise RuntimeError('Segment files missing')
+
+    sorted_segments = sorted(segment_files, key=lambda path: path.stat().st_mtime)
+    concat_list = DATA_DIR / f"{Path(output_prefix).name}_concat.txt"
+
+    with concat_list.open('w', encoding='utf-8') as handle:
+        for path in sorted_segments:
+            handle.write(f"file '{_escape_concat_path(path)}'\n")
+
+    merged_path = DATA_DIR / f"{Path(output_prefix).name}_merged{sorted_segments[0].suffix}"
+    thumbnail = _find_thumbnail(output_prefix)
+    include_cover = thumbnail is not None and sorted_segments[0].suffix.lower() == '.mp3'
+
+    args = ['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', str(concat_list)]
+
+    if include_cover:
+        args.extend([
+            '-i', str(thumbnail),
+            '-map', '0:a',
+            '-map', '1:v',
+            '-c:a', 'copy',
+            '-c:v', 'mjpeg',
+            '-disposition:v:0', 'attached_pic'
+        ])
+    else:
+        args.extend(['-c', 'copy'])
+
+    clean_title = _clean_metadata(title)
+    clean_artist = _clean_metadata(artist)
+    if clean_title:
+        args.extend(['-metadata', f'title={clean_title}'])
+    if clean_artist:
+        args.extend(['-metadata', f'artist={clean_artist}'])
+
+    args.append(str(merged_path))
+
+    process = await asyncio.create_subprocess_exec(
+        *args,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
+
+    stdout, stderr = await process.communicate()
+
+    if process.returncode != 0:
+        error_msg = stderr.decode().strip() or stdout.decode().strip() or 'ffmpeg concat failed'
+        raise RuntimeError(error_msg)
+
+    concat_list.unlink(missing_ok=True)
+    for path in segment_files:
+        path.unlink(missing_ok=True)
+    if thumbnail:
+        thumbnail.unlink(missing_ok=True)
+
+    return merged_path
+
+
+async def _run_ytdlp(
+    url: str,
+    fmt: str,
+    output_prefix: str,
+    segments: Optional[list[SegmentRequest]],
+    title: Optional[str],
+    artist: Optional[str],
+    segment_mode: Optional[str]
+) -> Path:
+    args = build_ytdlp_args(
+        url,
+        fmt,
+        output_prefix,
+        segments,
+        title,
+        artist,
+        write_thumbnail=segment_mode == 'single'
+    )
 
     logger.info(f"Starting yt-dlp for {url}")
     process = await asyncio.create_subprocess_exec(
@@ -176,7 +300,15 @@ async def _run_ytdlp(url: str, fmt: str, output_prefix: str, segments: Optional[
     matches = sorted(DATA_DIR.glob(f'{Path(output_prefix).name}.*'))
     if not matches:
         raise RuntimeError('Download file missing')
-    return matches[0]
+
+    audio_matches = [path for path in matches if not _is_thumbnail(path)]
+    if not audio_matches:
+        raise RuntimeError('Download file missing')
+
+    if segments and segment_mode == 'single':
+        return await _merge_segments(output_prefix, audio_matches, title, artist)
+
+    return audio_matches[0]
 
 
 @app.get('/health')
@@ -201,7 +333,15 @@ async def download(request: DownloadRequest, authorization: Optional[str] = Head
     output_prefix = str(DATA_DIR / download_id)
 
     try:
-        file_path = await _run_ytdlp(request.url, fmt, output_prefix, request.segments)
+        file_path = await _run_ytdlp(
+            request.url,
+            fmt,
+            output_prefix,
+            request.segments,
+            request.title,
+            request.artist,
+            request.segment_mode
+        )
     except Exception as exc:
         return DownloadResponse(status='error', error=str(exc))
 
