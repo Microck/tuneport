@@ -10,7 +10,7 @@ import { AnimatedBeam } from "@/components/ui/animated-beam";
 import { TextAnimate } from "@/components/ui/text-animate";
 import WordRotate from "@/components/ui/word-rotate";
 import { Highlighter } from "@/components/ui/highlighter";
-import { motion } from "motion/react";
+import { motion, LayoutGroup } from "motion/react";
 
 const Circle = forwardRef<
   HTMLDivElement,
@@ -59,20 +59,31 @@ export function Flow() {
           </Highlighter>{" "}
           Integration
         </h2>
-        <motion.div 
-          layout
-          className="flex flex-wrap justify-center items-center gap-x-1.5 w-full text-slate-500 sm:text-lg sm:leading-7" 
-          data-animate="text" 
-          data-animate-variant="fade"
-          transition={{ duration: 0.25, ease: "easeOut" }}
-        >
-          <motion.span layout>How TunePort bridges your</motion.span>
-          <WordRotate
-            words={["streaming services", "music library", "playlists"]}
-            className="inline-block font-medium text-slate-700"
-          />
-          <motion.span layout>with a single click.</motion.span>
-        </motion.div>
+        <LayoutGroup>
+          <motion.div 
+            layout
+            className="flex flex-wrap justify-center items-center gap-x-1.5 w-full text-slate-500 sm:text-lg sm:leading-7" 
+            data-animate="text" 
+            data-animate-variant="fade"
+          >
+            <motion.span 
+              layout 
+              transition={{ duration: 0.25, ease: "easeOut" }}
+            >
+              How TunePort bridges your
+            </motion.span>
+            <WordRotate
+              words={["streaming services", "music library", "playlists"]}
+              className="inline-block font-medium text-slate-700"
+            />
+            <motion.span 
+              layout 
+              transition={{ duration: 0.25, ease: "easeOut" }}
+            >
+              with a single click.
+            </motion.span>
+          </motion.div>
+        </LayoutGroup>
       </div>
 
       <div
