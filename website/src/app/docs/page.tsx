@@ -41,7 +41,13 @@ export const metadata: Metadata = {
 export default function DocsPage() {
   return (
     <div className="relative bg-white pb-24 pt-24 overflow-hidden">
-      <DotPattern className={cn("[mask-image:radial-gradient(600px_circle_at_center,white,transparent)] opacity-50")} />
+      <div className="absolute inset-0 h-[800px] overflow-hidden">
+        <DotPattern 
+          width={32}
+          height={32}
+          className={cn("[mask-image:radial-gradient(600px_circle_at_center,white,transparent)] opacity-40")} 
+        />
+      </div>
 
       <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="mb-12">
@@ -372,15 +378,15 @@ export default function DocsPage() {
             </div>
 
             <MagicCard className="relative overflow-hidden rounded-xl border border-slate-200 p-6 shadow-sm bg-white" gradientColor={"#F1F5F9"}>
-              <div className="font-mono text-sm space-y-4">
+              <div className="font-sans text-sm space-y-4">
                 <div>
-                  <div className="text-slate-500 mb-1 text-xs uppercase tracking-wider">Input</div>
-                  <div className="text-red-600 bg-red-50 p-2 rounded border border-red-100">"The Weeknd - Blinding Lights (Official Audio) [HD]"</div>
+                  <div className="text-slate-500 mb-1 text-xs uppercase tracking-wider font-semibold">Input</div>
+                  <div className="font-mono text-red-600 bg-red-50 p-2 rounded border border-red-100">"The Weeknd - Blinding Lights (Official Audio) [HD]"</div>
                 </div>
                 <div className="h-px bg-slate-100" />
                 <div>
-                  <div className="text-slate-500 mb-1 text-xs uppercase tracking-wider">Sanitized</div>
-                  <div className="text-emerald-600 bg-emerald-50 p-2 rounded border border-emerald-100">"The Weeknd - Blinding Lights"</div>
+                  <div className="text-slate-500 mb-1 text-xs uppercase tracking-wider font-semibold">Sanitized</div>
+                  <div className="font-mono text-emerald-600 bg-emerald-50 p-2 rounded border border-emerald-100">"The Weeknd - Blinding Lights"</div>
                 </div>
               </div>
             </MagicCard>
