@@ -267,11 +267,11 @@ export default function DocsPage() {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between border-b border-emerald-100 pb-2">
                     <span className="text-slate-500">Input</span>
-                    <span className="font-medium text-slate-900">glass beach - bedroom community</span>
+                    <span className="font-medium text-slate-900">Hakushi Hasegawa - Desert</span>
                   </div>
                   <div className="flex justify-between border-b border-emerald-100 pb-2">
                     <span className="text-slate-500">Match</span>
-                    <span className="font-medium text-slate-900">glass beach - bedroom community</span>
+                    <span className="font-medium text-slate-900">Hakushi Hasegawa - Desert</span>
                   </div>
                   <div className="pt-2 text-xs">
                     <div className="flex justify-between text-emerald-700"><span>Title Score</span><span>1.00 (Exact)</span></div>
@@ -290,17 +290,17 @@ export default function DocsPage() {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between border-b border-rose-100 pb-2">
                     <span className="text-slate-500">Input</span>
-                    <span className="font-medium text-slate-900">Tally Hall - Ruler of Everything</span>
+                    <span className="font-medium text-slate-900">Aphex Twin - Avril 14th</span>
                   </div>
                   <div className="flex justify-between border-b border-rose-100 pb-2">
                     <span className="text-slate-500">Match</span>
-                    <span className="font-medium text-slate-900">CoverArtist - Ruler of Everything</span>
+                    <span className="font-medium text-slate-900">Scary Pockets - Avril 14th (Funk Cover)</span>
                   </div>
                   <div className="pt-2 text-xs">
-                    <div className="flex justify-between text-emerald-700"><span>Title Score</span><span>1.00 (Exact)</span></div>
+                    <div className="flex justify-between text-emerald-700"><span>Title Score</span><span>0.85 (Partial)</span></div>
                     <div className="flex justify-between text-rose-600 font-bold"><span>Artist Score</span><span>0.00 (Mismatch)</span></div>
-                    <div className="flex justify-between text-emerald-700"><span>Duration</span><span>0.98</span></div>
-                    <div className="flex justify-between font-bold text-rose-900 mt-2 border-t border-rose-200 pt-2"><span>FINAL SCORE</span><span>0.65 (Fail)</span></div>
+                    <div className="flex justify-between text-emerald-700"><span>Duration</span><span>0.92</span></div>
+                    <div className="flex justify-between font-bold text-rose-900 mt-2 border-t border-rose-200 pt-2"><span>FINAL SCORE</span><span>0.56 (Fail)</span></div>
                   </div>
                 </div>
               </div>
