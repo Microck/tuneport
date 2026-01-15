@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Features } from "@/components/sections/features";
 import { Flow } from "@/components/sections/flow";
 import { Hero } from "@/components/sections/hero";
+import { VelocitySection } from "@/components/sections/velocity-section";
 
 export const metadata: Metadata = {
   title: "TunePort | YouTube to Spotify Sync",
@@ -23,6 +24,7 @@ export default function Home() {
   return (
     <>
       <Hero />
+      <VelocitySection />
       <Features />
       <Flow />
     </>

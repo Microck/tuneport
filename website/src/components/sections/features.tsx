@@ -1,6 +1,7 @@
 "use client";
 
 import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
+import { BlurFade } from "@/components/ui/blur-fade";
 import { Highlighter } from "@/components/ui/highlighter";
 import { Marquee } from "@/components/ui/marquee";
 import { motion } from "framer-motion";
@@ -162,7 +163,9 @@ export function Features() {
       
       <BentoGrid className="auto-rows-[22rem]">
         {features.map((feature, idx) => (
-          <BentoCard key={idx} {...feature} />
+          <BlurFade key={idx} delay={0.25 + idx * 0.05} inView>
+            <BentoCard {...feature} />
+          </BlurFade>
         ))}
       </BentoGrid>
     </section>
