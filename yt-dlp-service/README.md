@@ -57,12 +57,15 @@ A lightweight, self-hosted API wrapper for `yt-dlp` designed for the TunePort ex
 
 ## segments payload
 
-pass an optional `segments` array to `/download` to cut by timestamps.
+pass an optional `segments` array to `/download` to cut by timestamps. use `segment_mode: "single"` to merge all ranges into one file. use `title` and `artist` to force metadata.
 
 ```json
 {
   "url": "https://www.youtube.com/watch?v=...",
   "format": "mp3",
+  "segment_mode": "single",
+  "title": "song",
+  "artist": "artist",
   "segments": [
     { "start": 0, "end": 142, "title": "intro" },
     { "start": 142, "end": 317, "title": "track two" },
