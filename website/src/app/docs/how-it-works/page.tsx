@@ -1,9 +1,13 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Code2, GitBranch, Database, ShieldCheck, Terminal } from "lucide-react";
+import { ArrowLeft, Code2, GitBranch, ShieldCheck, Timer, Type, User, AlertCircle, FileAudio, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { TextAnimate } from "@/components/ui/text-animate";
+import { BentoGrid, BentoCard } from "@/components/ui/bento-grid";
+import { ShineBorder } from "@/components/ui/shine-border";
+import { BorderBeam } from "@/components/ui/border-beam";
+import { MatchingFlowDiagram } from "@/components/diagrams/matching-flow";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -25,7 +29,7 @@ export default function HowItWorksPage() {
         )}
       />
 
-      <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12">
           <Link href="/docs">
             <Button variant="ghost" className="gap-2 pl-0 text-slate-600 hover:bg-transparent hover:text-emerald-600">
@@ -35,7 +39,7 @@ export default function HowItWorksPage() {
           </Link>
         </div>
 
-        <div className="relative mb-16 text-center">
+        <div className="relative mb-20 text-center">
           <div className="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-800 backdrop-blur-md mb-6">
             <Code2 className="h-4 w-4 mr-2" />
             System Internals
@@ -50,128 +54,164 @@ export default function HowItWorksPage() {
           </p>
         </div>
 
-        <div className="prose prose-slate lg:prose-lg max-w-none">
-          
-          <div className="grid gap-8 md:grid-cols-2 mb-12 not-prose">
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <ShieldCheck className="h-8 w-8 text-emerald-500 mb-4" />
-              <h3 className="text-lg font-bold text-slate-900 mb-2">Sanitization</h3>
-              <p className="text-slate-600 text-sm">
-                Aggressive regex patterns clean up "YouTube noise" (e.g., "(Official Video)", "[4K]", "Lyrics") to reveal the true track title.
-              </p>
-            </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <GitBranch className="h-8 w-8 text-indigo-500 mb-4" />
-              <h3 className="text-lg font-bold text-slate-900 mb-2">Fuzzy Matching</h3>
-              <p className="text-slate-600 text-sm">
-                Jaro-Winkler similarity scoring with weighted factors ensures we find the exact song on Spotify, not a karaoke cover.
-              </p>
-            </div>
-          </div>
-
-          <h2 className="flex items-center gap-2 text-2xl font-bold text-slate-900 mt-12 mb-6">
-            1. Metadata Extraction & Sanitization
-          </h2>
-          <p className="text-slate-600 mb-4">
-            Before searching Spotify, we must clean the YouTube title. Raw titles often contain "noise" that confuses search engines.
-          </p>
-          <div className="bg-slate-900 rounded-xl p-4 mb-6 overflow-x-auto">
-            <code className="text-sm font-mono text-emerald-400">
-              // Input: "The Weeknd - Blinding Lights (Official Audio) [HD]"<br/>
-              // Output: "The Weeknd - Blinding Lights"
-            </code>
-          </div>
-          <p className="text-slate-600 mb-4">
-            We use a comprehensive list of RegEx patterns to remove:
-          </p>
-          <ul className="list-disc pl-6 mb-8 text-slate-600 space-y-2">
-            <li>Media types: <code>(Official Video)</code>, <code>(Audio)</code>, <code>(Visualizer)</code>, <code>(Lyric Video)</code></li>
-            <li>Quality markers: <code>[HD]</code>, <code>[HQ]</code>, <code>[4K]</code>, <code>[1080p]</code></li>
-            <li>Edits: <code>(Radio Edit)</code>, <code>(Clean Version)</code>, <code>(Remastered)</code></li>
-            <li>Featuring: Normalizes <code>feat.</code>, <code>ft.</code>, <code>featuring</code>, <code>with</code>, <code>x</code> to a standard format.</li>
-          </ul>
-
-          <h2 className="flex items-center gap-2 text-2xl font-bold text-slate-900 mt-12 mb-6">
-            2. The Matching Algorithm
-          </h2>
-          <p className="text-slate-600 mb-4">
-            Once we have a clean search query, we fetch results from Spotify. But getting results isn't enough—we need the <em>right</em> result. We score each candidate using a weighted algorithm:
-          </p>
-          
-          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden mb-8">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-700">
-                <tr>
-                  <th className="px-6 py-3 font-semibold">Factor</th>
-                  <th className="px-6 py-3 font-semibold">Weight</th>
-                  <th className="px-6 py-3 font-semibold">Algorithm</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                <tr>
-                  <td className="px-6 py-4">Title Similarity</td>
-                  <td className="px-6 py-4 font-mono text-emerald-600">50%</td>
-                  <td className="px-6 py-4 text-slate-600">Jaro-Winkler Distance</td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4">Artist Similarity</td>
-                  <td className="px-6 py-4 font-mono text-emerald-600">35%</td>
-                  <td className="px-6 py-4 text-slate-600">Jaro-Winkler Distance</td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4">Duration Match</td>
-                  <td className="px-6 py-4 font-mono text-emerald-600">15%</td>
-                  <td className="px-6 py-4 text-slate-600">Linear (&lt;30s delta)</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8">
-            <p className="text-amber-800 text-sm font-medium">
-              <strong>Threshold Rule:</strong> A match is only auto-added if the total score is <strong>&ge; 0.7</strong>. This prevents false positives where the title matches perfectly (0.5) but the artist is completely wrong (0.0).
-            </p>
-          </div>
-
-          <h2 className="flex items-center gap-2 text-2xl font-bold text-slate-900 mt-12 mb-6">
-            3. Download Pipeline
-          </h2>
-          <p className="text-slate-600 mb-4">
-            We use <code>yt-dlp</code> with specific arguments to ensure high-fidelity archival and metadata embedding.
-          </p>
-          <div className="bg-slate-900 text-slate-50 p-4 rounded-xl overflow-x-auto text-sm font-mono mb-8">
-            <pre><code>{`yt-dlp
-  --no-playlist
-  --extract-audio
-  --audio-format best        # Opus (webm) or AAC (m4a)
-  --add-metadata             # Embeds Artist, Title, Album
-  --embed-thumbnail          # Embeds Video Thumbnail as Cover Art
-  --parse-metadata "title:%(title)s"
-  --output "Artist - Title.ext"`}</code></pre>
-          </div>
-
-          <h2 className="flex items-center gap-2 text-2xl font-bold text-slate-900 mt-12 mb-6">
-            4. Smart Sync Logic
-          </h2>
-          <p className="text-slate-600 mb-4">
-            The extension handles edge cases gracefully:
-          </p>
-          <ul className="space-y-4">
-            <li className="flex gap-3">
-              <div className="mt-1 min-w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-xs font-bold">A</div>
-              <div>
-                <strong className="text-slate-900">Found on Spotify:</strong> Added to your playlist. Download is optional (based on settings).
-              </div>
-            </li>
-            <li className="flex gap-3">
-              <div className="mt-1 min-w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-xs font-bold">B</div>
-              <div>
-                <strong className="text-slate-900">Not found on Spotify:</strong> If "Enable Download" is ON, we download the file anyway. The system notifies you to add the download folder to <strong>Spotify Local Files</strong>.
-              </div>
-            </li>
-          </ul>
-
+        <div className="mb-24">
+          <MatchingFlowDiagram />
         </div>
+
+        <div className="mb-24">
+          <h2 className="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-2">
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold">1</span>
+            Sanitization Pipeline
+          </h2>
+          
+          <div className="grid gap-8 lg:grid-cols-2">
+            <div className="prose prose-slate">
+              <p className="text-slate-600 text-lg mb-4">
+                Raw YouTube titles are noisy. Before any matching occurs, the title passes through a rigorous sanitization layer.
+              </p>
+              <ul className="space-y-2 text-slate-600">
+                <li className="flex gap-2">
+                  <ShieldCheck className="h-5 w-5 text-emerald-500 flex-shrink-0" />
+                  <span>Removes media markers (Official Video, Lyrics, 4K)</span>
+                </li>
+                <li className="flex gap-2">
+                  <ShieldCheck className="h-5 w-5 text-emerald-500 flex-shrink-0" />
+                  <span>Normalizes featuring artists (ft. → feat.)</span>
+                </li>
+                <li className="flex gap-2">
+                  <ShieldCheck className="h-5 w-5 text-emerald-500 flex-shrink-0" />
+                  <span>Extracts "Artist - Title" structure</span>
+                </li>
+              </ul>
+            </div>
+
+            <ShineBorder shineColor={["#6366f1", "#8b5cf6"]} className="relative overflow-hidden rounded-xl bg-slate-950 p-6 text-slate-50 shadow-xl">
+              <div className="font-mono text-sm space-y-4">
+                <div>
+                  <div className="text-slate-500 mb-1 text-xs uppercase tracking-wider">Input</div>
+                  <div className="text-red-300">"The Weeknd - Blinding Lights (Official Audio) [HD]"</div>
+                </div>
+                <div className="h-px bg-slate-800" />
+                <div>
+                  <div className="text-slate-500 mb-1 text-xs uppercase tracking-wider">Sanitized Output</div>
+                  <div className="text-emerald-300">"The Weeknd - Blinding Lights"</div>
+                </div>
+                <div className="h-px bg-slate-800" />
+                <div>
+                  <div className="text-slate-500 mb-1 text-xs uppercase tracking-wider">Extracted Metadata</div>
+                  <div className="text-indigo-300">
+                    Artist: "The Weeknd"<br/>
+                    Title: "Blinding Lights"
+                  </div>
+                </div>
+              </div>
+            </ShineBorder>
+          </div>
+        </div>
+
+        <div className="mb-24">
+          <h2 className="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-2">
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold">2</span>
+            The Matching Algorithm
+          </h2>
+          <p className="text-slate-600 text-lg mb-8 max-w-3xl">
+            We use a weighted scoring system based on <strong>Jaro-Winkler similarity</strong> to ensure we find the exact track on Spotify, avoiding covers and remixes.
+          </p>
+
+          <BentoGrid className="grid-rows-1 md:grid-rows-2 h-[500px]">
+            <BentoCard
+              name="Title Similarity"
+              className="md:col-span-2"
+              Icon={Type}
+              description="50% Weight. Compares the sanitized YouTube title with Spotify track title using fuzzy matching to handle minor typos or differences."
+              href="#"
+              cta="Core Metric"
+              background={<div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-transparent opacity-50" />}
+            />
+            <BentoCard
+              name="Artist Similarity"
+              className="md:col-span-1"
+              Icon={User}
+              description="35% Weight. Critical for preventing false positives. Mismatched artists heavily penalize the score."
+              href="#"
+              cta="Safety Check"
+              background={<div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-50" />}
+            />
+            <BentoCard
+              name="Duration Match"
+              className="md:col-span-1"
+              Icon={Timer}
+              description="15% Weight. Ensures the audio length is within 30 seconds, filtering out extended mixes or radio edits."
+              href="#"
+              cta="Validation"
+              background={<div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-transparent opacity-50" />}
+            />
+          </BentoGrid>
+
+          <div className="mt-8 rounded-xl border border-rose-200 bg-rose-50 p-6">
+            <div className="flex items-start gap-4">
+              <div className="p-2 bg-white rounded-lg shadow-sm">
+                <AlertCircle className="h-6 w-6 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-rose-900 mb-1">Confidence Threshold: 0.7</h3>
+                <p className="text-rose-800">
+                  A match is only auto-added if the weighted score is <strong>&ge; 0.7</strong>. This strict threshold ensures that if the artist doesn't match, the song won't be added, solving the "AnimeOST vs Original Artist" problem.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-24">
+          <h2 className="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-2">
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold">3</span>
+            Download Engine
+          </h2>
+          
+          <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+            <BorderBeam size={250} duration={12} delay={9} borderWidth={1.5} colorFrom="#10B981" colorTo="#3B82F6" />
+            
+            <div className="grid gap-8 md:grid-cols-2 items-center">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 mb-4">High-Fidelity Archival</h3>
+                <p className="text-slate-600 mb-6">
+                  TunePort doesn't just download the stream; it reconstructs a proper music file. We use <code>yt-dlp</code> with specific arguments to embed metadata that YouTube hides.
+                </p>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-sm text-slate-700 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <FileAudio className="h-4 w-4 text-indigo-500" />
+                    <span>Best Audio (Opus/AAC)</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-slate-700 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <User className="h-4 w-4 text-emerald-500" />
+                    <span>ID3 Tags (Artist, Title, Album)</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-slate-700 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <Settings className="h-4 w-4 text-amber-500" />
+                    <span>Embedded Thumbnail Art</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-slate-900 rounded-xl p-5 font-mono text-xs text-slate-300 leading-relaxed shadow-inner">
+                <div className="flex gap-2 mb-2 border-b border-slate-800 pb-2">
+                  <span className="text-red-400">●</span>
+                  <span className="text-yellow-400">●</span>
+                  <span className="text-green-400">●</span>
+                </div>
+                <span className="text-emerald-400">$</span> yt-dlp \<br/>
+                &nbsp;&nbsp;<span className="text-indigo-400">--extract-audio</span> \<br/>
+                &nbsp;&nbsp;<span className="text-indigo-400">--audio-format</span> best \<br/>
+                &nbsp;&nbsp;<span className="text-amber-400">--add-metadata</span> \<br/>
+                &nbsp;&nbsp;<span className="text-amber-400">--embed-thumbnail</span> \<br/>
+                &nbsp;&nbsp;<span className="text-slate-400">--parse-metadata "title:%(title)s"</span> \<br/>
+                &nbsp;&nbsp;<span className="text-slate-400">--output "Artist - Title.ext"</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
