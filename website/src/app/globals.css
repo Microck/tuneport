@@ -83,7 +83,19 @@
   0%, 90%, 100% {
     background-position: calc(-100% - var(--shiny-width)) 0;}
   30%, 60% {
-    background-position: calc(100% + var(--shiny-width)) 0;}}}
+    background-position: calc(100% + var(--shiny-width)) 0;}}
+  --animate-background-position-spin: background-position-spin 3000ms infinite alternate;
+  @keyframes background-position-spin {
+  0% {
+    background-position: top center;}
+  100% {
+    background-position: bottom center;}}
+  --animate-blink-cursor: blink-cursor 1.2s step-end infinite;
+  @keyframes blink-cursor {
+  0%, 49% {
+    opacity: 1;}
+  50%, 100% {
+    opacity: 0;}}}
 
 :root {
   --background: 0 0% 98%;

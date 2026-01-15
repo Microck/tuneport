@@ -1,6 +1,7 @@
 "use client";
 
 import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
+import { Highlighter } from "@/components/ui/highlighter";
 import { Marquee } from "@/components/ui/marquee";
 import { motion } from "framer-motion";
 import { ScanSearch, ShieldCheck, Zap, FileAudio } from "lucide-react";
@@ -145,7 +146,14 @@ export function Features() {
     <section className="container mx-auto py-24 px-4 sm:px-6" id="features">
       <div className="mx-auto max-w-2xl text-center mb-16">
         <h2 className="text-3xl font-bold tracking-tighter text-slate-900 sm:text-4xl md:text-5xl" data-animate="text" data-animate-variant="slide-up">
-            Built for Speed & Quality
+          Built for{" "}
+          <Highlighter action="underline" color="#FCD34D" isView>
+            Speed
+          </Highlighter>
+          {" "}&{" "}
+          <Highlighter action="underline" color="#FBCFE8" isView>
+            Quality
+          </Highlighter>
         </h2>
         <p className="mt-4 text-lg text-slate-600" data-animate="text" data-animate-variant="fade">
             Everything you need to manage your music library without leaving YouTube.

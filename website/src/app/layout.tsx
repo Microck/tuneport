@@ -3,6 +3,8 @@ import { Instrument_Sans } from "next/font/google";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { GsapProvider } from "@/components/gsap-provider";
+import { ScrollProgress } from "@/components/ui/scroll-progress";
+import { SmoothCursor } from "@/components/ui/smooth-cursor";
 import "./globals.css";
 
 const instrumentSans = Instrument_Sans({
@@ -58,6 +60,8 @@ export default function RootLayout({
         className={`${instrumentSans.variable} antialiased`}
       >
         <GsapProvider>
+          <ScrollProgress />
+          <SmoothCursor />
           <div id="smooth-wrapper">
             <div id="smooth-content">
               <Header />

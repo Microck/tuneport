@@ -4,9 +4,12 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { BorderBeam } from "@/components/ui/border-beam";
+import { Meteors } from "@/components/ui/meteors";
+import { Pointer } from "@/components/ui/pointer";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { Button } from "@/components/ui/button";
 import { TextAnimate } from "@/components/ui/text-animate";
+import { TypingAnimation } from "@/components/ui/typing-animation";
 import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
 import { cn } from "@/lib/utils";
 import { Github } from "lucide-react";
@@ -49,6 +52,10 @@ export function Hero() {
         )}
       />
 
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <Meteors number={24} />
+      </div>
+
       <div className="z-10 flex w-full max-w-5xl flex-col items-center gap-8 text-center">
         
           <div className="flex flex-col items-center gap-4">
@@ -87,8 +94,21 @@ export function Hero() {
             The missing link between YouTube and Spotify.
           </TextAnimate>
 
+          <TypingAnimation
+            words={[
+              "Match clean metadata.",
+              "Sync playlists instantly.",
+              "Download lossless first.",
+            ]}
+            className="text-sm text-slate-500 sm:text-base"
+            duration={70}
+            pauseDelay={1200}
+            loop
+          />
+
           <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center">
-            <div className="flex flex-col items-center gap-2">
+            <div className="relative flex flex-col items-center gap-2">
+              <Pointer className="text-rose-600" />
               <ShimmerButton className="shadow-2xl h-12 px-8 opacity-80 pointer-events-none" data-placeholder="webstore-url" data-animate="button">
                 <span className="whitespace-pre-wrap text-center text-base font-semibold leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg">
                   Chrome Web Store soon
@@ -96,12 +116,15 @@ export function Hero() {
               </ShimmerButton>
             </div>
             
-            <Link href="https://github.com/Microck/tuneport" target="_blank">
-              <Button variant="outline" className="h-12 px-8 border-slate-200 hover:bg-slate-50 text-slate-700 font-medium" data-animate="button">
-                <Github className="mr-2 h-4 w-4" />
-                Go to GitHub
-              </Button>
-            </Link>
+            <div className="relative">
+              <Pointer className="text-emerald-600" />
+              <Link href="https://github.com/Microck/tuneport" target="_blank">
+                <Button variant="outline" className="h-12 px-8 border-slate-200 hover:bg-slate-50 text-slate-700 font-medium" data-animate="button">
+                  <Github className="mr-2 h-4 w-4" />
+                  Go to GitHub
+                </Button>
+              </Link>
+            </div>
           </div>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-600" data-animate="text" data-animate-variant="fade">
             <Link href="/tutorial" className="hover:text-slate-900">Read the tutorial</Link>

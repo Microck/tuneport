@@ -7,9 +7,10 @@
     "config": "tailwind.config.ts",
     "css": "src/app/globals.css",
     "baseColor": "zinc",
-    "cssVars": true,
+    "cssVariables": true,
     "prefix": ""
   },
+  "iconLibrary": "lucide",
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
@@ -17,11 +18,11 @@
     "lib": "@/lib",
     "hooks": "@/hooks"
   },
-  "iconLibrary": "lucide",
   "registries": {
     "@react-bits": "https://reactbits.dev/r/{name}.json",
     "@animate-ui": "https://animate-ui.com/r/{name}.json",
     "@reui": "https://reui.io/r/{name}.json",
-    "@magic-ui": "https://magicui.design/r/{name}.json"
+    "@magic-ui": "https://magicui.design/r/{name}.json",
+    "@magicui": "https://magicui.design/r/{name}.json"
   }
 }
