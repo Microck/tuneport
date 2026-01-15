@@ -7,6 +7,8 @@ import { FileAudio } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { AnimatedBeam } from "@/components/ui/animated-beam";
+import WordRotate from "@/components/ui/word-rotate";
+import { Highlighter } from "@/components/ui/highlighter";
 
 const Circle = forwardRef<
   HTMLDivElement,
@@ -50,10 +52,18 @@ export function Flow() {
     <section className="container mx-auto py-24 sm:py-32" id="how-it-works">
       <div className="flex flex-col items-center justify-center gap-4 text-center">
         <h2 className="text-3xl font-bold tracking-tighter text-slate-900 md:text-4xl" data-animate="text" data-animate-variant="slide-right">
-          Seamless Integration
+          <Highlighter action="underline" color="#A7F3D0" isView>
+            Seamless
+          </Highlighter>{" "}
+          Integration
         </h2>
         <p className="max-w-[85%] leading-normal text-slate-500 sm:text-lg sm:leading-7" data-animate="text" data-animate-variant="fade">
-          How TunePort bridges your streaming services with a single click.
+          How TunePort bridges your{" "}
+          <WordRotate
+            words={["streaming services", "music library", "playlists"]}
+            className="inline-block font-medium text-slate-700"
+          />{" "}
+          with a single click.
         </p>
       </div>
 

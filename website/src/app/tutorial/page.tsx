@@ -3,7 +3,9 @@ import Link from "next/link";
 import { ArrowLeft, Download, MousePointerClick, ListMusic, ShieldCheck, PlayCircle, Settings, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
+import { Meteors } from "@/components/ui/meteors";
 import { TextAnimate } from "@/components/ui/text-animate";
+import { Highlighter } from "@/components/ui/highlighter";
 import { BentoGrid, BentoCard } from "@/components/ui/bento-grid";
 import { ShineBorder } from "@/components/ui/shine-border";
 import { cn } from "@/lib/utils";
@@ -27,6 +29,9 @@ export const metadata: Metadata = {
 export default function TutorialPage() {
   return (
     <div className="relative bg-white pb-12 pt-20 overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <Meteors number={20} />
+      </div>
       <AnimatedGridPattern
         numSquares={30}
         maxOpacity={0.1}
@@ -61,7 +66,15 @@ export default function TutorialPage() {
           </TextAnimate>
           
           <p className="mx-auto max-w-2xl text-lg text-slate-600 leading-relaxed" data-animate="text" data-animate-variant="fade">
-             From YouTube to Spotify in four steps. No accounts, no friction, purely local.
+             From YouTube to Spotify in{" "}
+             <Highlighter action="underline" color="#93C5FD" isView>
+               four steps
+             </Highlighter>
+             . No accounts, no friction,{" "}
+             <Highlighter action="underline" color="#FDE68A" isView>
+               purely local
+             </Highlighter>
+             .
           </p>
         </div>
 

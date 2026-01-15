@@ -4,12 +4,12 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { BorderBeam } from "@/components/ui/border-beam";
-import { Meteors } from "@/components/ui/meteors";
+
 import { Pointer } from "@/components/ui/pointer";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { Button } from "@/components/ui/button";
 import { TextAnimate } from "@/components/ui/text-animate";
-import { TypingAnimation } from "@/components/ui/typing-animation";
+
 import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
 import { cn } from "@/lib/utils";
 import { Github } from "lucide-react";
@@ -52,10 +52,6 @@ export function Hero() {
         )}
       />
 
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <Meteors number={24} />
-      </div>
-
       <div className="z-10 flex w-full max-w-5xl flex-col items-center gap-8 text-center">
         
           <div className="flex flex-col items-center gap-4">
@@ -93,18 +89,6 @@ export function Hero() {
           >
             The missing link between YouTube and Spotify.
           </TextAnimate>
-
-          <TypingAnimation
-            words={[
-              "Match clean metadata.",
-              "Sync playlists instantly.",
-              "Download lossless first.",
-            ]}
-            className="text-sm text-slate-500 sm:text-base"
-            duration={70}
-            pauseDelay={1200}
-            loop
-          />
 
           <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center">
             <div className="relative flex flex-col items-center gap-2">
