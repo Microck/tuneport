@@ -7,8 +7,10 @@ import { FileAudio } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { AnimatedBeam } from "@/components/ui/animated-beam";
+import { TextAnimate } from "@/components/ui/text-animate";
 import WordRotate from "@/components/ui/word-rotate";
 import { Highlighter } from "@/components/ui/highlighter";
+import { motion } from "motion/react";
 
 const Circle = forwardRef<
   HTMLDivElement,
@@ -57,14 +59,20 @@ export function Flow() {
           </Highlighter>{" "}
           Integration
         </h2>
-        <p className="w-full text-slate-500 sm:text-lg sm:leading-7" data-animate="text" data-animate-variant="fade">
+        <motion.p 
+          layout
+          className="w-full text-slate-500 sm:text-lg sm:leading-7" 
+          data-animate="text" 
+          data-animate-variant="fade"
+          transition={{ duration: 0.25, ease: "easeOut" }}
+        >
           How TunePort bridges your{" "}
           <WordRotate
             words={["streaming services", "music library", "playlists"]}
             className="inline-block font-medium text-slate-700"
           />{" "}
           with a single click.
-        </p>
+        </motion.p>
       </div>
 
       <div

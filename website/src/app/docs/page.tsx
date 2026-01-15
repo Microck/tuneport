@@ -146,28 +146,28 @@ export default function DocsPage() {
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                      <TableCell className="font-medium">251</TableCell>
-                      <TableCell>Opus (.webm)</TableCell>
-                      <TableCell>130–160 kbps</TableCell>
-                      <TableCell className="text-right"><span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">Best</span></TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">140</TableCell>
-                      <TableCell>AAC (.m4a)</TableCell>
-                      <TableCell>128 kbps</TableCell>
-                      <TableCell className="text-right"><span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Legacy</span></TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">141</TableCell>
-                      <TableCell>AAC (.m4a)</TableCell>
-                      <TableCell>256 kbps</TableCell>
-                      <TableCell className="text-right"><span className="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-700">Premium</span></TableCell>
-                    </TableRow>
-                    <TableRow>
                       <TableCell className="font-medium">380</TableCell>
                       <TableCell>EC-3 (.m4a)</TableCell>
                       <TableCell>384 kbps</TableCell>
-                      <TableCell className="text-right"><span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700">5.1</span></TableCell>
+                      <TableCell className="text-right"><span className="inline-flex items-center rounded-full bg-fuchsia-100 px-2.5 py-0.5 text-xs font-medium text-fuchsia-800">5.1 Surround</span></TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">141</TableCell>
+                      <TableCell>AAC-LC (.m4a)</TableCell>
+                      <TableCell>256 kbps</TableCell>
+                      <TableCell className="text-right"><span className="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-700">Premium Only</span></TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">251</TableCell>
+                      <TableCell>Opus (.webm)</TableCell>
+                      <TableCell>130–160 kbps</TableCell>
+                      <TableCell className="text-right"><span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">Standard Best</span></TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">140</TableCell>
+                      <TableCell>AAC-LC (.m4a)</TableCell>
+                      <TableCell>128 kbps</TableCell>
+                      <TableCell className="text-right"><span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Legacy Default</span></TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell className="font-medium">250</TableCell>
@@ -293,7 +293,7 @@ export default function DocsPage() {
                     <span className="font-medium text-slate-900">Alstroemeria Records - Bad Apple!!</span>
                   </div>
                   <div className="flex justify-between border-b border-rose-100 pb-2">
-                    <span className="text-slate-500">Match</span>
+                    <span className="text-slate-500">Candidate</span>
                     <span className="font-medium text-slate-900">RichaadEB - Bad Apple!! (Metal Cover)</span>
                   </div>
                   <div className="pt-2 text-xs">
