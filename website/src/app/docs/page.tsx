@@ -242,13 +242,13 @@ export default function DocsPage() {
 
         {/* --- Part 1: Audio Quality & Transcoding --- */}
         
-        <div className="relative mb-16 rounded-2xl bg-white p-1 backdrop-blur-sm overflow-hidden border border-slate-200 shadow-sm">
-          <div className="relative z-10 rounded-xl bg-white/80 p-8">
-            <h3 className="mb-4 text-lg font-semibold text-emerald-600" data-animate="text" data-animate-variant="slide-up">Abstract</h3>
-            <p className="text-slate-600 leading-relaxed" data-animate="text" data-animate-variant="fade">
+        <div className="relative mb-16">
+          <MagicCard className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 shadow-sm" gradientColor={"#F1F5F9"}>
+            <h3 className="mb-4 text-lg font-semibold text-emerald-600">Abstract</h3>
+            <p className="text-slate-600 leading-relaxed">
               User-generated audio on video platforms has become a massive, unplanned music archive. Yet, serious misconceptions persist about the quality of these streams. Commercial converters profit from this confusion, selling &quot;320kbps MP3&quot; tools that cannot mathematically exist given the source material. This research evaluates YouTube&apos;s actual delivery infrastructure, demonstrating that the platform&apos;s standard Opus format provides superior spectral fidelity compared to legacy AAC-LC, and quantifies the degradation introduced by transcoding.
             </p>
-          </div>
+          </MagicCard>
         </div>
 
         <div className="mb-20">
