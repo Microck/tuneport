@@ -11,8 +11,9 @@ class TestYtDlpArgs(unittest.TestCase):
         self.assertNotIn('--download-sections', args)
         self.assertIn('--convert-thumbnails', args)
         self.assertIn('-f', args)
-        self.assertTrue(any('bestaudio[ext=m4a]' in arg for arg in args))
-        self.assertNotIn('--extract-audio', args)
+        self.assertTrue(any('251/140/bestaudio' in arg for arg in args))
+        self.assertIn('--extract-audio', args)
+        self.assertIn('--audio-format', args)
         self.assertNotIn('--postprocessor-args', args)
 
     def test_build_args_with_segments(self):
