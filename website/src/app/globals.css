@@ -199,3 +199,12 @@ body {
 body[data-pointer-active="true"] .smooth-cursor {
   opacity: 0 !important;
 }
+
+.smooth-cursor {
+  transition: opacity 0.2s ease-out;
+}
+
+/* Hide native cursor on interactive elements to prevent double cursor */
+a, button, [role="button"], input, label, select, textarea {
+  cursor: none !important;
+}
