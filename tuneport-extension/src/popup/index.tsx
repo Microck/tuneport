@@ -32,7 +32,8 @@ import { cn } from '../lib/utils';
 import { ChromeMessageService } from '../services/ChromeMessageService';
 import { SpotifyAuthService } from '../services/SpotifyAuthService';
 import { DEFAULT_COBALT_INSTANCE, DEFAULT_YTDLP_INSTANCE } from '../config/defaults';
-import { parseDescriptionSegments, parseManualMultiSegments, parseManualSingleSegments, Segment, SegmentMode } from '../services/SegmentParser';
+import { parseDescriptionSegments, parseManualMultiSegments, parseManualSingleSegments } from '../services/SegmentParser';
+import type { Segment, SegmentMode } from '../services/SegmentParser';
 
 
 const ShimmerButton: React.FC<{

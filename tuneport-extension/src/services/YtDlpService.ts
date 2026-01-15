@@ -1,6 +1,6 @@
 import { AudioFormat, CobaltService } from './CobaltService';
 import { DownloadResult } from './DownloadService';
-import { Segment, SegmentMode } from './SegmentParser';
+import type { Segment, SegmentMode } from './SegmentParser';
 
 export interface YtDlpMetadata {
   title: string;

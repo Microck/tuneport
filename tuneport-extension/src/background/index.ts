@@ -5,7 +5,7 @@ import { LucidaService } from '../services/LucidaService';
 import { AudioFormat } from '../services/CobaltService';
 import { YouTubeMetadataService, YouTubeMusicMetadata } from '../services/YouTubeMetadataService';
 import { applyDownloadCompletion, applyDownloadInterruption } from './download-utils';
-import { Segment, SegmentMode } from '../services/SegmentParser';
+import type { Segment, SegmentMode } from '../services/SegmentParser';
 import { addSegmentsToSpotify, SegmentSummary } from '../services/SegmentSpotify';
 
 

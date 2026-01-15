@@ -2,7 +2,7 @@ import { CobaltService, AudioFormat } from './CobaltService';
 import { YtDlpService } from './YtDlpService';
 import { LucidaService, LucidaOptions } from './LucidaService';
 import { DEFAULT_COBALT_INSTANCE, DEFAULT_YTDLP_INSTANCE, DEFAULT_YTDLP_TOKEN } from '../config/defaults';
-import { Segment, SegmentMode } from './SegmentParser';
+import type { Segment, SegmentMode } from './SegmentParser';
 import { resolveSegmentMetadata } from './SegmentMetadata';
 
 
