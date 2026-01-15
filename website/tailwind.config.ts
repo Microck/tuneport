@@ -93,6 +93,7 @@ const config: Config = {
         "border-beam": "border-beam calc(var(--duration) * 1s) infinite linear",
         "fade-in": "fade-in 0.3s ease-out",
         "slide-up": "slide-up 0.3s ease-out",
+        "grid": "grid 15s linear infinite",
       },
       keyframes: {
         "shimmer-slide": {
@@ -114,6 +115,10 @@ const config: Config = {
         "slide-up": {
           "0%": { opacity: "0", transform: "translateY(10px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "grid": {
+          "0%": { transform: "translateY(-50%)" },
+          "100%": { transform: "translateY(0)" },
         },
       },
       backgroundImage: {

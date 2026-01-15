@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Code2, GitBranch, ShieldCheck, Timer, Type, User, AlertCircle, FileAudio, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
+import RetroGrid from "@/components/ui/retro-grid";
 import { TextAnimate } from "@/components/ui/text-animate";
 import { BentoGrid, BentoCard } from "@/components/ui/bento-grid";
 import { ShineBorder } from "@/components/ui/shine-border";
@@ -18,18 +18,9 @@ export const metadata: Metadata = {
 export default function HowItWorksPage() {
   return (
     <div className="relative bg-white pb-24 pt-24 overflow-hidden">
-      <AnimatedGridPattern
-        numSquares={30}
-        maxOpacity={0.1}
-        duration={3}
-        repeatDelay={1}
-        className={cn(
-          "[mask-image:radial-gradient(500px_circle_at_center,white,transparent)]",
-          "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12",
-        )}
-      />
+      <RetroGrid className="light" />
 
-      <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="mb-12">
           <Link href="/docs">
             <Button variant="ghost" className="gap-2 pl-0 text-slate-600 hover:bg-transparent hover:text-emerald-600">
@@ -42,11 +33,11 @@ export default function HowItWorksPage() {
         <div className="relative mb-20 text-center">
           <div className="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-800 backdrop-blur-md mb-6">
             <Code2 className="h-4 w-4 mr-2" />
-            System Internals
+            Architecture Deep Dive
           </div>
 
           <TextAnimate animation="blurInUp" by="word" className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-5xl mb-6">
-            How TunePort Works
+            Under The Hood
           </TextAnimate>
 
           <p className="mx-auto max-w-2xl text-lg text-slate-600 leading-relaxed">
