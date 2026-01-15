@@ -241,7 +241,7 @@ export class MatchingService {
   /**
    * Check if a match score meets the threshold for auto-adding
    */
-  static isAutoAddable(score: number): boolean {
-    return score >= 0.7;
+  static isAutoAddable(score: number, threshold: number = 0.7): boolean {
+    return score >= threshold;
   }
 }

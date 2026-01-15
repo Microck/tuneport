@@ -257,6 +257,7 @@ export class BackgroundService {
     defaultQuality: string; 
     defaultPlaylist: string;
     spotifyFallbackMode: 'auto' | 'ask' | 'never';
+    matchThreshold: number;
   }> {
     try {
       const result = await chrome.storage.local.get(['tuneport_settings']);
@@ -264,11 +265,12 @@ export class BackgroundService {
         enableDownload: false, 
         defaultQuality: 'best', 
         defaultPlaylist: '',
-        spotifyFallbackMode: 'auto' as const
+        spotifyFallbackMode: 'auto' as const,
+        matchThreshold: 0.7
       };
       return { ...defaults, ...result.tuneport_settings };
     } catch {
-      return { enableDownload: false, defaultQuality: 'best', defaultPlaylist: '', spotifyFallbackMode: 'auto' };
+      return { enableDownload: false, defaultQuality: 'best', defaultPlaylist: '', spotifyFallbackMode: 'auto', matchThreshold: 0.7 };
     }
   }
 
@@ -453,14 +455,16 @@ export class BackgroundService {
       
       job.progress = 30;
 
-      const searchResults = await this.searchOnSpotify(metadata.title, metadata.artist, metadata.duration);
+      const settings = await this.getSettings();
+      const matchThreshold = settings.matchThreshold ?? 0.7;
+
+      const searchResults = await this.searchOnSpotify(metadata.title, metadata.artist, metadata.duration, matchThreshold);
       job.progress = 50;
 
       let spotifyMatchFound = !!searchResults.exactMatch;
 
       if (!spotifyMatchFound) {
         // Try YouTube Music fallback
-        const settings = await this.getSettings();
         const fallbackMode = settings.spotifyFallbackMode || 'auto';
         
         if (fallbackMode !== 'never') {
@@ -490,7 +494,8 @@ export class BackgroundService {
               const fallbackResults = await this.searchOnSpotify(
                 musicMetadata.title,
                 musicMetadata.artist,
-                metadata.duration
+                metadata.duration,
+                matchThreshold
               );
               
               if (fallbackResults.exactMatch) {
@@ -757,7 +762,7 @@ export class BackgroundService {
     return null;
   }
 
-  private async searchOnSpotify(title: string, artist: string, duration: number) {
+  private async searchOnSpotify(title: string, artist: string, duration: number, threshold: number = 0.7) {
     const token = await this.getSpotifyToken();
     if (!token) {
       throw new Error('Not authenticated with Spotify');
@@ -800,12 +805,12 @@ export class BackgroundService {
       if (fallbackResponse.ok) {
         const fallbackData = await fallbackResponse.json();
         const fallbackTracks = fallbackData.tracks?.items || [];
-        const exactMatch = this.findBestMatch(fallbackTracks, effectiveTitle, effectiveArtist, duration);
+        const exactMatch = this.findBestMatch(fallbackTracks, effectiveTitle, effectiveArtist, duration, threshold);
         return { tracks: fallbackTracks, exactMatch };
       }
     }
 
-    const exactMatch = this.findBestMatch(tracks, effectiveTitle, effectiveArtist, duration);
+    const exactMatch = this.findBestMatch(tracks, effectiveTitle, effectiveArtist, duration, threshold);
     
     return { tracks, exactMatch };
   }
@@ -830,7 +835,7 @@ export class BackgroundService {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  private findBestMatch(tracks: any[], title: string, artist: string, duration: number) {
+  private findBestMatch(tracks: any[], title: string, artist: string, duration: number, threshold: number = 0.7) {
     if (tracks.length === 0) {
       return null;
     }
@@ -854,7 +859,7 @@ export class BackgroundService {
       }
     }
 
-    return MatchingService.isAutoAddable(bestScore) ? bestMatch : null;
+    return MatchingService.isAutoAddable(bestScore, threshold) ? bestMatch : null;
   }
 
   private calculateStringSimilarity(str1: string, str2: string): number {

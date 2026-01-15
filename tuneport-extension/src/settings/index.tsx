@@ -57,6 +57,7 @@ interface SettingsState {
   customPresets: QualityPreset[];
   spotifyFallbackMode: 'auto' | 'ask' | 'never';
   enableDebugConsole: boolean;
+  matchThreshold: number;
 }
 
 const DEFAULT_SETTINGS: SettingsState = {
@@ -74,7 +75,8 @@ const DEFAULT_SETTINGS: SettingsState = {
   lucidaEnabled: false,
   customPresets: [],
   spotifyFallbackMode: 'auto',
-  enableDebugConsole: false
+  enableDebugConsole: false,
+  matchThreshold: 0.7
 };
 
 const QUALITY_OPTIONS = [
@@ -428,6 +430,24 @@ export const SettingsPage: React.FC = () => {
                   className="overflow-hidden"
                 >
                   <div className="space-y-4 pt-2 pb-2">
+                    <div className="bg-tf-gray/30 border border-tf-border rounded-xl p-3 space-y-2">
+                      <div className="flex justify-between items-center">
+                        <label className="block text-[10px] font-bold text-tf-slate">Matching Confidence</label>
+                        <span className="text-[10px] font-mono text-tf-emerald font-bold">{settings.matchThreshold ?? 0.7}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.5"
+                        max="1.0"
+                        step="0.05"
+                        value={settings.matchThreshold ?? 0.7}
+                        onChange={(e) => updateSetting('matchThreshold', parseFloat(e.target.value))}
+                        className="w-full h-1.5 bg-tf-border rounded-lg appearance-none cursor-pointer accent-tf-emerald"
+                      />
+                      <p className="text-[9px] text-tf-slate-muted leading-relaxed">
+                        Threshold for auto-adding tracks. Higher values prevent false positives. Recommended: 0.7-0.85.
+                      </p>
+                    </div>
                     <div className="bg-tf-gray/30 border border-tf-border rounded-xl p-3">
                       <ToggleField
                         label="Enable Debug Console"

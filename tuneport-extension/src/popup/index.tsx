@@ -370,6 +370,7 @@ interface SettingsState {
   customPresets: QualityPreset[];
   spotifyFallbackMode: 'auto' | 'ask' | 'never';
   enableDebugConsole: boolean;
+  matchThreshold: number;
 }
 
 const DEFAULT_SETTINGS: SettingsState = {
@@ -389,7 +390,8 @@ const DEFAULT_SETTINGS: SettingsState = {
   visiblePlaylists: [],
   customPresets: [],
   spotifyFallbackMode: 'auto',
-  enableDebugConsole: false
+  enableDebugConsole: false,
+  matchThreshold: 0.7
 };
 
 export const TunePortPopup: React.FC = () => {
@@ -1325,6 +1327,24 @@ export const TunePortPopup: React.FC = () => {
                 </button>
                 {showAdvanced && (
                   <div className="mt-3 space-y-3">
+                    <div className="p-3 bg-tf-gray/30 border border-tf-border rounded-lg space-y-2">
+                      <div className="flex justify-between items-center">
+                        <label className="block text-[10px] font-bold text-tf-slate">Matching Confidence</label>
+                        <span className="text-[10px] font-mono text-tf-emerald font-bold">{settings.matchThreshold ?? 0.7}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.5"
+                        max="1.0"
+                        step="0.05"
+                        value={settings.matchThreshold ?? 0.7}
+                        onChange={(e) => updateSetting('matchThreshold', parseFloat(e.target.value))}
+                        className="w-full h-1.5 bg-tf-border rounded-lg appearance-none cursor-pointer accent-tf-emerald"
+                      />
+                      <p className="text-[9px] text-tf-slate-muted leading-relaxed">
+                        Threshold for auto-adding tracks. Higher values prevent false positives (wrong artist/remix). Recommended: 0.7-0.85.
+                      </p>
+                    </div>
                     <div className="flex items-center justify-between p-2 bg-tf-gray/30 border border-tf-border rounded-lg">
                       <div>
                         <p className="text-xs font-bold text-tf-slate">Debug Console</p>
