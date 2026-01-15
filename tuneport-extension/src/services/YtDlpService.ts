@@ -1,11 +1,14 @@
 import { AudioFormat, CobaltService } from './CobaltService';
 import { DownloadResult } from './DownloadService';
+import { Segment } from './SegmentParser';
 
 export interface YtDlpOptions {
   format: AudioFormat;
   instance: string;
   token?: string;
+  segments?: Segment[];
 }
+
 
 interface YtDlpResponse {
   status: 'ok' | 'error';
@@ -46,8 +49,10 @@ export class YtDlpService {
         headers,
         body: JSON.stringify({
           url: youtubeUrl,
-          format
+          format,
+          segments: options.segments
         })
+
       });
 
       const data: YtDlpResponse = await response.json().catch(() => ({ status: 'error', error: 'Invalid response' }));

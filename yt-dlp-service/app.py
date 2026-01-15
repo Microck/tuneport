@@ -24,9 +24,15 @@ TOKEN_TTL_SECONDS = int(os.getenv('TOKEN_TTL_SECONDS', '900'))
 app = FastAPI()
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
+class SegmentRequest(BaseModel):
+    start: int
+    end: Optional[int] = None
+    title: Optional[str] = None
+
 class DownloadRequest(BaseModel):
     url: str
     format: str = 'best'
+    segments: Optional[list[SegmentRequest]] = None
 
 class DownloadResponse(BaseModel):
     status: str
@@ -94,17 +100,52 @@ async def startup_event():
     asyncio.create_task(_cleanup_loop())
 
 
-async def _run_ytdlp(url: str, fmt: str, output_prefix: str) -> Path:
+def _format_timestamp(seconds: int) -> str:
+    total_seconds = max(0, int(seconds))
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    remaining = total_seconds % 60
+
+    if hours > 0:
+        return f"{hours}:{minutes:02d}:{remaining:02d}"
+    return f"{minutes}:{remaining:02d}"
+
+
+def _segment_value(segment: SegmentRequest | dict, key: str) -> Optional[int]:
+    if isinstance(segment, dict):
+        return segment.get(key)
+    return getattr(segment, key)
+
+
+def _format_section(segment: SegmentRequest | dict) -> str:
+    start_value = _segment_value(segment, 'start') or 0
+    end_value = _segment_value(segment, 'end')
+    start = _format_timestamp(start_value)
+    if end_value is None:
+        return f"*{start}-"
+    end = _format_timestamp(end_value)
+    return f"*{start}-{end}"
+
+
+def build_ytdlp_args(url: str, fmt: str, output_prefix: str, segments: Optional[list[SegmentRequest]]) -> list[str]:
+    output_template = f"{output_prefix}.%(ext)s"
     args = [
         'yt-dlp',
         '--no-playlist', '--remote-components', 'ejs:github',
         '--no-part',
         '--cookies', COOKIE_PATH,
-        '--output', f'{output_prefix}.%(ext)s',
         '--add-metadata',
         '--embed-thumbnail',
-        '--parse-metadata', 'title:%(title)s', # Ensure clean title if possible
+        '--parse-metadata', 'title:%(title)s',
     ]
+
+    if segments:
+        output_template = f"{output_prefix}.%(section_start)s-%(section_end)s.%(ext)s"
+        for segment in segments:
+            args.extend(['--download-sections', _format_section(segment)])
+        args.append('--force-keyframes-at-cuts')
+
+    args.extend(['--output', output_template])
 
     if fmt == 'best':
         args.extend(['-f', 'bestaudio'])
@@ -112,6 +153,11 @@ async def _run_ytdlp(url: str, fmt: str, output_prefix: str) -> Path:
         args.extend(['-f', 'bestaudio', '--extract-audio', '--audio-format', fmt, '--audio-quality', '0'])
 
     args.append(url)
+    return args
+
+
+async def _run_ytdlp(url: str, fmt: str, output_prefix: str, segments: Optional[list[SegmentRequest]]) -> Path:
+    args = build_ytdlp_args(url, fmt, output_prefix, segments)
 
     logger.info(f"Starting yt-dlp for {url}")
     process = await asyncio.create_subprocess_exec(
@@ -155,7 +201,7 @@ async def download(request: DownloadRequest, authorization: Optional[str] = Head
     output_prefix = str(DATA_DIR / download_id)
 
     try:
-        file_path = await _run_ytdlp(request.url, fmt, output_prefix)
+        file_path = await _run_ytdlp(request.url, fmt, output_prefix, request.segments)
     except Exception as exc:
         return DownloadResponse(status='error', error=str(exc))
 

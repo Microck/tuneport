@@ -32,6 +32,7 @@ import { cn } from '../lib/utils';
 import { ChromeMessageService } from '../services/ChromeMessageService';
 import { SpotifyAuthService } from '../services/SpotifyAuthService';
 import { DEFAULT_COBALT_INSTANCE, DEFAULT_YTDLP_INSTANCE } from '../config/defaults';
+import { parseDescriptionSegments, parseManualSegments, Segment } from '../services/SegmentParser';
 
 
 const ShimmerButton: React.FC<{
@@ -404,6 +405,12 @@ export const TunePortPopup: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'sync' | 'activity' | 'settings'>('sync');
   const [selectedQuality, setSelectedQuality] = useState<string>('best');
   const [enableDownload, setEnableDownload] = useState(true);
+  const [segmentsEnabled, setSegmentsEnabled] = useState(false);
+  const [segmentMode, setSegmentMode] = useState<'auto' | 'manual'>('auto');
+  const [segmentInput, setSegmentInput] = useState('');
+  const [detectedSegments, setDetectedSegments] = useState<Segment[]>([]);
+  const [manualSegments, setManualSegments] = useState<Segment[]>([]);
+  const [selectedSegmentIndexes, setSelectedSegmentIndexes] = useState<number[]>([]);
   const [showQualityDropdown, setShowQualityDropdown] = useState(false);
   const [settings, setSettings] = useState<SettingsState>(DEFAULT_SETTINGS);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -414,6 +421,7 @@ export const TunePortPopup: React.FC = () => {
   const [playlistSearch, setPlaylistSearch] = useState('');
   const [debugLogs, setDebugLogs] = useState<Array<{ time: string; message: string; type: 'info' | 'error' | 'warn' }>>([]);
   const [showDebugConsole, setShowDebugConsole] = useState(false);
+
 
   const logoUrl = useMemo(() => chrome.runtime.getURL('assets/logo.png'), []);
 
@@ -597,6 +605,65 @@ export const TunePortPopup: React.FC = () => {
     }
   };
 
+  const segmentsAllowed = settings.downloadProvider === 'yt-dlp';
+  const activeSegments = segmentMode === 'auto' ? detectedSegments : manualSegments;
+
+  const updateSelectedSegments = (segments: Segment[]) => {
+    setSelectedSegmentIndexes(segments.map((_, index) => index));
+  };
+
+  const toggleSegmentIndex = (index: number) => {
+    setSelectedSegmentIndexes((prev) => {
+      if (prev.includes(index)) {
+        return prev.filter((item) => item !== index);
+      }
+      return [...prev, index];
+    });
+  };
+
+  const handleDetectSegments = async () => {
+    try {
+      const tab = await ChromeMessageService.getCurrentTab();
+      if (!tab?.id) return;
+
+      const response = await ChromeMessageService.sendMessageToTab(tab.id, { type: 'GET_PAGE_METADATA' });
+      const description = response?.metadata?.description || '';
+      const segments = parseDescriptionSegments(description);
+      setDetectedSegments(segments);
+      updateSelectedSegments(segments);
+    } catch (error) {
+      console.error('Failed to detect segments:', error);
+    }
+  };
+
+  const handleManualSegmentsChange = (value: string) => {
+    setSegmentInput(value);
+    const segments = parseManualSegments(value);
+    setManualSegments(segments);
+    updateSelectedSegments(segments);
+  };
+
+  const formatTimestamp = (value: number) => {
+    const totalSeconds = Math.max(0, Math.floor(value));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const formatSegmentLabel = (segment: Segment) => {
+    const start = formatTimestamp(segment.start);
+    const end = segment.end !== undefined ? formatTimestamp(segment.end) : 'end';
+    const range = segment.end !== undefined ? `${start}-${end}` : `${start}+`;
+    return segment.title ? `${range} · ${segment.title}` : range;
+  };
+
+
   const filteredPlaylists = useMemo(() => {
     let filtered = playlists;
     
@@ -641,6 +708,11 @@ export const TunePortPopup: React.FC = () => {
   const handleSync = async (playlistId: string) => {
     try {
       const quality = allQualityPresets.find(q => q.id === selectedQuality) || QUALITY_PRESETS[0];
+      const selectedSegments = segmentsEnabled && segmentsAllowed
+        ? activeSegments.filter((_, index) => selectedSegmentIndexes.includes(index))
+        : [];
+      const segmentsPayload = selectedSegments.length > 0 ? selectedSegments : undefined;
+
       const response = await ChromeMessageService.sendMessage({
         type: 'ADD_TRACK_TO_PLAYLIST',
         data: { 
@@ -648,7 +720,8 @@ export const TunePortPopup: React.FC = () => {
           playlistId,
           download: enableDownload,
           downloadOptions: enableDownload ? {
-            format: quality.format
+            format: quality.format,
+            segments: segmentsPayload
           } : undefined
         }
       });
@@ -660,6 +733,7 @@ export const TunePortPopup: React.FC = () => {
       console.error('Sync failed:', error);
     }
   };
+
 
   const isYouTube = currentUrl.includes('youtube.com') || currentUrl.includes('youtu.be');
 
@@ -863,7 +937,124 @@ export const TunePortPopup: React.FC = () => {
                     </div>
                   )}
 
+                  {enableDownload && (
+                    <div className="rounded-2xl border border-tf-border bg-white p-3 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-[11px] font-bold text-tf-slate">Segment Download</p>
+                          <p className="text-[9px] text-tf-slate-muted">Cut by timestamps or manual ranges</p>
+                        </div>
+                        <button
+                          onClick={() => segmentsAllowed && setSegmentsEnabled(!segmentsEnabled)}
+                          disabled={!segmentsAllowed}
+                          className={cn(
+                            "w-10 h-5 rounded-full transition-all relative",
+                            segmentsEnabled && segmentsAllowed ? "bg-tf-emerald" : "bg-tf-border",
+                            !segmentsAllowed && "opacity-50 cursor-not-allowed"
+                          )}
+                        >
+                          <div className={cn(
+                            "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all",
+                            segmentsEnabled && segmentsAllowed ? "left-5" : "left-0.5"
+                          )} />
+                        </button>
+                      </div>
+
+                      {!segmentsAllowed && (
+                        <p className="text-[9px] text-amber-600 font-medium">segments only on yt-dlp</p>
+                      )}
+
+                      {segmentsEnabled && segmentsAllowed && (
+                        <div className="space-y-3">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                setSegmentMode('auto');
+                                updateSelectedSegments(detectedSegments);
+                              }}
+                              className={cn(
+                                "flex-1 py-2 rounded-lg text-[10px] font-bold",
+                                segmentMode === 'auto' ? "bg-tf-emerald/10 text-tf-emerald" : "bg-tf-gray text-tf-slate-muted"
+                              )}
+                            >
+                              Auto
+                            </button>
+                            <button
+                              onClick={() => {
+                                setSegmentMode('manual');
+                                updateSelectedSegments(manualSegments);
+                              }}
+                              className={cn(
+                                "flex-1 py-2 rounded-lg text-[10px] font-bold",
+                                segmentMode === 'manual' ? "bg-tf-emerald/10 text-tf-emerald" : "bg-tf-gray text-tf-slate-muted"
+                              )}
+                            >
+                              Manual
+                            </button>
+                          </div>
+
+                          {segmentMode === 'auto' ? (
+                            <div className="space-y-2">
+                              <button
+                                onClick={handleDetectSegments}
+                                className="w-full py-2 rounded-lg text-[10px] font-bold bg-tf-gray/60 text-tf-slate hover:bg-tf-gray"
+                              >
+                                Detect from description
+                              </button>
+
+                              {detectedSegments.length > 0 ? (
+                                <div className="max-h-28 overflow-y-auto space-y-1">
+                                  {detectedSegments.map((segment, index) => (
+                                    <label key={`auto-${index}`} className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-tf-gray/40 cursor-pointer">
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedSegmentIndexes.includes(index)}
+                                        onChange={() => toggleSegmentIndex(index)}
+                                        className="w-3 h-3 rounded border-tf-border text-tf-emerald focus:ring-tf-emerald/20"
+                                      />
+                                      <span className="text-[10px] font-medium text-tf-slate truncate">{formatSegmentLabel(segment)}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-[9px] text-tf-slate-muted">No timestamps detected yet.</p>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <textarea
+                                value={segmentInput}
+                                onChange={(e) => handleManualSegmentsChange(e.target.value)}
+                                placeholder="3:24-5:47 theme\n6:14-8:28 closing"
+                                className="w-full min-h-[72px] p-2 text-[10px] rounded-lg border border-tf-border bg-tf-gray/30 focus:outline-none focus:border-tf-emerald"
+                              />
+
+                              {manualSegments.length > 0 ? (
+                                <div className="max-h-28 overflow-y-auto space-y-1">
+                                  {manualSegments.map((segment, index) => (
+                                    <label key={`manual-${index}`} className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-tf-gray/40 cursor-pointer">
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedSegmentIndexes.includes(index)}
+                                        onChange={() => toggleSegmentIndex(index)}
+                                        className="w-3 h-3 rounded border-tf-border text-tf-emerald focus:ring-tf-emerald/20"
+                                      />
+                                      <span className="text-[10px] font-medium text-tf-slate truncate">{formatSegmentLabel(segment)}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-[9px] text-tf-slate-muted">Paste ranges like 0:00-2:22 Title.</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <div className="relative">
+
                     <button
                       onClick={() => setShowPlaylistDropdown(!showPlaylistDropdown)}
                       className="w-full flex items-center justify-between p-3 rounded-2xl border border-tf-border bg-white hover:border-tf-emerald transition-all"

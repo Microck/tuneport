@@ -6,6 +6,7 @@ A lightweight, self-hosted API wrapper for `yt-dlp` designed for the TunePort ex
 
 -   **Authenticated**: Secure access via Bearer token.
 -   **Auto-cleanup**: Automatically deletes downloaded files after a configurable TTL (default 15 mins).
+-   **Segment downloads**: Optional `segments` payload to cut by timestamps.
 -   **Dockerized**: Easy to deploy with Docker Compose.
 -   **Bot Bypass**: Includes `deno` and cookie support for bypassing YouTube's bot detection.
 
@@ -53,6 +54,22 @@ A lightweight, self-hosted API wrapper for `yt-dlp` designed for the TunePort ex
 2.  Set **Download Provider** to `yt-dlp`.
 3.  Set **Instance URL** to your server URL (e.g., `http://localhost:3001` or your public HTTPS URL).
 4.  Set **API Token** to the token you defined in `docker-compose.yml`.
+
+## segments payload
+
+pass an optional `segments` array to `/download` to cut by timestamps.
+
+```json
+{
+  "url": "https://www.youtube.com/watch?v=...",
+  "format": "mp3",
+  "segments": [
+    { "start": 0, "end": 142, "title": "intro" },
+    { "start": 142, "end": 317, "title": "track two" },
+    { "start": 317, "end": null, "title": "outro" }
+  ]
+}
+```
 
 ## Environment Variables
 

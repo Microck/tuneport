@@ -52,6 +52,7 @@ global.chrome = {
     },
     getURL: jest.fn((path) => `chrome-extension://test/${path}`)
   },
+
   notifications: {
     create: jest.fn()
   },
@@ -147,7 +148,7 @@ describe('BackgroundService', () => {
       const result = (BackgroundService as any).findBestMatch([], 'Test', 'Artist', 180);
       expect(result).toBeNull();
     });
-
+ 
     test('should return best matching track', () => {
       const tracks = [
         { name: 'Wrong Song', artists: [{ name: 'Wrong Artist' }], duration_ms: 180000 },
@@ -159,4 +160,6 @@ describe('BackgroundService', () => {
       expect(result.name).toBe('Test Song');
     });
   });
+
 });
+

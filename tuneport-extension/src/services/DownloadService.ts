@@ -2,6 +2,8 @@ import { CobaltService, AudioFormat } from './CobaltService';
 import { YtDlpService } from './YtDlpService';
 import { LucidaService, LucidaOptions } from './LucidaService';
 import { DEFAULT_COBALT_INSTANCE, DEFAULT_YTDLP_INSTANCE, DEFAULT_YTDLP_TOKEN } from '../config/defaults';
+import { Segment } from './SegmentParser';
+
 
 
 export type DownloadSource = 'lucida' | 'cobalt' | 'yt-dlp';
@@ -16,6 +18,8 @@ export interface DownloadResult {
   isLossless: boolean;
   error?: string;
   downloadId?: number;
+  downloadIds?: number[];
+  filenames?: string[];
 }
 
 export interface DownloadOptions {
@@ -26,7 +30,9 @@ export interface DownloadOptions {
   downloadProvider?: 'cobalt' | 'yt-dlp';
   ytDlpInstance?: string;
   ytDlpToken?: string;
+  segments?: Segment[];
 }
+
 
 
 export class DownloadService {
@@ -155,6 +161,23 @@ export class DownloadService {
       console.warn('[DownloadService] Failed to load download settings:', error);
     }
 
+    const normalizedSegments = this.normalizeSegments(options.segments);
+    const effectiveYtDlpToken = ytDlpToken || (ytDlpInstance === DEFAULT_YTDLP_INSTANCE ? DEFAULT_YTDLP_TOKEN : undefined);
+
+    if (normalizedSegments.length > 0) {
+      return await this.downloadSegments(
+        youtubeUrl,
+        title,
+        artist,
+        normalizedSegments,
+        {
+          format: (options.format || 'best') as AudioFormat,
+          ytDlpInstance,
+          ytDlpToken: effectiveYtDlpToken
+        }
+      );
+    }
+
     if (downloadProvider === 'cobalt') {
       await CobaltService.ensureAuthenticated();
     }
@@ -225,6 +248,139 @@ export class DownloadService {
     }
   }
 
+
+  private static normalizeSegments(segments?: Segment[]): Segment[] {
+    if (!segments) return [];
+
+    return segments
+      .filter((segment) => typeof segment.start === 'number' && !Number.isNaN(segment.start))
+      .map((segment) => {
+        const normalizedEnd = typeof segment.end === 'number' && !Number.isNaN(segment.end)
+          ? Math.max(0, Math.floor(segment.end))
+          : undefined;
+        return {
+          start: Math.max(0, Math.floor(segment.start)),
+          end: normalizedEnd,
+          title: segment.title?.trim() || undefined
+        };
+      })
+      .filter((segment) => segment.end === undefined || segment.end > segment.start);
+  }
+
+  private static formatTimestamp(seconds: number): string {
+    const totalSeconds = Math.max(0, Math.floor(seconds));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const remainingSeconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+
+  private static formatSegmentRange(segment: Segment): string | undefined {
+    if (segment.end === undefined) {
+      return this.formatTimestamp(segment.start);
+    }
+
+    return `${this.formatTimestamp(segment.start)}-${this.formatTimestamp(segment.end)}`;
+  }
+
+  private static generateSegmentFilename(
+    title: string,
+    artist: string,
+    segment: Segment,
+    quality: string
+  ): string {
+    const rangeLabel = this.formatSegmentRange(segment);
+    const baseTitle = segment.title || (rangeLabel ? `${title} (${rangeLabel})` : title);
+    const ext = quality.toLowerCase().includes('flac') ? 'flac' : 
+                quality.toLowerCase().includes('opus') ? 'opus' : 'mp3';
+
+    if (artist) {
+      return `${artist} - ${baseTitle}.${ext}`;
+    }
+    return `${baseTitle}.${ext}`;
+  }
+
+  private static async downloadSegments(
+    youtubeUrl: string,
+    title: string,
+    artist: string,
+    segments: Segment[],
+    options: {
+      format: AudioFormat;
+      ytDlpInstance: string;
+      ytDlpToken?: string;
+    }
+  ): Promise<DownloadResult> {
+    const downloadIds: number[] = [];
+    const filenames: string[] = [];
+    let lastQuality = CobaltService.getQualityLabel(options.format);
+
+    for (const segment of segments) {
+      const ytDlpResult = await YtDlpService.getDownloadUrl(youtubeUrl, {
+        format: options.format,
+        instance: options.ytDlpInstance,
+        token: options.ytDlpToken,
+        segments: [segment]
+      });
+
+      if (!ytDlpResult.success || !ytDlpResult.url) {
+        return {
+          success: false,
+          source: 'yt-dlp',
+          quality: ytDlpResult.quality || lastQuality,
+          isLossless: false,
+          error: ytDlpResult.error || 'Download failed',
+          downloadIds: downloadIds.length > 0 ? downloadIds : undefined,
+          filenames: filenames.length > 0 ? filenames : undefined
+        };
+      }
+
+      lastQuality = ytDlpResult.quality || lastQuality;
+
+      const filename = this.generateSegmentFilename(title, artist, segment, lastQuality);
+      const sanitizedFilename = this.sanitizeFilename(filename);
+      const fullPath = `TunePort/${sanitizedFilename}`;
+
+      const downloadId = await chrome.downloads.download({
+        url: ytDlpResult.url,
+        filename: fullPath,
+        saveAs: false
+      });
+
+      if (downloadId === undefined) {
+        const lastError = chrome.runtime.lastError;
+        return {
+          success: false,
+          source: 'yt-dlp',
+          quality: lastQuality,
+          isLossless: false,
+          error: lastError?.message || 'Failed to start download - no download ID returned',
+          downloadIds: downloadIds.length > 0 ? downloadIds : undefined,
+          filenames: filenames.length > 0 ? filenames : undefined
+        };
+      }
+
+      this.monitorDownload(downloadId);
+      downloadIds.push(downloadId);
+      filenames.push(sanitizedFilename);
+    }
+
+    return {
+      success: true,
+      source: 'yt-dlp',
+      quality: lastQuality,
+      isLossless: false,
+      downloadIds,
+      filenames,
+      filename: filenames.length === 1 ? filenames[0] : undefined
+    };
+  }
+
   private static monitorDownload(downloadId: number): void {
     const listener = (delta: chrome.downloads.DownloadDelta) => {
       if (delta.id !== downloadId) return;
@@ -258,6 +414,7 @@ export class DownloadService {
       }
     });
   }
+
 
   private static sanitizeFilename(filename: string): string {
     return filename

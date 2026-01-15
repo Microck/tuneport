@@ -5,10 +5,14 @@ import { LucidaService } from '../services/LucidaService';
 import { AudioFormat } from '../services/CobaltService';
 import { YouTubeMetadataService, YouTubeMusicMetadata } from '../services/YouTubeMetadataService';
 import { applyDownloadCompletion, applyDownloadInterruption } from './download-utils';
+import { Segment } from '../services/SegmentParser';
+import { addSegmentsToSpotify, SegmentSummary } from '../services/SegmentSpotify';
+
 
 
 interface DownloadOptions {
   format: string;
+  segments?: Segment[];
 }
 
 interface AddTrackJob {
@@ -28,13 +32,17 @@ interface AddTrackJob {
     quality?: string;
     source?: string;
     filename?: string;
+    fileCount?: number;
   };
+  downloadOptions?: DownloadOptions;
+  segmentSummary?: SegmentSummary;
   error?: string;
   createdAt: string;
   currentStep?: string;
   startedAt?: number;
   fallbackMetadata?: YouTubeMusicMetadata;
 }
+
 
 interface SpotifyPlaylist {
   id: string;
@@ -422,6 +430,7 @@ export class BackgroundService {
       status: 'queued',
       progress: 0,
       downloadInfo: { enabled: enableDownload },
+      downloadOptions,
       createdAt: new Date().toISOString(),
       currentStep: 'Initializing...',
       startedAt: Date.now()
@@ -458,77 +467,114 @@ export class BackgroundService {
       const settings = await this.getSettings();
       const matchThreshold = settings.matchThreshold ?? 0.7;
 
-      const searchResults = await this.searchOnSpotify(metadata.title, metadata.artist, metadata.duration, matchThreshold);
-      job.progress = 50;
+      const segmentCandidates = downloadOptions?.segments || [];
+      let spotifyMatchFound = false;
+      let result = { added: false, duplicate: false };
 
-      let spotifyMatchFound = !!searchResults.exactMatch;
+      if (segmentCandidates.length > 0) {
+        job.currentStep = 'Searching Spotify for segments...';
+        this.activeJobs.set(jobId, { ...job });
 
-      if (!spotifyMatchFound) {
-        // Try YouTube Music fallback
-        const fallbackMode = settings.spotifyFallbackMode || 'auto';
-        
-        if (fallbackMode !== 'never') {
-          const videoId = this.extractVideoId(youtubeUrl);
-          if (videoId) {
-            job.currentStep = 'Trying YouTube Music metadata...';
-            this.activeJobs.set(jobId, { ...job });
-            
-            const musicMetadata = await YouTubeMetadataService.fetchMusicMetadata(videoId);
-            
-            if (musicMetadata) {
-              console.log('[TunePort BG] Found YouTube Music metadata:', musicMetadata);
-              
-              if (fallbackMode === 'ask') {
-                // Set job to awaiting_fallback and wait for user confirmation
-                job.status = 'awaiting_fallback';
-                job.fallbackMetadata = musicMetadata;
-                job.currentStep = 'Waiting for confirmation...';
-                this.activeJobs.set(jobId, { ...job });
-                return job; // Return early, user will confirm/reject via message
-              }
-              
-              // Auto mode - try searching with new metadata
-              job.currentStep = 'Searching Spotify with new metadata...';
+        const segmentResult = await addSegmentsToSpotify({
+          segments: segmentCandidates,
+          fallbackArtist: metadata.artist,
+          matchThreshold,
+          search: this.searchOnSpotify.bind(this),
+          add: (trackUri) => this.addToPlaylist(playlistId, trackUri)
+        });
+
+        job.segmentSummary = segmentResult.summary;
+        if (segmentResult.firstTrackInfo) {
+          job.trackInfo = {
+            title: segmentResult.firstTrackInfo.title,
+            artist: segmentResult.firstTrackInfo.artist,
+            spotifyTrack: segmentResult.firstTrackInfo.spotifyTrack
+          };
+        }
+
+        this.activeJobs.set(jobId, { ...job });
+        job.progress = 50;
+
+        spotifyMatchFound = segmentResult.summary.added > 0 || segmentResult.summary.duplicates > 0;
+        const allDuplicates = segmentResult.summary.added === 0 &&
+          segmentResult.summary.duplicates > 0 &&
+          segmentResult.summary.failed === 0;
+        result = { added: segmentResult.summary.added > 0, duplicate: allDuplicates };
+      } else {
+        const searchResults = await this.searchOnSpotify(metadata.title, metadata.artist, metadata.duration, matchThreshold);
+        job.progress = 50;
+
+        spotifyMatchFound = !!searchResults.exactMatch;
+
+        if (!spotifyMatchFound) {
+          // Try YouTube Music fallback
+          const fallbackMode = settings.spotifyFallbackMode || 'auto';
+          
+          if (fallbackMode !== 'never') {
+            const videoId = this.extractVideoId(youtubeUrl);
+            if (videoId) {
+              job.currentStep = 'Trying YouTube Music metadata...';
               this.activeJobs.set(jobId, { ...job });
               
-              const fallbackResults = await this.searchOnSpotify(
-                musicMetadata.title,
-                musicMetadata.artist,
-                metadata.duration,
-                matchThreshold
-              );
+              const musicMetadata = await YouTubeMetadataService.fetchMusicMetadata(videoId);
               
-              if (fallbackResults.exactMatch) {
-                searchResults.exactMatch = fallbackResults.exactMatch;
-                job.trackInfo = {
-                  title: musicMetadata.title,
-                  artist: musicMetadata.artist,
-                  spotifyTrack: fallbackResults.exactMatch
-                };
-                spotifyMatchFound = true;
+              if (musicMetadata) {
+                console.log('[TunePort BG] Found YouTube Music metadata:', musicMetadata);
+                
+                if (fallbackMode === 'ask') {
+                  // Set job to awaiting_fallback and wait for user confirmation
+                  job.status = 'awaiting_fallback';
+                  job.fallbackMetadata = musicMetadata;
+                  job.currentStep = 'Waiting for confirmation...';
+                  this.activeJobs.set(jobId, { ...job });
+                  return job; // Return early, user will confirm/reject via message
+                }
+                
+                // Auto mode - try searching with new metadata
+                job.currentStep = 'Searching Spotify with new metadata...';
+                this.activeJobs.set(jobId, { ...job });
+                
+                const fallbackResults = await this.searchOnSpotify(
+                  musicMetadata.title,
+                  musicMetadata.artist,
+                  metadata.duration,
+                  matchThreshold
+                );
+                
+                if (fallbackResults.exactMatch) {
+                  searchResults.exactMatch = fallbackResults.exactMatch;
+                  job.trackInfo = {
+                    title: musicMetadata.title,
+                    artist: musicMetadata.artist,
+                    spotifyTrack: fallbackResults.exactMatch
+                  };
+                  spotifyMatchFound = true;
+                }
               }
             }
           }
+
+          if (!spotifyMatchFound && !enableDownload) {
+            throw new Error('Could not find matching track on Spotify');
+          }
         }
 
-        if (!spotifyMatchFound && !enableDownload) {
-          throw new Error('Could not find matching track on Spotify');
+        if (spotifyMatchFound) {
+          job.trackInfo!.spotifyTrack = searchResults.exactMatch;
+          job.status = 'adding';
+          job.progress = 60;
+          job.currentStep = 'Adding to playlist...';
+          this.activeJobs.set(jobId, { ...job });
+
+          result = await this.addToPlaylist(playlistId, searchResults.exactMatch.uri);
+          job.progress = 70;
+        } else {
+          console.log('[TunePort BG] Spotify match failed, proceeding to download logic');
         }
       }
 
-      let result = { added: false, duplicate: false };
-
-      if (spotifyMatchFound) {
-        job.trackInfo!.spotifyTrack = searchResults.exactMatch;
-        job.status = 'adding';
-        job.progress = 60;
-        job.currentStep = 'Adding to playlist...';
-        this.activeJobs.set(jobId, { ...job });
-
-        result = await this.addToPlaylist(playlistId, searchResults.exactMatch.uri);
-        job.progress = 70;
-      } else {
-        console.log('[TunePort BG] Spotify match failed, proceeding to download logic');
+      if (!spotifyMatchFound && !enableDownload) {
+        throw new Error('Could not find matching track on Spotify');
       }
 
       if (enableDownload && downloadOptions) {
@@ -537,23 +583,29 @@ export class BackgroundService {
         this.activeJobs.set(jobId, { ...job });
 
         const format = (downloadOptions.format || 'best') as AudioFormat;
+        const segments = downloadOptions.segments;
         this.log(`[Download] Starting download: ${youtubeUrl}, format: ${format}`);
 
         const downloadResult = await DownloadService.downloadAudio(
           youtubeUrl,
           metadata.title,
           metadata.artist,
-          { format, preferLossless: true }
+          { format, preferLossless: true, segments }
         );
 
         this.log(`[Download] Result: success=${downloadResult.success}, source=${downloadResult.source}, quality=${downloadResult.quality}${downloadResult.error ? ', error=' + downloadResult.error : ''}`);
 
-        if (downloadResult.success && downloadResult.downloadId !== undefined) {
+        const downloadIds = downloadResult.downloadIds
+          ?? (downloadResult.downloadId !== undefined ? [downloadResult.downloadId] : []);
+        const fileCount = downloadIds.length;
+
+        if (downloadResult.success && fileCount > 0) {
           job.downloadInfo = {
             enabled: true,
             quality: downloadResult.quality,
             source: downloadResult.source,
-            filename: downloadResult.filename
+            filename: downloadResult.filename || downloadResult.filenames?.[0],
+            fileCount: fileCount > 1 ? fileCount : undefined
           };
 
           if (!downloadResult.isLossless && LucidaService.isEnabled()) {
@@ -562,7 +614,7 @@ export class BackgroundService {
 
           job.progress = 85;
           this.activeJobs.set(jobId, { ...job });
-          this.monitorDownloadJob(jobId, downloadResult.downloadId, result.duplicate, spotifyMatchFound);
+          this.monitorDownloadJob(jobId, downloadIds, result.duplicate, spotifyMatchFound);
           return job;
         }
 
@@ -587,16 +639,25 @@ export class BackgroundService {
       job.currentStep = undefined;
       this.activeJobs.set(jobId, { ...job });
 
-      if (result.duplicate) {
+      if (job.segmentSummary) {
+        const segmentNotice = this.formatSegmentSummary(job.segmentSummary);
+        this.showNotification(
+          segmentNotice.title,
+          segmentNotice.message,
+          'success'
+        );
+      } else if (result.duplicate) {
         this.showNotification(
           'Already in Playlist',
           `"${metadata.title}" is already in this playlist`,
           'success'
         );
       } else {
-        const downloadMsg = enableDownload && job.downloadInfo?.filename
-          ? ` (Downloaded: ${job.downloadInfo.quality})`
-          : '';
+        const downloadMsg = enableDownload && job.downloadInfo?.fileCount && job.downloadInfo.fileCount > 1
+          ? ` (Downloaded: ${job.downloadInfo.fileCount} files)`
+          : enableDownload && job.downloadInfo?.filename
+            ? ` (Downloaded: ${job.downloadInfo.quality})`
+            : '';
         this.showNotification(
           'Added to Spotify',
           `"${metadata.title}" added to playlist${downloadMsg}`,
@@ -621,7 +682,10 @@ export class BackgroundService {
     return job;
   }
 
-  private monitorDownloadJob(jobId: string, downloadId: number, duplicate: boolean, spotifyMatchFound: boolean) {
+  private monitorDownloadJob(jobId: string, downloadIds: number | number[], duplicate: boolean, spotifyMatchFound: boolean) {
+    const ids = Array.isArray(downloadIds) ? downloadIds : [downloadIds];
+    const pending = new Set(ids);
+
     const finalizeSuccess = () => {
       const job = this.activeJobs.get(jobId);
       if (!job) return;
@@ -639,6 +703,22 @@ export class BackgroundService {
         return;
       }
 
+      const downloadMsg = job.downloadInfo?.fileCount && job.downloadInfo.fileCount > 1
+        ? ` (Downloaded: ${job.downloadInfo.fileCount} files)`
+        : job.downloadInfo?.filename
+          ? ` (Downloaded: ${job.downloadInfo.quality})`
+          : '';
+
+      if (job.segmentSummary) {
+        const segmentNotice = this.formatSegmentSummary(job.segmentSummary);
+        this.showNotification(
+          segmentNotice.title,
+          `${segmentNotice.message}${downloadMsg}`,
+          'success'
+        );
+        return;
+      }
+
       if (!spotifyMatchFound) {
         this.showNotification(
           'Downloaded (Local File)',
@@ -647,10 +727,6 @@ export class BackgroundService {
         );
         return;
       }
-
-      const downloadMsg = job.downloadInfo?.filename
-        ? ` (Downloaded: ${job.downloadInfo.quality})`
-        : '';
 
       this.showNotification(
         'Added to Spotify',
@@ -673,32 +749,26 @@ export class BackgroundService {
     };
 
     const listener = (delta: chrome.downloads.DownloadDelta) => {
-      if (delta.id !== downloadId) return;
+      if (!pending.has(delta.id)) return;
 
       if (delta.state?.current === 'complete') {
+        pending.delete(delta.id);
+        if (pending.size === 0) {
+          chrome.downloads.onChanged.removeListener(listener);
+          finalizeSuccess();
+        }
+      }
+
+      if (delta.state?.current === 'interrupted') {
         chrome.downloads.onChanged.removeListener(listener);
-        finalizeSuccess();
-      } else if (delta.state?.current === 'interrupted') {
-        chrome.downloads.onChanged.removeListener(listener);
-        finalizeFailure(delta.error?.current);
+        const error = delta.error?.current;
+        finalizeFailure(error);
       }
     };
 
     chrome.downloads.onChanged.addListener(listener);
-
-    chrome.downloads.search({ id: downloadId }, (results) => {
-      const item = results?.[0];
-      if (!item) return;
-
-      if (item.state === 'complete') {
-        chrome.downloads.onChanged.removeListener(listener);
-        finalizeSuccess();
-      } else if (item.state === 'interrupted') {
-        chrome.downloads.onChanged.removeListener(listener);
-        finalizeFailure(item.error);
-      }
-    });
   }
+
 
   private async extractYouTubeMetadata(youtubeUrl: string) {
 
@@ -814,6 +884,30 @@ export class BackgroundService {
     
     return { tracks, exactMatch };
   }
+
+  private formatSegmentSummary(summary: SegmentSummary): { title: string; message: string } {
+    if (summary.added > 0) {
+      const skipped = summary.total - summary.added;
+      const skippedText = skipped > 0 ? ` (${skipped} skipped)` : '';
+      return {
+        title: 'Added to Spotify',
+        message: `Added ${summary.added} segment track${summary.added === 1 ? '' : 's'}${skippedText}`
+      };
+    }
+
+    if (summary.duplicates > 0 && summary.failed === 0) {
+      return {
+        title: 'Already in Playlist',
+        message: 'Segment tracks already in this playlist'
+      };
+    }
+
+    return {
+      title: 'Track not found',
+      message: 'No segment tracks matched on Spotify'
+    };
+  }
+
 
   private buildQueryChain(title: string, artist: string): string[] {
     const queries: string[] = [];
@@ -1209,23 +1303,31 @@ export class BackgroundService {
         job.currentStep = 'Downloading audio...';
         this.activeJobs.set(jobId, { ...job });
 
+        const format = (job.downloadOptions?.format || 'best') as AudioFormat;
+        const segments = job.downloadOptions?.segments;
+
         const downloadResult = await DownloadService.downloadAudio(
           job.youtubeUrl,
           job.fallbackMetadata.title,
           job.fallbackMetadata.artist,
-          { format: 'best' as AudioFormat, preferLossless: true }
+          { format, preferLossless: true, segments }
         );
 
-        if (downloadResult.success && downloadResult.downloadId !== undefined) {
+        const downloadIds = downloadResult.downloadIds
+          ?? (downloadResult.downloadId !== undefined ? [downloadResult.downloadId] : []);
+        const fileCount = downloadIds.length;
+
+        if (downloadResult.success && fileCount > 0) {
           job.downloadInfo = {
             enabled: true,
             quality: downloadResult.quality,
             source: downloadResult.source,
-            filename: downloadResult.filename
+            filename: downloadResult.filename || downloadResult.filenames?.[0],
+            fileCount: fileCount > 1 ? fileCount : undefined
           };
           job.progress = 85;
           this.activeJobs.set(jobId, { ...job });
-          this.monitorDownloadJob(jobId, downloadResult.downloadId, result.duplicate, true);
+          this.monitorDownloadJob(jobId, downloadIds, result.duplicate, true);
           sendResponse({ success: true });
           return;
         }

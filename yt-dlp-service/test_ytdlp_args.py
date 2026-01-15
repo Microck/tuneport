@@ -1,0 +1,27 @@
+import unittest
+
+from app import build_ytdlp_args
+
+
+class TestYtDlpArgs(unittest.TestCase):
+    def test_build_args_without_segments(self):
+        args = build_ytdlp_args('https://youtube.com/watch?v=test', 'best', '/data/abc', None)
+        self.assertIn('--output', args)
+        self.assertIn('/data/abc.%(ext)s', args)
+        self.assertNotIn('--download-sections', args)
+
+    def test_build_args_with_segments(self):
+        segments = [
+            {'start': 0, 'end': 10, 'title': 'intro'},
+            {'start': 12, 'end': None, 'title': 'outro'}
+        ]
+        args = build_ytdlp_args('https://youtube.com/watch?v=test', 'mp3', '/data/abc', segments)
+        self.assertIn('--download-sections', args)
+        self.assertIn('*0:00-0:10', args)
+        self.assertIn('*0:12-', args)
+        self.assertIn('--force-keyframes-at-cuts', args)
+        self.assertIn('/data/abc.%(section_start)s-%(section_end)s.%(ext)s', args)
+
+
+if __name__ == '__main__':
+    unittest.main()

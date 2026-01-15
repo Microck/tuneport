@@ -17,12 +17,18 @@ describe('DownloadService.downloadAudio', () => {
         }
       },
       downloads: {
-        download: jest.fn(() => Promise.resolve(1))
+        download: jest.fn(() => Promise.resolve(1)),
+        onChanged: {
+          addListener: jest.fn(),
+          removeListener: jest.fn()
+        },
+        search: jest.fn((_query, callback) => callback([]))
       },
       runtime: {
         lastError: undefined
       }
     } as unknown as typeof chrome;
+
   });
 
   test('defaults to yt-dlp when setting missing', async () => {
@@ -80,4 +86,91 @@ describe('DownloadService.downloadAudio', () => {
       token: 'test-token'
     });
   });
+
+  test('passes segments to yt-dlp when provided', async () => {
+    jest.spyOn(LucidaService, 'isEnabled').mockReturnValue(false);
+    jest.spyOn(CobaltService, 'ensureAuthenticated').mockResolvedValue(true);
+
+    global.chrome.storage.local.get = jest.fn(() => Promise.resolve({
+      tuneport_settings: {
+        downloadProvider: 'yt-dlp',
+        ytDlpInstance: 'https://yt.micr.dev',
+        ytDlpToken: 'test-token'
+      }
+    }));
+
+    const segments = [{ start: 0, end: 10, title: 'intro' }];
+
+    const ytDlpSpy = jest.spyOn(YtDlpService, 'getDownloadUrl').mockResolvedValue({
+      success: false,
+      source: 'yt-dlp',
+      quality: 'Opus ~128k',
+      isLossless: false,
+      error: 'fail'
+    });
+
+    await DownloadService.downloadAudio('https://youtube.com/watch?v=test', 'title', 'artist', {
+      format: 'best',
+      segments
+    });
+
+    expect(ytDlpSpy).toHaveBeenCalledWith('https://youtube.com/watch?v=test', {
+      format: 'best',
+      instance: 'https://yt.micr.dev',
+      token: 'test-token',
+      segments
+    });
+  });
+
+  test('downloads each segment when multiple provided', async () => {
+    jest.spyOn(LucidaService, 'isEnabled').mockReturnValue(false);
+    jest.spyOn(CobaltService, 'ensureAuthenticated').mockResolvedValue(true);
+
+    global.chrome.storage.local.get = jest.fn(() => Promise.resolve({
+      tuneport_settings: {
+        downloadProvider: 'yt-dlp',
+        ytDlpInstance: 'https://yt.micr.dev',
+        ytDlpToken: 'test-token'
+      }
+    }));
+
+    const segments = [
+      { start: 0, end: 10, title: 'intro' },
+      { start: 10, end: 20, title: 'verse' }
+    ];
+
+    const ytDlpSpy = jest.spyOn(YtDlpService, 'getDownloadUrl').mockResolvedValue({
+      success: true,
+      source: 'yt-dlp',
+      quality: 'Opus ~128k',
+      isLossless: false,
+      url: 'https://yt.micr.dev/file/abc',
+      filename: 'file.opus'
+    });
+
+    global.chrome.downloads.download = jest.fn()
+      .mockResolvedValueOnce(10)
+      .mockResolvedValueOnce(11);
+
+    const result = await DownloadService.downloadAudio('https://youtube.com/watch?v=test', 'title', 'artist', {
+      format: 'best',
+      segments
+    });
+
+    expect(ytDlpSpy).toHaveBeenNthCalledWith(1, 'https://youtube.com/watch?v=test', {
+      format: 'best',
+      instance: 'https://yt.micr.dev',
+      token: 'test-token',
+      segments: [segments[0]]
+    });
+    expect(ytDlpSpy).toHaveBeenNthCalledWith(2, 'https://youtube.com/watch?v=test', {
+      format: 'best',
+      instance: 'https://yt.micr.dev',
+      token: 'test-token',
+      segments: [segments[1]]
+    });
+    expect(global.chrome.downloads.download).toHaveBeenCalledTimes(2);
+    expect(result.downloadIds).toEqual([10, 11]);
+  });
 });
+
