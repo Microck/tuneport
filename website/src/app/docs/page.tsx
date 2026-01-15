@@ -9,6 +9,7 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import { MagicCard } from "@/components/ui/magic-card";
 import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import { MatchingFlowDiagram } from "@/components/diagrams/matching-flow";
+import { MatchingWeightsChart } from "@/components/diagrams/matching-weights";
 import WordRotate from "@/components/ui/word-rotate";
 import {
   Table,
@@ -227,38 +228,84 @@ export default function DocsPage() {
             Matching Algorithm
           </h3>
           <p className="text-slate-600 mb-8 max-w-3xl">
-            We use a weighted scoring system based on <strong>Jaro-Winkler similarity</strong> to prevent adding covers or remixes. Matches must score <strong>&ge; 0.7</strong> to be auto-added.
+            We use a smart, weighted scoring system to prevent adding covers or remixes. Matches must score <strong>&ge; 0.7</strong> to be auto-added. (For the technically curious, we utilize Jaro-Winkler similarity for text comparison).
           </p>
 
-          <BentoGrid className="grid-rows-1 md:grid-rows-2 h-[400px]">
-            <BentoCard
-              name="Title Similarity"
-              className="md:col-span-2"
-              Icon={Type}
-              description="50% Weight. Fuzzy matching handles minor typos."
-              href="#"
-              cta="Core Metric"
-              background={<div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-transparent opacity-50" />}
-            />
-            <BentoCard
-              name="Artist Similarity"
-              className="md:col-span-1"
-              Icon={User}
-              description="35% Weight. Mismatches heavily penalize score."
-              href="#"
-              cta="Safety Check"
-              background={<div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-50" />}
-            />
-            <BentoCard
-              name="Duration Match"
-              className="md:col-span-1"
-              Icon={Timer}
-              description="15% Weight. Filters out extended mixes."
-              href="#"
-              cta="Validation"
-              background={<div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-transparent opacity-50" />}
-            />
-          </BentoGrid>
+          <div className="space-y-12">
+            <MatchingWeightsChart />
+
+            <div className="flex flex-col md:flex-row gap-4">
+              <MagicCard className="flex-[5] p-6 border border-slate-200 bg-white" gradientColor="#F1F5F9">
+                <div className="flex items-center gap-3 mb-3 text-indigo-600">
+                  <Type className="h-6 w-6" />
+                  <h4 className="font-bold">Title Similarity</h4>
+                </div>
+                <p className="text-sm text-slate-600">50% Weight. Fuzzy matching handles minor typos and formatting differences.</p>
+              </MagicCard>
+              <MagicCard className="flex-[3.5] p-6 border border-slate-200 bg-white" gradientColor="#F1F5F9">
+                <div className="flex items-center gap-3 mb-3 text-emerald-600">
+                  <User className="h-6 w-6" />
+                  <h4 className="font-bold">Artist Similarity</h4>
+                </div>
+                <p className="text-sm text-slate-600">35% Weight. Ensures it's the original performer, not a cover band.</p>
+              </MagicCard>
+              <MagicCard className="flex-[1.5] p-6 border border-slate-200 bg-white" gradientColor="#F1F5F9">
+                <div className="flex items-center gap-3 mb-3 text-amber-600">
+                  <Timer className="h-6 w-6" />
+                  <h4 className="font-bold">Duration</h4>
+                </div>
+                <p className="text-sm text-slate-600">15% Weight. Filters extended mixes.</p>
+              </MagicCard>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-6">
+                <h4 className="font-bold text-emerald-900 mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                  Example: The Good Match
+                </h4>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between border-b border-emerald-100 pb-2">
+                    <span className="text-slate-500">Input</span>
+                    <span className="font-medium text-slate-900">Michael Jackson - Billie Jean</span>
+                  </div>
+                  <div className="flex justify-between border-b border-emerald-100 pb-2">
+                    <span className="text-slate-500">Match</span>
+                    <span className="font-medium text-slate-900">Billie Jean (Remastered 2015)</span>
+                  </div>
+                  <div className="pt-2 font-mono text-xs">
+                    <div className="flex justify-between text-emerald-700"><span>Title Score</span><span>0.95 (Fuzzy)</span></div>
+                    <div className="flex justify-between text-emerald-700"><span>Artist Score</span><span>1.00 (Exact)</span></div>
+                    <div className="flex justify-between text-emerald-700"><span>Duration</span><span>0.98</span></div>
+                    <div className="flex justify-between font-bold text-emerald-900 mt-2 border-t border-emerald-200 pt-2"><span>FINAL SCORE</span><span>0.97 (Pass)</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-rose-200 bg-rose-50/50 p-6">
+                <h4 className="font-bold text-rose-900 mb-4 flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-rose-600" />
+                  Example: The Cover Song
+                </h4>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between border-b border-rose-100 pb-2">
+                    <span className="text-slate-500">Input</span>
+                    <span className="font-medium text-slate-900">The Beatles - Yesterday</span>
+                  </div>
+                  <div className="flex justify-between border-b border-rose-100 pb-2">
+                    <span className="text-slate-500">Match</span>
+                    <span className="font-medium text-slate-900">Boyz II Men - Yesterday</span>
+                  </div>
+                  <div className="pt-2 font-mono text-xs">
+                    <div className="flex justify-between text-emerald-700"><span>Title Score</span><span>1.00 (Exact)</span></div>
+                    <div className="flex justify-between text-rose-600 font-bold"><span>Artist Score</span><span>0.10 (Mismatch)</span></div>
+                    <div className="flex justify-between text-emerald-700"><span>Duration</span><span>0.90</span></div>
+                    <div className="flex justify-between font-bold text-rose-900 mt-2 border-t border-rose-200 pt-2"><span>FINAL SCORE</span><span>0.58 (Fail)</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="mb-24">
