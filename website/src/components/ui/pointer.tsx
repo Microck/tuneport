@@ -45,12 +45,14 @@ export function Pointer({
         }
 
         const handleMouseEnter = (e: MouseEvent) => {
+          document.body.setAttribute("data-pointer-active", "true")
           x.set(e.clientX)
           y.set(e.clientY)
           setIsActive(true)
         }
 
         const handleMouseLeave = () => {
+          document.body.removeAttribute("data-pointer-active")
           setIsActive(false)
         }
 
@@ -59,6 +61,7 @@ export function Pointer({
         parentElement.addEventListener("mouseleave", handleMouseLeave)
 
         return () => {
+          document.body.removeAttribute("data-pointer-active")
           parentElement.style.cursor = ""
           parentElement.removeEventListener("mousemove", handleMouseMove)
           parentElement.removeEventListener("mouseenter", handleMouseEnter)

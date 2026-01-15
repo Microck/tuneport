@@ -1,5 +1,41 @@
 # changelog
 
+## v3.0.8
+
+**release date:** 2026-01-14
+
+advanced configuration for matching logic.
+
+### changes
+
+- **configurable matching**: added a slider in advanced settings to adjust the matching confidence threshold (0.5 - 1.0). useful for fine-tuning false positives vs. missing matches. default is 0.7.
+
+---
+
+## v3.0.7
+
+**release date:** 2026-01-14
+
+stricter matching to prevent false positives.
+
+### changes
+
+- **matching algorithm**: increased confidence threshold for auto-adding tracks (0.5 -> 0.7). this prevents adding incorrect covers or remixes when the artist doesn't match.
+
+---
+
+## v3.0.6
+
+**release date:** 2026-01-14
+
+documentation link fixes.
+
+### changes
+
+- **docs**: updated self-hosting guide link to point to the correct domain (`tuneport.micr.dev`).
+
+---
+
 ## v3.0.5
 
 **release date:** 2026-01-14

@@ -210,12 +210,12 @@ export default function DocsPage() {
               <div className="font-sans text-sm space-y-4">
                 <div>
                   <div className="text-slate-500 mb-1 text-xs uppercase tracking-wider font-semibold">Input</div>
-                  <div className="font-sans text-base font-medium text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">"The Weeknd - Blinding Lights (Official Audio) [HD]"</div>
+                  <div className="font-sans text-base font-medium text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">"Daft Punk - One More Time (Official Video)"</div>
                 </div>
                 <div className="h-px bg-slate-100" />
                 <div>
                   <div className="text-slate-500 mb-1 text-xs uppercase tracking-wider font-semibold">Sanitized</div>
-                  <div className="font-sans text-base font-medium text-emerald-700 bg-emerald-50 p-3 rounded-lg border border-emerald-100">"The Weeknd - Blinding Lights"</div>
+                  <div className="font-sans text-base font-medium text-emerald-700 bg-emerald-50 p-3 rounded-lg border border-emerald-100">"Daft Punk - One More Time"</div>
                 </div>
               </div>
             </MagicCard>
@@ -290,11 +290,11 @@ export default function DocsPage() {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between border-b border-rose-100 pb-2">
                     <span className="text-slate-500">Input</span>
-                    <span className="font-medium text-slate-900">Aphex Twin - Avril 14th</span>
+                    <span className="font-medium text-slate-900">Alstroemeria Records - Bad Apple!!</span>
                   </div>
                   <div className="flex justify-between border-b border-rose-100 pb-2">
                     <span className="text-slate-500">Match</span>
-                    <span className="font-medium text-slate-900">Scary Pockets - Avril 14th (Funk Cover)</span>
+                    <span className="font-medium text-slate-900">RichaadEB - Bad Apple!! (Metal Cover)</span>
                   </div>
                   <div className="pt-2 text-xs">
                     <div className="flex justify-between text-emerald-700"><span>Title Score</span><span>0.85 (Partial)</span></div>

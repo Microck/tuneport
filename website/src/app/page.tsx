@@ -24,8 +24,8 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <VelocitySection />
       <Features />
+      <VelocitySection />
       <Flow />
     </>
   );

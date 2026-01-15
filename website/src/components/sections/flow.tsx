@@ -57,7 +57,7 @@ export function Flow() {
           </Highlighter>{" "}
           Integration
         </h2>
-        <p className="max-w-[85%] leading-normal text-slate-500 sm:text-lg sm:leading-7" data-animate="text" data-animate-variant="fade">
+        <p className="w-full text-slate-500 sm:text-lg sm:leading-7" data-animate="text" data-animate-variant="fade">
           How TunePort bridges your{" "}
           <WordRotate
             words={["streaming services", "music library", "playlists"]}
