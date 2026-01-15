@@ -59,20 +59,20 @@ export function Flow() {
           </Highlighter>{" "}
           Integration
         </h2>
-        <motion.p 
+        <motion.div 
           layout
-          className="w-full text-slate-500 sm:text-lg sm:leading-7" 
+          className="flex flex-wrap justify-center items-center gap-x-1.5 w-full text-slate-500 sm:text-lg sm:leading-7" 
           data-animate="text" 
           data-animate-variant="fade"
           transition={{ duration: 0.25, ease: "easeOut" }}
         >
-          How TunePort bridges your{" "}
+          <motion.span layout>How TunePort bridges your</motion.span>
           <WordRotate
             words={["streaming services", "music library", "playlists"]}
             className="inline-block font-medium text-slate-700"
-          />{" "}
-          with a single click.
-        </motion.p>
+          />
+          <motion.span layout>with a single click.</motion.span>
+        </motion.div>
       </div>
 
       <div
