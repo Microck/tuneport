@@ -34,7 +34,11 @@ export default function WordRotate({
   }, [words, duration]);
 
   return (
-    <span className="overflow-hidden inline-flex">
+    <motion.span
+      className="overflow-hidden inline-flex"
+      layout
+      transition={{ duration: 0.25, ease: "easeOut" }}
+    >
       <AnimatePresence mode="wait">
         <motion.span
           key={words[index]}
@@ -44,6 +48,6 @@ export default function WordRotate({
           {words[index]}
         </motion.span>
       </AnimatePresence>
-    </span>
+    </motion.span>
   );
 }
