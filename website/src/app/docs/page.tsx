@@ -157,6 +157,18 @@ export default function DocsPage() {
                       <TableCell className="text-right"><span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">Legacy</span></TableCell>
                     </TableRow>
                     <TableRow>
+                      <TableCell className="font-medium">141</TableCell>
+                      <TableCell>AAC (.m4a)</TableCell>
+                      <TableCell>256 kbps</TableCell>
+                      <TableCell className="text-right"><span className="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-700">Premium</span></TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">380</TableCell>
+                      <TableCell>EC-3 (.m4a)</TableCell>
+                      <TableCell>384 kbps</TableCell>
+                      <TableCell className="text-right"><span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700">5.1</span></TableCell>
+                    </TableRow>
+                    <TableRow>
                       <TableCell className="font-medium">250</TableCell>
                       <TableCell>Opus (.webm)</TableCell>
                       <TableCell>60-80 kbps</TableCell>
@@ -173,7 +185,7 @@ export default function DocsPage() {
 
         <div className="mb-24">
           <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl mb-12 text-center">
-            TunePort Architecture
+            How It Works
           </h2>
           <div className="my-12">
             <MatchingFlowDiagram />
@@ -197,12 +209,12 @@ export default function DocsPage() {
               <div className="font-sans text-sm space-y-4">
                 <div>
                   <div className="text-slate-500 mb-1 text-xs uppercase tracking-wider font-semibold">Input</div>
-                  <div className="font-mono text-red-600 bg-red-50 p-2 rounded border border-red-100">"The Weeknd - Blinding Lights (Official Audio) [HD]"</div>
+                  <div className="font-sans text-base font-medium text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">"The Weeknd - Blinding Lights (Official Audio) [HD]"</div>
                 </div>
                 <div className="h-px bg-slate-100" />
                 <div>
                   <div className="text-slate-500 mb-1 text-xs uppercase tracking-wider font-semibold">Sanitized</div>
-                  <div className="font-mono text-emerald-600 bg-emerald-50 p-2 rounded border border-emerald-100">"The Weeknd - Blinding Lights"</div>
+                  <div className="font-sans text-base font-medium text-emerald-700 bg-emerald-50 p-3 rounded-lg border border-emerald-100">"The Weeknd - Blinding Lights"</div>
                 </div>
               </div>
             </MagicCard>
@@ -274,18 +286,24 @@ export default function DocsPage() {
                 </div>
               </div>
               
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 font-mono text-xs text-slate-600 leading-relaxed shadow-sm">
-                <div className="flex gap-2 mb-2 border-b border-slate-200 pb-2">
-                  <span className="text-red-400">●</span>
-                  <span className="text-yellow-400">●</span>
-                  <span className="text-green-400">●</span>
+              <MagicCard className="w-full overflow-hidden rounded-xl border border-slate-200 shadow-sm bg-white" gradientColor="#F1F5F9">
+                <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50/50 px-4 py-2.5">
+                  <div className="h-3 w-3 rounded-full bg-red-400/80" />
+                  <div className="h-3 w-3 rounded-full bg-amber-400/80" />
+                  <div className="h-3 w-3 rounded-full bg-emerald-400/80" />
+                  <div className="ml-2 text-[10px] font-medium text-slate-400 font-sans">bash</div>
                 </div>
-                <span className="text-emerald-600">$</span> yt-dlp \<br/>
-                &nbsp;&nbsp;<span className="text-indigo-600">--extract-audio</span> \<br/>
-                &nbsp;&nbsp;<span className="text-indigo-600">--audio-format</span> best \<br/>
-                &nbsp;&nbsp;<span className="text-amber-600">--add-metadata</span> \<br/>
-                &nbsp;&nbsp;<span className="text-amber-600">--embed-thumbnail</span>
-              </div>
+                <div className="p-5 font-mono text-xs leading-relaxed text-slate-600">
+                  <span className="select-none text-emerald-600 mr-2">$</span>
+                  yt-dlp \<br/>
+                  <div className="pl-4 space-y-1 mt-1">
+                    <div><span className="text-indigo-600">--extract-audio</span> \</div>
+                    <div><span className="text-indigo-600">--audio-format</span> best \</div>
+                    <div><span className="text-amber-600">--add-metadata</span> \</div>
+                    <div><span className="text-amber-600">--embed-thumbnail</span></div>
+                  </div>
+                </div>
+              </MagicCard>
             </div>
           </div>
         </div>
