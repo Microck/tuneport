@@ -2,7 +2,7 @@
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuWVF76czLSte06p4n6f9liTcouZNmGsz/Qld4a9bynRqToO7IAs8X1CLv2N9EdsU77ApL+ZRtvRrtzRtNMVMpkzNVw5LLv6RCbsGWSF2Au5rKM9GpyrxpVZ0bqt/eWcBwEBV7qkXjb/AhXmd2cmLuF5WYl8OB0U+LHcvIRlcijZg20ce+Trzt/B6KDwYEiiSi89oP4wVusKVEyF8ylWA5PMPiZ5MFo0ByCF4c+/TAikM2jRKPhQn86IJsq5rHdDizNICAfP/sNqsKIo7yw3G7YZf9rGwX3J+NEkGhg3bjOE+bC96ol7UYcKDfWYYCEGsVNLv6tpxKgXAUzsQ6iXseQIDAQAB",
   "manifest_version": 3,
   "name": "TunePort - YouTube to Spotify",
-  "version": "3.0.8",
+  "version": "3.0.9",
   "description": "Sync YouTube videos to Spotify and download lossless audio.",
   "permissions": [
     "contextMenus",
