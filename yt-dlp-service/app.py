@@ -180,7 +180,7 @@ def build_ytdlp_args(url: str, fmt: str, output_prefix: str, segments: Optional[
     args.extend(['--output', output_template])
 
     if fmt == 'best':
-        args.extend(['-f', 'bestaudio', '--extract-audio', '--audio-format', 'opus', '--audio-quality', '0'])
+        args.extend(['-f', 'bestaudio[ext=m4a]/bestaudio[ext=mp4]/bestaudio'])
     else:
         args.extend(['-f', 'bestaudio', '--extract-audio', '--audio-format', fmt, '--audio-quality', '0'])
 
