@@ -9,6 +9,9 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import { ShineBorder } from "@/components/ui/shine-border";
 import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import { MatchingFlowDiagram } from "@/components/diagrams/matching-flow";
+import { Meteors } from "@/components/ui/meteors";
+import WordRotate from "@/components/ui/word-rotate";
+import RetroGrid from "@/components/ui/retro-grid";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -30,18 +33,9 @@ export const metadata: Metadata = {
 export default function DocsPage() {
   return (
     <div className="relative bg-white pb-24 pt-24 overflow-hidden">
-      <AnimatedGridPattern
-        numSquares={30}
-        maxOpacity={0.1}
-        duration={3}
-        repeatDelay={1}
-        className={cn(
-          "[mask-image:radial-gradient(500px_circle_at_center,white,transparent)]",
-          "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12",
-        )}
-      />
+      <RetroGrid className="light" />
 
-      <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="mb-12">
           <Link href="/">
             <Button variant="ghost" className="gap-2 pl-0 text-slate-600 hover:bg-transparent hover:text-rose-600" data-animate="button">
@@ -51,14 +45,17 @@ export default function DocsPage() {
           </Link>
         </div>
 
-        <div className="relative mb-16 text-center">
+        <div className="relative mb-20 text-center">
           <div className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800 backdrop-blur-md mb-6" data-animate="text" data-animate-variant="slide-down">
             Docs
           </div>
 
-          <TextAnimate animation="blurInUp" by="word" className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-5xl md:text-6xl mb-6">
-            Technical Architecture
-          </TextAnimate>
+          <div className="h-20 sm:h-24 flex items-center justify-center mb-6">
+            <WordRotate
+              className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-5xl md:text-6xl"
+              words={["Technical Architecture", "System Internals", "Deep Dive", "Audio Engineering"]}
+            />
+          </div>
 
           <p className="mx-auto max-w-2xl text-lg text-slate-600 leading-relaxed" data-animate="text" data-animate-variant="fade">
             Deep dive into YouTube's audio infrastructure, generation loss, and TunePort's internal matching logic.
@@ -67,15 +64,14 @@ export default function DocsPage() {
 
         {/* --- Part 1: Audio Quality & Transcoding --- */}
         
-        <div className="relative mb-16 rounded-2xl bg-white/50 p-1 backdrop-blur-sm">
-          <ShineBorder shineColor={["#E11D48", "#10B981"]} className="rounded-2xl" borderWidth={1.5}>
-            <div className="rounded-xl bg-white/80 p-8 shadow-sm">
-              <h3 className="mb-4 text-lg font-semibold text-slate-900" data-animate="text" data-animate-variant="slide-up">Abstract</h3>
-              <p className="text-slate-600 leading-relaxed" data-animate="text" data-animate-variant="fade">
-                User-generated audio on video platforms has become a massive, unplanned music archive. Yet, serious misconceptions persist about the quality of these streams. Commercial converters profit from this confusion, selling &quot;320kbps MP3&quot; tools that cannot mathematically exist given the source material. This research evaluates YouTube&apos;s actual delivery infrastructure, demonstrating that the platform&apos;s standard Opus format provides superior spectral fidelity compared to legacy AAC-LC, and quantifies the degradation introduced by transcoding.
-              </p>
-            </div>
-          </ShineBorder>
+        <div className="relative mb-16 rounded-2xl bg-slate-950 p-1 backdrop-blur-sm overflow-hidden border border-slate-800 shadow-2xl">
+          <Meteors number={30} />
+          <div className="relative z-10 rounded-xl bg-slate-950/80 p-8">
+            <h3 className="mb-4 text-lg font-semibold text-emerald-400" data-animate="text" data-animate-variant="slide-up">Abstract</h3>
+            <p className="text-slate-300 leading-relaxed" data-animate="text" data-animate-variant="fade">
+              User-generated audio on video platforms has become a massive, unplanned music archive. Yet, serious misconceptions persist about the quality of these streams. Commercial converters profit from this confusion, selling &quot;320kbps MP3&quot; tools that cannot mathematically exist given the source material. This research evaluates YouTube&apos;s actual delivery infrastructure, demonstrating that the platform&apos;s standard Opus format provides superior spectral fidelity compared to legacy AAC-LC, and quantifies the degradation introduced by transcoding.
+            </p>
+          </div>
         </div>
 
         <div className="mb-20">
