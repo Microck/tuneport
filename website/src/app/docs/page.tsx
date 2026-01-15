@@ -267,17 +267,17 @@ export default function DocsPage() {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between border-b border-emerald-100 pb-2">
                     <span className="text-slate-500">Input</span>
-                    <span className="font-medium text-slate-900">Michael Jackson - Billie Jean</span>
+                    <span className="font-medium text-slate-900">glass beach - bedroom community</span>
                   </div>
                   <div className="flex justify-between border-b border-emerald-100 pb-2">
                     <span className="text-slate-500">Match</span>
-                    <span className="font-medium text-slate-900">Billie Jean (Remastered 2015)</span>
+                    <span className="font-medium text-slate-900">glass beach - bedroom community</span>
                   </div>
-                  <div className="pt-2 font-mono text-xs">
-                    <div className="flex justify-between text-emerald-700"><span>Title Score</span><span>0.95 (Fuzzy)</span></div>
+                  <div className="pt-2 text-xs">
+                    <div className="flex justify-between text-emerald-700"><span>Title Score</span><span>1.00 (Exact)</span></div>
                     <div className="flex justify-between text-emerald-700"><span>Artist Score</span><span>1.00 (Exact)</span></div>
-                    <div className="flex justify-between text-emerald-700"><span>Duration</span><span>0.98</span></div>
-                    <div className="flex justify-between font-bold text-emerald-900 mt-2 border-t border-emerald-200 pt-2"><span>FINAL SCORE</span><span>0.97 (Pass)</span></div>
+                    <div className="flex justify-between text-emerald-700"><span>Duration</span><span>1.00</span></div>
+                    <div className="flex justify-between font-bold text-emerald-900 mt-2 border-t border-emerald-200 pt-2"><span>FINAL SCORE</span><span>1.00 (Pass)</span></div>
                   </div>
                 </div>
               </div>
@@ -290,17 +290,17 @@ export default function DocsPage() {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between border-b border-rose-100 pb-2">
                     <span className="text-slate-500">Input</span>
-                    <span className="font-medium text-slate-900">The Beatles - Yesterday</span>
+                    <span className="font-medium text-slate-900">Tally Hall - Ruler of Everything</span>
                   </div>
                   <div className="flex justify-between border-b border-rose-100 pb-2">
                     <span className="text-slate-500">Match</span>
-                    <span className="font-medium text-slate-900">Boyz II Men - Yesterday</span>
+                    <span className="font-medium text-slate-900">CoverArtist - Ruler of Everything</span>
                   </div>
-                  <div className="pt-2 font-mono text-xs">
+                  <div className="pt-2 text-xs">
                     <div className="flex justify-between text-emerald-700"><span>Title Score</span><span>1.00 (Exact)</span></div>
-                    <div className="flex justify-between text-rose-600 font-bold"><span>Artist Score</span><span>0.10 (Mismatch)</span></div>
-                    <div className="flex justify-between text-emerald-700"><span>Duration</span><span>0.90</span></div>
-                    <div className="flex justify-between font-bold text-rose-900 mt-2 border-t border-rose-200 pt-2"><span>FINAL SCORE</span><span>0.58 (Fail)</span></div>
+                    <div className="flex justify-between text-rose-600 font-bold"><span>Artist Score</span><span>0.00 (Mismatch)</span></div>
+                    <div className="flex justify-between text-emerald-700"><span>Duration</span><span>0.98</span></div>
+                    <div className="flex justify-between font-bold text-rose-900 mt-2 border-t border-rose-200 pt-2"><span>FINAL SCORE</span><span>0.65 (Fail)</span></div>
                   </div>
                 </div>
               </div>
@@ -334,12 +334,6 @@ export default function DocsPage() {
               </div>
               
               <MagicCard className="w-full overflow-hidden rounded-xl border border-slate-200 shadow-sm bg-white" gradientColor="#F1F5F9">
-                <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50/50 px-4 py-2.5">
-                  <div className="h-3 w-3 rounded-full bg-red-400/80" />
-                  <div className="h-3 w-3 rounded-full bg-amber-400/80" />
-                  <div className="h-3 w-3 rounded-full bg-emerald-400/80" />
-                  <div className="ml-2 text-[10px] font-medium text-slate-400 font-sans">bash</div>
-                </div>
                 <div className="p-5 font-mono text-xs leading-relaxed text-slate-600">
                   <span className="select-none text-emerald-600 mr-2">$</span>
                   yt-dlp \<br/>
