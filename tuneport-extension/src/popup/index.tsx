@@ -573,6 +573,9 @@ export const TunePortPopup: React.FC = () => {
       
       // Trigger Spotify auth
       await SpotifyAuthService.connect(clientId);
+      
+      // Force reload settings to clear onboarding screen
+      loadSettings();
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
     }
