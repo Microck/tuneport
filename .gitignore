@@ -46,3 +46,7 @@ docs/*
 !docs/TEXWORKS_INSTRUCTIONS.md
 .vercel
 .worktrees/
+
+
+# python
+__pycache__/

@@ -373,6 +373,7 @@ interface SettingsState {
   spotifyFallbackMode: 'auto' | 'ask' | 'never';
   enableDebugConsole: boolean;
   matchThreshold: number;
+  downloadMode: 'always' | 'missing_only';
 }
 
 const DEFAULT_SETTINGS: SettingsState = {
@@ -393,7 +394,8 @@ const DEFAULT_SETTINGS: SettingsState = {
   customPresets: [],
   spotifyFallbackMode: 'auto',
   enableDebugConsole: false,
-  matchThreshold: 0.85
+  matchThreshold: 0.85,
+  downloadMode: 'missing_only'
 };
 
 export const TunePortPopup: React.FC = () => {
@@ -737,8 +739,9 @@ export const TunePortPopup: React.FC = () => {
           } : undefined
         }
       });
+      // Always switch to activity tab to show feedback
+      setActiveTab('activity');
       if (response.success) {
-        setActiveTab('activity');
         loadJobs();
       }
     } catch (error) {
@@ -1532,6 +1535,34 @@ export const TunePortPopup: React.FC = () => {
                       <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.enableDownload ? "left-4" : "left-0.5")} />
                     </button>
                   </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-tf-slate">Download Mode</p>
+                      <p className="text-[10px] text-tf-slate-muted">When to download audio</p>
+                    </div>
+                    <div className="flex bg-tf-gray/30 rounded-lg p-0.5">
+                      <button
+                        onClick={() => updateSetting('downloadMode', 'always')}
+                        className={cn(
+                          "px-2 py-1 text-[9px] font-bold rounded-md transition-all",
+                          settings.downloadMode === 'always' ? "bg-white shadow text-tf-slate" : "text-tf-slate-muted hover:text-tf-slate"
+                        )}
+                      >
+                        Always
+                      </button>
+                      <button
+                        onClick={() => updateSetting('downloadMode', 'missing_only')}
+                        className={cn(
+                          "px-2 py-1 text-[9px] font-bold rounded-md transition-all",
+                          settings.downloadMode === 'missing_only' ? "bg-white shadow text-tf-slate" : "text-tf-slate-muted hover:text-tf-slate"
+                        )}
+                      >
+                        Missing
+                      </button>
+                    </div>
+                  </div>
+
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs font-bold text-tf-slate">Quality Warnings</p>

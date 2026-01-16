@@ -585,6 +585,24 @@ export class BackgroundService {
       }
 
       if (enableDownload && downloadOptions) {
+        // Skip download if match found and mode is missing_only
+        const downloadMode = settings.downloadMode || 'missing_only';
+        if (spotifyMatchFound && downloadMode === 'missing_only') {
+          this.log(`[Download] Skipping download because track was found on Spotify (mode: ${downloadMode})`);
+          
+          job.status = 'completed';
+          job.progress = 100;
+          job.currentStep = undefined;
+          this.activeJobs.set(jobId, { ...job });
+
+          this.showNotification(
+            'Added to Spotify',
+            `"${metadata.title}" added to playlist (download skipped)`,
+            'success'
+          );
+          return job;
+        }
+
         job.status = 'downloading';
         job.currentStep = 'Downloading audio...';
         this.activeJobs.set(jobId, { ...job });
