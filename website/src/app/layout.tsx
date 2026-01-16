@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Instrument_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { GsapProvider } from "@/components/gsap-provider";
@@ -7,8 +7,8 @@ import { ScrollProgress } from "@/components/ui/scroll-progress";
 import { SmoothCursor } from "@/components/ui/smooth-cursor";
 import "./globals.css";
 
-const instrumentSans = Instrument_Sans({
-  variable: "--font-instrument-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -57,7 +57,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${instrumentSans.variable} antialiased`}
+        className={`${inter.variable} antialiased font-sans`}
       >
         <GsapProvider>
           <ScrollProgress />
