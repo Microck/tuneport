@@ -8,6 +8,7 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import { Pointer } from "@/components/ui/pointer";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { Button } from "@/components/ui/button";
+import { MorphingText } from "@/components/ui/morphing-text";
 import { TextAnimate } from "@/components/ui/text-animate";
 
 import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
@@ -65,22 +66,12 @@ export function Hero() {
             </AnimatedGradientText>
           </div>
 
-          <h1 className="text-4xl font-bold tracking-tighter text-slate-900 sm:text-6xl md:text-7xl lg:text-8xl text-balance break-keep hyphens-none">
-            <TextAnimate
-              animation="blurInUp"
-              by="text"
-              className="text-inherit hidden sm:block"
-            >
-              Sync. Download. Disappear.
-            </TextAnimate>
-            <TextAnimate
-              animation="blurInUp"
-              by="text"
-              className="text-inherit sm:hidden"
-            >
-              {"Sync. Download.\nDisappear."}
-            </TextAnimate>
-          </h1>
+          <div className="my-8">
+            <MorphingText
+              texts={["Sync.", "Download.", "Disappear."]}
+              className="text-slate-900"
+            />
+          </div>
           
           <TextAnimate
             animation="fadeIn"

@@ -9,6 +9,7 @@ import { Meteors } from "@/components/ui/meteors";
 import { TextAnimate } from "@/components/ui/text-animate";
 import { Highlighter } from "@/components/ui/highlighter";
 import { BentoGrid, BentoCard } from "@/components/ui/bento-grid";
+import { HeroVideoDialog } from "@/components/ui/hero-video-dialog";
 import { ShineBorder } from "@/components/ui/shine-border";
 import { cn } from "@/lib/utils";
 
@@ -137,6 +138,20 @@ export default function TutorialPage() {
                     href="/docs"
                 />
             </BentoGrid>
+        </div>
+
+        <div className="mb-20">
+            <h2 className="mb-6 text-xl font-bold text-slate-900 flex items-center gap-2">
+                <PlayCircle className="h-5 w-5 text-slate-700" />
+                Video Tutorial
+            </h2>
+            <HeroVideoDialog
+                animationStyle="from-center"
+                videoSrc="https://www.youtube.com/embed/dQw4w9WgXcQ" // TODO: Replace with actual tutorial video
+                thumbnailSrc="https://startup-template-sage.vercel.app/hero-light.png" // Placeholder thumbnail
+                thumbnailAlt="TunePort Tutorial Walkthrough"
+                className="w-full rounded-xl border border-slate-200 shadow-sm"
+            />
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 md:p-10">
