@@ -267,6 +267,7 @@ export class BackgroundService {
     defaultPlaylist: string;
     spotifyFallbackMode: 'auto' | 'ask' | 'never';
     matchThreshold: number;
+    downloadMode: 'always' | 'missing_only';
   }> {
     try {
       const result = await chrome.storage.local.get(['tuneport_settings']);
@@ -275,11 +276,19 @@ export class BackgroundService {
         defaultQuality: 'best', 
         defaultPlaylist: '',
         spotifyFallbackMode: 'auto' as const,
-        matchThreshold: 0.7
+        matchThreshold: 0.7,
+        downloadMode: 'missing_only' as const
       };
       return { ...defaults, ...result.tuneport_settings };
     } catch {
-      return { enableDownload: false, defaultQuality: 'best', defaultPlaylist: '', spotifyFallbackMode: 'auto', matchThreshold: 0.7 };
+      return { 
+        enableDownload: false, 
+        defaultQuality: 'best', 
+        defaultPlaylist: '', 
+        spotifyFallbackMode: 'auto', 
+        matchThreshold: 0.7,
+        downloadMode: 'missing_only'
+      };
     }
   }
 
