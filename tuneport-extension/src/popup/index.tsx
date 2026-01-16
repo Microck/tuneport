@@ -72,10 +72,10 @@ const Onboarding: React.FC<{
           </label>
           <div className="flex gap-2">
             <div className="flex-1 bg-white rounded-lg p-3 text-[10px] font-mono text-tf-slate-muted truncate border border-tf-border shadow-sm">
-              {redirectUri}
+              {`https://${chrome.runtime.id}.chromiumapp.org/`}
             </div>
             <button
-              onClick={() => handleCopy(redirectUri)}
+              onClick={() => handleCopy(`https://${chrome.runtime.id}.chromiumapp.org/`)}
               className="p-3 bg-white hover:bg-tf-gray rounded-lg border border-tf-border transition-colors text-tf-emerald shadow-sm"
             >
               <Copy className="w-4 h-4" />
