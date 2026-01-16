@@ -1,12 +1,12 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Download, MousePointerClick, ListMusic, ShieldCheck, PlayCircle, Settings, CheckCircle } from "lucide-react";
+import { ArrowLeft, PlayCircle, Settings, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { Meteors } from "@/components/ui/meteors";
 import { TextAnimate } from "@/components/ui/text-animate";
 import { Highlighter } from "@/components/ui/highlighter";
-import { BentoGrid, BentoCard } from "@/components/ui/bento-grid";
+import { SetupSteps } from "@/components/sections/setup-steps";
 import { ShineBorder } from "@/components/ui/shine-border";
 import { cn } from "@/lib/utils";
 
@@ -104,45 +104,7 @@ export default function TutorialPage() {
         </div>
 
         <div className="mb-10">
-             <BentoGrid className="lg:auto-rows-[18rem]">
-                {/* TODO: Update href and description when Chrome Web Store listing is live */}
-                <BentoCard
-                    name="1. Install"
-                    className="col-span-3 lg:col-span-1"
-                    background={<div className="absolute inset-0 bg-gradient-to-br from-rose-50 to-transparent opacity-50" />}
-                    Icon={Download}
-                    description="Install TunePort from GitHub Releases and pin it to your toolbar for instant access."
-                    href="https://github.com/Microck/tuneport/releases"
-                    cta="Install Now"
-                />
-                <BentoCard
-                    name="2. Detect"
-                    className="col-span-3 lg:col-span-1"
-                    background={<div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-50" />}
-                    Icon={MousePointerClick}
-                    description="Right-click any YouTube video and select 'Add to TunePort'. We automatically parse the metadata."
-                    href="https://github.com/Microck/tuneport#quickstart"
-                    cta="See Demo"
-                />
-                <BentoCard
-                    name="3. Match"
-                    className="col-span-3 lg:col-span-1"
-                    background={<div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-50" />}
-                    Icon={ListMusic}
-                    description="Our fuzzy matching algorithm finds the exact track on Spotify, filtering out covers and remixes."
-                    href="/docs"
-                    cta="How it works"
-                />
-                <BentoCard
-                    name="4. Sync & Download"
-                    className="col-span-3"
-                    background={<div className="absolute inset-0 bg-gradient-to-r from-slate-50 to-slate-100 opacity-50" />}
-                    Icon={ShieldCheck}
-                    description="One click adds the track to your chosen Spotify playlist AND downloads the high-quality Opus file to your local drive. Best of both worlds."
-                    href="https://github.com/Microck/tuneport/releases"
-                    cta="Start Syncing"
-                />
-            </BentoGrid>
+             <SetupSteps />
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 md:p-10">

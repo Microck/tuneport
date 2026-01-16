@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Features } from "@/components/sections/features";
 import { Flow } from "@/components/sections/flow";
 import { Hero } from "@/components/sections/hero";
-import { SetupGuide } from "@/components/sections/setup-guide";
 import { VelocitySection } from "@/components/sections/velocity-section";
 
 export const metadata: Metadata = {
@@ -26,7 +25,6 @@ export default function Home() {
     <>
       <Hero />
       <Features />
-      <SetupGuide />
       <VelocitySection />
       <Flow />
     </>
