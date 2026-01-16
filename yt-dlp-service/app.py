@@ -179,8 +179,10 @@ def build_ytdlp_args(url: str, fmt: str, output_prefix: str, segments: Optional[
 
     args.extend(['--output', output_template])
 
-    if fmt == 'best':
-        args.extend(['-f', '251/140/bestaudio', '--extract-audio', '--audio-format', 'opus', '--audio-quality', '0'])
+    if fmt == 'best' or fmt == 'opus':
+        args.extend(['-f', '251/bestaudio', '--extract-audio', '--audio-format', 'opus', '--audio-quality', '0'])
+    elif fmt == 'm4a':
+        args.extend(['-f', '140/bestaudio', '--extract-audio', '--audio-format', 'm4a', '--audio-quality', '0'])
     else:
         args.extend(['-f', 'bestaudio', '--extract-audio', '--audio-format', fmt, '--audio-quality', '0'])
 
@@ -326,7 +328,7 @@ async def download(request: DownloadRequest, authorization: Optional[str] = Head
     # Cleanup is now handled by background loop
 
     fmt = request.format.lower()
-    if fmt not in {'best', 'mp3', 'ogg', 'wav'}:
+    if fmt not in {'best', 'opus', 'm4a', 'mp3', 'ogg', 'wav'}:
         raise HTTPException(status_code=400, detail='Unsupported format')
 
     download_id = uuid.uuid4().hex
