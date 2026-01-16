@@ -1,5 +1,16 @@
 # changelog
 
+## v4.1.0
+
+**release date:** 2026-01-16
+
+major architecture change: bring your own key (byok).
+
+### changes
+
+- **byok architecture**: removed embedded api keys. users must now provide their own spotify client id.
+- **security**: enhanced security by removing shared credentials from the codebase.
+
 ## v3.0.8
 
 **release date:** 2026-01-14
