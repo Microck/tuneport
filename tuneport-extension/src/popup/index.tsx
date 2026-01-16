@@ -72,10 +72,10 @@ const Onboarding: React.FC<{
           </label>
           <div className="flex gap-2">
             <div className="flex-1 bg-white rounded-lg p-3 text-[10px] font-mono text-tf-slate-muted truncate border border-tf-border shadow-sm">
-              {`https://${chrome.runtime.id}.chromiumapp.org/`}
+              {`chrome-extension://${chrome.runtime.id}/popup/auth-callback.html`}
             </div>
             <button
-              onClick={() => handleCopy(`https://${chrome.runtime.id}.chromiumapp.org/`)}
+              onClick={() => handleCopy(`chrome-extension://${chrome.runtime.id}/popup/auth-callback.html`)}
               className="p-3 bg-white hover:bg-tf-gray rounded-lg border border-tf-border transition-colors text-tf-emerald shadow-sm"
             >
               <Copy className="w-4 h-4" />
