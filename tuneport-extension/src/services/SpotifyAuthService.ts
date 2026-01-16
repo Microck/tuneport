@@ -19,7 +19,7 @@ export class SpotifyAuthService {
   ].join(' ');
 
   private static getRedirectUri(): string {
-    return chrome.runtime.getURL('popup/auth-callback.html');
+    return chrome.identity.getRedirectURL();
   }
 
   static async getAuthUrl(clientId?: string): Promise<string> {
