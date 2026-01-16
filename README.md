@@ -1,10 +1,10 @@
 <p align="center">
   <a href="https://github.com/Microck/tuneport">
-    <img src="https://github.com/user-attachments/assets/9cbf4362-6d00-4347-8bfa-88d779a22faf" alt="logo" width="172">
+    <img src="https://github.com/user-attachments/assets/9cbf4362-6d00-4347-8bfa-88d779a22faf" alt="logo" width="100">
   </a>
 </p>
 
-<p align="center">a browser extension that syncs youtube videos to spotify playlists with zero friction.</p>
+<p align="center">a browser extension that syncs YouTube videos to Spotify playlists with zero friction.</p>
 
 <p align="center">
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-green.svg" /></a>
@@ -13,48 +13,49 @@
 </p>
 
 <p align="center">
-  <img src="./assets/tuneport.gif" width="1000" alt="tuneport preview" />
+  <img src="./assets/tuneport.gif" width="800" alt="tuneport preview" />
 </p>
 
 ---
 
 ## overview
 
-tuneport bridges the gap between youtube's discovery algorithm and spotify's library management. it detects the video you're watching, finds the best match on spotify, and adds it to your chosen playlist with a single click.
+tuneport bridges the gap between YouTube's discovery algorithm and Spotify's library management. it detects the video you're watching, finds the best match on Spotify, and adds it to your chosen playlist with a single click.
 
-unlike other sync tools, tuneport also offers **simultaneous downloads**. it checks lossless sources (qobuz, tidal, deezer) via lucida before falling back to youtube's audio stream, ensuring you always get the highest quality file for your local archive.
+unlike other sync tools, tuneport also offers **simultaneous downloads**. it checks lossless sources (Qobuz, Tidal, Deezer) via Lucida before falling back to YouTube's audio stream, ensuring you always get the highest quality file for your local archive.
+
+---
+
+## installation & setup
+
+1.  **install extension**: download the latest `tuneport-github-v*.zip` from [releases](https://github.com/Microck/tuneport/releases). unzip, go to `chrome://extensions`, enable **developer mode**, and **load unpacked**.
+2.  **create Spotify app**: go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and create a new application.
+3.  **add redirect uri**: find your redirect uri in the extension setup screen (e.g. `https://<id>.chromiumapp.org/`). add this to your Spotify app settings and save.
+4.  **client id**: copy the `client id` from the dashboard and paste it into the extension.
+
+---
 
 ## features
 
 -   **instant sync**: right-click any video -> "add to playlist".
--   **smart matching**: uses jaro-winkler fuzzy matching to handle "official video", "lyrics", and "ft." noise.
--   **youtube music fallback**: when spotify match fails, tries youtube music metadata for better results (auto/ask/never modes).
--   **dual pipeline**: adds to spotify + downloads to disk in parallel.
--   **segment downloads**: auto or manual ranges via yt-dlp. manual supports single-song cuts (merged) or multiple tracks. adds to spotify when titles exist.
--   **lossless first**: prioritizes flac from lucida (qobuz/tidal/deezer); falls back to youtube's native opus stream (~128kbps, perceptually equivalent to mp3 320kbps).
+-   **smart matching**: uses Jaro-Winkler fuzzy matching to handle "official video", "lyrics", and "ft." noise.
+-   **YouTube Music fallback**: when Spotify match fails, tries YouTube Music metadata for better results (auto/ask/never modes).
+-   **dual pipeline**: adds to Spotify + downloads to disk in parallel.
+-   **segment downloads**: auto or manual ranges via yt-dlp. manual supports single-song cuts (merged) or multiple tracks. adds to Spotify when titles exist.
+-   **lossless first**: prioritizes flac from Lucida (Qobuz/Tidal/Deezer); falls back to YouTube's native opus stream (~128kbps, perceptually equivalent to mp3 320kbps).
 -   **custom quality presets**: create up to 5 custom download presets with format descriptions.
 -   **duplicate guard**: checks destination playlist before adding to prevent clutter.
-
--   **spotify local files tutorial**: in-app guide for setting up spotify to scan downloaded files.
 -   **privacy**: runs entirely in the browser. no backend server. no data collection.
 
-## quickstart
+---
 
-### manual installation
-
-1.  download the latest `tuneport-github-v*.zip` from [releases](https://github.com/Microck/tuneport/releases).
-2.  unzip the archive.
-3.  navigate to `chrome://extensions`.
-4.  enable **developer mode** (top right toggle).
-5.  click **load unpacked** and select the unzipped folder.
-
-### configuration
+## configuration
 
 click the extension icon or access settings via the right-click menu.
 
 -   **default playlist**: set a target to skip the selection menu.
--   **download format**: opus (best quality from youtube), mp3, ogg, or wav. note: youtube serves ~128kbps opus which is perceptually equivalent to mp3 320kbps.
--   **lossless sources**: enable "lucida" in advanced settings for true lossless (flac) from qobuz/tidal/deezer.
+-   **download format**: opus (best quality from YouTube), mp3, ogg, or wav. YouTube serves ~128kbps opus which is perceptually equivalent to mp3 320kbps.
+-   **lossless sources**: enable "lucida" in advanced settings for true lossless (flac) from Qobuz/Tidal/Deezer.
 
 ## development
 
@@ -120,11 +121,11 @@ graph TD
 
 ## troubleshooting
 
-**"not authenticated with spotify"**
-click the tuneport icon in the toolbar and hit "connect spotify". the token refreshes automatically.
+**"not authenticated with Spotify"**
+click the tuneport icon in the toolbar and hit "connect Spotify". the token refreshes automatically.
 
 **"download failed"**
-the default download provider is yt-dlp (self-hosted at `https://yt.micr.dev`). if downloads fail, check your internet connection. you can also switch to cobalt in settings if needed.
+the default download provider is yt-dlp (self-hosted at `https://yt.micr.dev`). if downloads fail, check your internet connection. you can also switch to Cobalt in settings if needed.
 
 **"track not found"**
 the matching algorithm requires a clean title format (e.g., "Artist - Title"). heavy remix/mashup titles may fail confidence checks.

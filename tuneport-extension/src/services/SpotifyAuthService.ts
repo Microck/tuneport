@@ -22,20 +22,22 @@ export class SpotifyAuthService {
     return chrome.runtime.getURL('popup/auth-callback.html');
   }
 
-  static async getAuthUrl(): Promise<string> {
+  static async getAuthUrl(clientId?: string): Promise<string> {
     const state = this.generateState();
     const codeVerifier = this.generateCodeVerifier();
     const codeChallenge = await this.generateCodeChallenge(codeVerifier);
     const redirectUri = this.getRedirectUri();
+    const effectiveClientId = clientId || this.SPOTIFY_CLIENT_ID;
 
     await ChromeMessageService.setStorage({ 
       'spotify_auth_state': state,
-      'spotify_code_verifier': codeVerifier
+      'spotify_code_verifier': codeVerifier,
+      'spotify_client_id': effectiveClientId
     });
 
     const params = new URLSearchParams({
       response_type: 'code',
-      client_id: this.SPOTIFY_CLIENT_ID,
+      client_id: effectiveClientId,
       scope: this.SCOPES,
       redirect_uri: redirectUri,
       state: state,
@@ -46,8 +48,8 @@ export class SpotifyAuthService {
     return `https://accounts.spotify.com/authorize?${params.toString().replace(/\+/g, '%20')}`;
   }
 
-  static async connect(): Promise<void> {
-    const authUrl = await this.getAuthUrl();
+  static async connect(clientId?: string): Promise<void> {
+    const authUrl = await this.getAuthUrl(clientId);
     chrome.tabs.create({ url: authUrl });
   }
 

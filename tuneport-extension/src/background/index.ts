@@ -1462,11 +1462,33 @@ export class BackgroundService {
   }
 
   private async getSpotifyToken(): Promise<string | null> {
+    if (this.spotifyToken) return this.spotifyToken;
+
     try {
-      // First check in-memory token
-      if (this.spotifyToken) {
+      const result = await chrome.storage.local.get(['spotify_access_token', 'spotifyToken', 'tuneport_settings']);
+      
+      // Check if user has BYOK credentials
+      const settings = result.tuneport_settings || {};
+      if (settings.spotifyClientId && !result.spotify_access_token) {
+        // If we have a Client ID but no token, we might need to prompt for auth
+        // But here we just return null so the UI prompts
+        return null;
+      }
+
+      if (result.spotify_access_token) {
+        this.spotifyToken = result.spotify_access_token;
+        return this.spotifyToken;
+      } else if (result.spotifyToken) {
+        // Legacy support
+        this.spotifyToken = result.spotifyToken;
         return this.spotifyToken;
       }
+      return null;
+    } catch (error) {
+      console.error('Failed to get Spotify token:', error);
+      return null;
+    }
+  }
       
       const result = await chrome.storage.local.get(['spotify_access_token', 'spotifyToken']);
       if (result.spotify_access_token) {

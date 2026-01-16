@@ -26,7 +26,9 @@ import {
   AlertCircle,
   HelpCircle,
   Trash2,
-  Terminal
+  Terminal,
+  ExternalLink,
+  Copy
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ChromeMessageService } from '../services/ChromeMessageService';
@@ -35,6 +37,108 @@ import { DEFAULT_COBALT_INSTANCE, DEFAULT_YTDLP_INSTANCE } from '../config/defau
 import { parseDescriptionSegments, parseManualMultiSegments, parseManualSingleSegments } from '../services/SegmentParser';
 import type { Segment, SegmentMode } from '../services/SegmentParser';
 
+
+// Onboarding Component
+const Onboarding: React.FC<{
+  settings: SettingsState;
+  onSave: (clientId: string) => void;
+}> = ({ settings, onSave }) => {
+  const [clientId, setClientId] = useState('');
+  const [showGuide, setShowGuide] = useState(false);
+  const redirectUri = chrome.identity.getRedirectURL();
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+
+  return (
+    <div className="flex flex-col h-full bg-tf-background text-white p-6 overflow-y-auto">
+      <div className="flex flex-col items-center mb-8 mt-4">
+        <div className="w-16 h-16 bg-gradient-to-br from-tf-emerald to-tf-emerald-dark rounded-2xl flex items-center justify-center shadow-2xl shadow-tf-emerald/20 mb-4">
+          <Music2 className="w-8 h-8 text-white" />
+        </div>
+        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
+          Welcome to TunePort
+        </h1>
+        <p className="text-tf-slate-muted text-sm mt-2 text-center">
+          Set up your own Spotify App to get started. This ensures higher rate limits and persistent login.
+        </p>
+      </div>
+
+      <div className="space-y-6 flex-1">
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-tf-slate uppercase tracking-wider">
+            1. Copy Redirect URI
+          </label>
+          <div className="flex gap-2">
+            <div className="flex-1 bg-tf-gray/30 rounded-lg p-3 text-xs font-mono text-tf-slate-light truncate border border-tf-border">
+              {redirectUri}
+            </div>
+            <button
+              onClick={() => handleCopy(redirectUri)}
+              className="p-3 bg-tf-gray/50 hover:bg-tf-gray rounded-lg border border-tf-border transition-colors"
+            >
+              <Copy className="w-4 h-4 text-tf-emerald" />
+            </button>
+          </div>
+          <p className="text-[10px] text-tf-slate-muted">
+            You'll need to paste this into your Spotify App settings.
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-tf-slate uppercase tracking-wider">
+            2. Enter Client ID
+          </label>
+          <input
+            type="text"
+            value={clientId}
+            onChange={(e) => setClientId(e.target.value)}
+            placeholder="Paste Client ID here"
+            className="w-full bg-tf-gray/30 rounded-lg p-3 text-sm text-white border border-tf-border focus:border-tf-emerald focus:outline-none transition-colors"
+          />
+        </div>
+
+        <button
+          onClick={() => setShowGuide(!showGuide)}
+          className="w-full flex items-center justify-between p-3 bg-tf-gray/20 rounded-lg text-xs text-tf-slate hover:text-white transition-colors"
+        >
+          <span>Need help getting these keys?</span>
+          {showGuide ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </button>
+
+        <AnimatePresence>
+          {showGuide && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="p-4 bg-tf-gray/20 rounded-lg text-xs text-tf-slate-muted space-y-3 border border-tf-border/50">
+                <p>1. Go to <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noreferrer" className="text-tf-emerald hover:underline">developer.spotify.com/dashboard</a> and log in.</p>
+                <p>2. Click <strong>Create App</strong>. Give it any name (e.g., "My TunePort").</p>
+                <p>3. In settings, find <strong>Redirect URIs</strong> and paste the URI from step 1.</p>
+                <p>4. Check "Web API" and "Web Playback SDK" (optional) and save.</p>
+                <p>5. Click <strong>Settings</strong> again to see your <strong>Client ID</strong>.</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <div className="mt-8">
+        <ShimmerButton
+          onClick={() => onSave(clientId)}
+          disabled={!clientId}
+          className="w-full"
+        >
+          Save & Connect
+        </ShimmerButton>
+      </div>
+    </div>
+  );
+};
 
 const ShimmerButton: React.FC<{
   children: React.ReactNode;
@@ -374,6 +478,8 @@ interface SettingsState {
   enableDebugConsole: boolean;
   matchThreshold: number;
   downloadMode: 'always' | 'missing_only';
+  spotifyClientId?: string;
+  spotifyClientSecret?: string;
 }
 
 const DEFAULT_SETTINGS: SettingsState = {
@@ -395,7 +501,9 @@ const DEFAULT_SETTINGS: SettingsState = {
   spotifyFallbackMode: 'auto',
   enableDebugConsole: false,
   matchThreshold: 0.85,
-  downloadMode: 'missing_only'
+  downloadMode: 'missing_only',
+  spotifyClientId: '',
+  spotifyClientSecret: ''
 };
 
 export const TunePortPopup: React.FC = () => {
@@ -428,6 +536,10 @@ export const TunePortPopup: React.FC = () => {
 
 
   const logoUrl = useMemo(() => chrome.runtime.getURL('assets/logo.png'), []);
+
+  if (!settings.spotifyClientId) {
+    return <Onboarding settings={settings} onSave={(clientId) => updateSetting('spotifyClientId', clientId)} />;
+  }
 
   useEffect(() => {
     checkConnection();
