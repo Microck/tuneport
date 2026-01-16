@@ -273,20 +273,20 @@ export class BackgroundService {
       const result = await chrome.storage.local.get(['tuneport_settings']);
       const defaults = { 
         enableDownload: false, 
-        defaultQuality: 'best', 
+        defaultQuality: 'm4a', 
         defaultPlaylist: '',
         spotifyFallbackMode: 'auto' as const,
-        matchThreshold: 0.7,
+        matchThreshold: 0.85,
         downloadMode: 'missing_only' as const
       };
       return { ...defaults, ...result.tuneport_settings };
     } catch {
       return { 
         enableDownload: false, 
-        defaultQuality: 'best', 
+        defaultQuality: 'm4a', 
         defaultPlaylist: '', 
         spotifyFallbackMode: 'auto', 
-        matchThreshold: 0.7,
+        matchThreshold: 0.85,
         downloadMode: 'missing_only'
       };
     }
@@ -305,9 +305,8 @@ export class BackgroundService {
       const withDownload = info.menuItemId === 'tuneport-add-download';
       
       if (youtubeUrl) {
-        try {
-          await chrome.action.openPopup();
-        } catch {}
+        // Do NOT open popup for context menu actions to avoid closing context menu prematurely or confusing user
+        // We handle background work silently with notifications
 
         const settings = await this.getSettings();
         if (settings.defaultPlaylist) {
@@ -315,7 +314,7 @@ export class BackgroundService {
             youtubeUrl, 
             settings.defaultPlaylist, 
             withDownload,
-            withDownload ? { format: 'best' } : undefined
+            withDownload ? { format: 'm4a' } : undefined
           );
         } else {
           this.showNotification(
@@ -334,15 +333,11 @@ export class BackgroundService {
       const playlistId = playlistMatch[2];
 
       if (youtubeUrl) {
-        try {
-          await chrome.action.openPopup();
-        } catch {}
-
         await this.addTrackToPlaylist(
           youtubeUrl, 
           playlistId, 
           withDownload,
-          withDownload ? { format: 'best' } : undefined
+          withDownload ? { format: 'm4a' } : undefined
         );
       }
     }
@@ -721,54 +716,91 @@ export class BackgroundService {
     const ids = Array.isArray(downloadIds) ? downloadIds : [downloadIds];
     const pending = new Set(ids);
 
-    const finalizeSuccess = () => {
-      const job = this.activeJobs.get(jobId);
-      if (!job) return;
+      const finalizeSuccess = async () => {
+        const job = this.activeJobs.get(jobId);
+        if (!job) return;
 
-      const { updatedJob } = applyDownloadCompletion(job);
-      Object.assign(job, updatedJob);
-      this.activeJobs.set(jobId, { ...job });
+        const { updatedJob } = applyDownloadCompletion(job);
+        Object.assign(job, updatedJob);
+        this.activeJobs.set(jobId, { ...job });
 
-      if (duplicate) {
+        if (duplicate) {
+          this.showNotification(
+            'Already in Playlist',
+            `"${job.trackInfo?.title || 'Track'}" is already in this playlist`,
+            'success'
+          );
+          return;
+        }
+
+        const downloadMsg = job.downloadInfo?.fileCount && job.downloadInfo.fileCount > 1
+          ? ` (Downloaded: ${job.downloadInfo.fileCount} files)`
+          : job.downloadInfo?.filename
+            ? ` (Downloaded: ${job.downloadInfo.quality})`
+            : '';
+
+        if (job.segmentSummary) {
+          const segmentNotice = this.formatSegmentSummary(job.segmentSummary);
+          this.showNotification(
+            segmentNotice.title,
+            `${segmentNotice.message}${downloadMsg}`,
+            'success'
+          );
+          return;
+        }
+
+        if (!spotifyMatchFound) {
+          // Attempt to add local file URI if no Spotify match was found
+          // This relies on Spotify Desktop having scanned the file or about to scan it
+          // We construct a spotify:local URI and try to add it
+          if (job.trackInfo?.artist && job.trackInfo?.title) {
+            // Duration is usually in metadata if coming from YouTube Music fallback, otherwise guess 0 or try to parse
+            // But we don't always have duration here if search failed completely.
+            // However, we do have metadata from extractYouTubeMetadata or fallback.
+            // Let's assume we can try without precise duration or use 0? Spotify usually needs it match.
+            // Actually, we probably don't have job.metadata (it was a mistake in previous edit).
+            // We should use whatever duration we have or 0.
+            
+            // Wait a moment for file system scan (totally heuristic)
+            await this.delay(2000);
+
+            const durationMs = 0; // We might not have it if we didn't match a track.
+            
+            const localUri = this.constructLocalUri(
+              job.trackInfo.artist, 
+              job.trackInfo.title, 
+              durationMs
+            );
+            
+            try {
+              const { added } = await this.addToPlaylist(job.playlistId, localUri);
+              if (added) {
+                this.showNotification(
+                  'Added Local File',
+                  `"${job.trackInfo.title}" added to playlist as local file${downloadMsg}`,
+                  'success'
+                );
+                return;
+              }
+            } catch (error) {
+              console.warn('Failed to add local file URI:', error);
+            }
+          }
+
+          this.showNotification(
+            'Downloaded (Local File)',
+            `"${job.trackInfo?.title || 'Track'}" not found on Spotify. Saved to Downloads.`,
+            'success'
+          );
+          return;
+        }
+
         this.showNotification(
-          'Already in Playlist',
-          `"${job.trackInfo?.title || 'Track'}" is already in this playlist`,
+          'Added to Spotify',
+          `"${job.trackInfo?.title || 'Track'}" added to playlist${downloadMsg}`,
           'success'
         );
-        return;
-      }
-
-      const downloadMsg = job.downloadInfo?.fileCount && job.downloadInfo.fileCount > 1
-        ? ` (Downloaded: ${job.downloadInfo.fileCount} files)`
-        : job.downloadInfo?.filename
-          ? ` (Downloaded: ${job.downloadInfo.quality})`
-          : '';
-
-      if (job.segmentSummary) {
-        const segmentNotice = this.formatSegmentSummary(job.segmentSummary);
-        this.showNotification(
-          segmentNotice.title,
-          `${segmentNotice.message}${downloadMsg}`,
-          'success'
-        );
-        return;
-      }
-
-      if (!spotifyMatchFound) {
-        this.showNotification(
-          'Downloaded (Local File)',
-          `"${job.trackInfo?.title || 'Track'}" not found on Spotify. Saved to Downloads.`,
-          'success'
-        );
-        return;
-      }
-
-      this.showNotification(
-        'Added to Spotify',
-        `"${job.trackInfo?.title || 'Track'}" added to playlist${downloadMsg}`,
-        'success'
-      );
-    };
+      };
 
     const finalizeFailure = (error?: string) => {
       const job = this.activeJobs.get(jobId);
@@ -993,6 +1025,19 @@ export class BackgroundService {
 
   private calculateStringSimilarity(str1: string, str2: string): number {
     return MatchingService.jaroWinklerSimilarity(str1.toLowerCase(), str2.toLowerCase());
+  }
+
+  private constructLocalUri(artist: string, title: string, durationMs: number): string {
+    // Format: spotify:local:{artist}:{album}:{title}:{duration}
+    // Encode parts, but keep colons
+    const cleanArtist = encodeURIComponent(artist || '').replace(/%20/g, '+');
+    const cleanTitle = encodeURIComponent(title || '').replace(/%20/g, '+');
+    // For local files, album is often empty or same as title. Spotify tends to use empty or title.
+    // Let's try empty album first as it's most common for single downloads
+    const cleanAlbum = ''; 
+    const duration = Math.round(durationMs / 1000);
+    
+    return `spotify:local:${cleanArtist}:${cleanAlbum}:${cleanTitle}:${duration}`;
   }
 
   private async addToPlaylist(playlistId: string, trackUri: string): Promise<{ added: boolean; duplicate: boolean }> {

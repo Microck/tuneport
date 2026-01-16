@@ -1,6 +1,6 @@
 {
   "name": "tuneport",
-  "version": "4.0.5",
+  "version": "4.0.6",
   "description": "Add YouTube videos to Spotify playlists and download high-quality audio",
   "main": "index.js",
   "scripts": {

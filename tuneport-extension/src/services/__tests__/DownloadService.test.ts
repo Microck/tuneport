@@ -31,6 +31,20 @@ describe('DownloadService.downloadAudio', () => {
 
   });
 
+  test('strips artist from title in filename generation', () => {
+    // @ts-ignore - testing private method
+    const filename1 = DownloadService.generateFilename('Artist - Song Title', 'Artist', 'mp3');
+    expect(filename1).toBe('Artist - Song Title.mp3');
+
+    // @ts-ignore
+    const filename2 = DownloadService.generateFilename('Artist-Song Title', 'Artist', 'mp3');
+    expect(filename2).toBe('Artist - Song Title.mp3');
+
+    // @ts-ignore
+    const filename3 = DownloadService.generateFilename('Song Title', 'Artist', 'mp3');
+    expect(filename3).toBe('Artist - Song Title.mp3');
+  });
+
   test('defaults to yt-dlp when setting missing', async () => {
     jest.spyOn(LucidaService, 'isEnabled').mockReturnValue(false);
     jest.spyOn(CobaltService, 'ensureAuthenticated').mockResolvedValue(true);
