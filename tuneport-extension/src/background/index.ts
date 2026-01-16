@@ -466,7 +466,12 @@ export class BackgroundService {
       job.progress = 30;
 
       const settings = await this.getSettings();
-      const matchThreshold = settings.matchThreshold ?? 0.7;
+      const matchThreshold = settings.matchThreshold ?? 0.85;
+
+      // Increase threshold if downloading to avoid catalog false positives
+      const effectiveThreshold = enableDownload 
+        ? Math.min(0.95, matchThreshold + 0.1)
+        : matchThreshold;
 
       const segmentCandidates = downloadOptions?.segments || [];
       const segmentMode = downloadOptions?.segmentMode || 'multiple';
@@ -480,7 +485,7 @@ export class BackgroundService {
         const segmentResult = await addSegmentsToSpotify({
           segments: segmentCandidates,
           fallbackArtist: metadata.artist,
-          matchThreshold,
+          matchThreshold: effectiveThreshold,
           search: this.searchOnSpotify.bind(this),
           add: (trackUri) => this.addToPlaylist(playlistId, trackUri)
         });
@@ -503,7 +508,7 @@ export class BackgroundService {
           segmentResult.summary.failed === 0;
         result = { added: segmentResult.summary.added > 0, duplicate: allDuplicates };
       } else {
-        const searchResults = await this.searchOnSpotify(metadata.title, metadata.artist, metadata.duration, matchThreshold);
+        const searchResults = await this.searchOnSpotify(metadata.title, metadata.artist, metadata.duration, effectiveThreshold);
         job.progress = 50;
 
         spotifyMatchFound = !!searchResults.exactMatch;
@@ -540,7 +545,7 @@ export class BackgroundService {
                   musicMetadata.title,
                   musicMetadata.artist,
                   metadata.duration,
-                  matchThreshold
+                  effectiveThreshold
                 );
                 
                 if (fallbackResults.exactMatch) {

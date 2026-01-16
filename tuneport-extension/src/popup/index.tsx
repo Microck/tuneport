@@ -179,10 +179,10 @@ interface QualityPreset {
 }
 
 const QUALITY_PRESETS: QualityPreset[] = [
+  { id: 'm4a', label: 'M4A', format: 'm4a', description: 'Native YouTube format (~128kbps). Recommended default for Spotify.' },
   { id: 'opus', label: 'Opus', format: 'opus', description: 'Highest quality source (~141kbps). Note: Not supported by Spotify Local Files.' },
-  { id: 'm4a', label: 'M4A', format: 'm4a', description: 'Native YouTube format (~128kbps). Recommended for Spotify Local Files.' },
   { id: 'mp3', label: 'MP3', format: 'mp3', description: 'Universal compatibility. Re-encoded from source.' },
-  { id: 'wav', label: 'WAV', format: 'wav', description: 'Uncompressed audio. Large files.' },
+  { id: 'wav', label: 'WAV', format: 'wav', description: 'Uncompressed audio. Very large files.' },
 ];
 
 
@@ -377,7 +377,7 @@ interface SettingsState {
 
 const DEFAULT_SETTINGS: SettingsState = {
   defaultPlaylist: '',
-  defaultQuality: 'best',
+  defaultQuality: 'm4a',
   fileNamingFormat: 'artist-title',
   enableDownload: true,
   enableLosslessSources: false,
@@ -393,7 +393,7 @@ const DEFAULT_SETTINGS: SettingsState = {
   customPresets: [],
   spotifyFallbackMode: 'auto',
   enableDebugConsole: false,
-  matchThreshold: 0.7
+  matchThreshold: 0.85
 };
 
 export const TunePortPopup: React.FC = () => {
@@ -404,7 +404,7 @@ export const TunePortPopup: React.FC = () => {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [currentUrl, setCurrentUrl] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'sync' | 'activity' | 'settings'>('sync');
-  const [selectedQuality, setSelectedQuality] = useState<string>('best');
+  const [selectedQuality, setSelectedQuality] = useState<string>('m4a');
   const [enableDownload, setEnableDownload] = useState(true);
   const [segmentsEnabled, setSegmentsEnabled] = useState(false);
   const [segmentMode, setSegmentMode] = useState<'auto' | 'manual'>('auto');
