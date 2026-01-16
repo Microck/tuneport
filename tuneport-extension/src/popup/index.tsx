@@ -52,42 +52,42 @@ const Onboarding: React.FC<{
   };
 
   return (
-    <div className="flex flex-col h-full bg-tf-background text-white p-6 overflow-y-auto">
+    <div className="flex flex-col h-full bg-tf-white min-h-[500px] text-tf-slate p-6 overflow-y-auto">
       <div className="flex flex-col items-center mb-8 mt-4">
-        <div className="w-16 h-16 bg-gradient-to-br from-tf-emerald to-tf-emerald-dark rounded-2xl flex items-center justify-center shadow-2xl shadow-tf-emerald/20 mb-4">
-          <Music2 className="w-8 h-8 text-white" />
+        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg border border-tf-border mb-4">
+          <img src={chrome.runtime.getURL('assets/logo.png')} alt="" className="w-10 h-10 drop-shadow-md" />
         </div>
-        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
+        <h1 className="text-2xl font-bold serif italic text-tf-slate">
           Welcome to TunePort
         </h1>
-        <p className="text-tf-slate-muted text-sm mt-2 text-center">
+        <p className="text-tf-slate-muted text-xs mt-2 text-center max-w-[240px] leading-relaxed">
           Set up your own Spotify App to get started. This ensures higher rate limits and persistent login.
         </p>
       </div>
 
       <div className="space-y-6 flex-1">
         <div className="space-y-2">
-          <label className="text-xs font-bold text-tf-slate uppercase tracking-wider">
+          <label className="text-[10px] font-bold text-tf-slate uppercase tracking-wider">
             1. Copy Redirect URI
           </label>
           <div className="flex gap-2">
-            <div className="flex-1 bg-tf-gray/30 rounded-lg p-3 text-xs font-mono text-tf-slate-light truncate border border-tf-border">
+            <div className="flex-1 bg-white rounded-lg p-3 text-[10px] font-mono text-tf-slate-muted truncate border border-tf-border shadow-sm">
               {redirectUri}
             </div>
             <button
               onClick={() => handleCopy(redirectUri)}
-              className="p-3 bg-tf-gray/50 hover:bg-tf-gray rounded-lg border border-tf-border transition-colors"
+              className="p-3 bg-white hover:bg-tf-gray rounded-lg border border-tf-border transition-colors text-tf-emerald shadow-sm"
             >
-              <Copy className="w-4 h-4 text-tf-emerald" />
+              <Copy className="w-4 h-4" />
             </button>
           </div>
-          <p className="text-[10px] text-tf-slate-muted">
+          <p className="text-[9px] text-tf-slate-muted">
             You'll need to paste this into your Spotify App settings.
           </p>
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-bold text-tf-slate uppercase tracking-wider">
+          <label className="text-[10px] font-bold text-tf-slate uppercase tracking-wider">
             2. Enter Client ID
           </label>
           <input
@@ -95,17 +95,29 @@ const Onboarding: React.FC<{
             value={clientId}
             onChange={(e) => setClientId(e.target.value)}
             placeholder="Paste Client ID here"
-            className="w-full bg-tf-gray/30 rounded-lg p-3 text-sm text-white border border-tf-border focus:border-tf-emerald focus:outline-none transition-colors"
+            className="w-full bg-white rounded-lg p-3 text-xs text-tf-slate border border-tf-border focus:border-tf-emerald focus:outline-none transition-all shadow-sm placeholder:text-tf-slate-muted/50"
           />
         </div>
 
-        <button
-          onClick={() => setShowGuide(!showGuide)}
-          className="w-full flex items-center justify-between p-3 bg-tf-gray/20 rounded-lg text-xs text-tf-slate hover:text-white transition-colors"
-        >
-          <span>Need help getting these keys?</span>
-          {showGuide ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </button>
+        <div className="flex items-center justify-between pt-2">
+            <button
+              onClick={() => setShowGuide(!showGuide)}
+              className="flex items-center gap-1.5 text-[10px] font-bold text-tf-slate-muted hover:text-tf-emerald transition-colors"
+            >
+              <HelpCircle className="w-3 h-3" />
+              <span>Need help getting these keys?</span>
+              {showGuide ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
+            <a 
+                href="https://tuneport.micr.dev/tutorial" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-[10px] font-bold text-tf-emerald hover:underline"
+            >
+                <ExternalLink className="w-3 h-3" />
+                Visual learner?
+            </a>
+        </div>
 
         <AnimatePresence>
           {showGuide && (
@@ -115,8 +127,8 @@ const Onboarding: React.FC<{
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="p-4 bg-tf-gray/20 rounded-lg text-xs text-tf-slate-muted space-y-3 border border-tf-border/50">
-                <p>1. Go to <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noreferrer" className="text-tf-emerald hover:underline">developer.spotify.com/dashboard</a> and log in.</p>
+              <div className="p-4 bg-white rounded-xl text-[10px] text-tf-slate-muted space-y-3 border border-tf-border shadow-sm mt-2">
+                <p>1. Go to <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noreferrer" className="text-tf-emerald font-bold hover:underline">developer.spotify.com/dashboard</a> and log in.</p>
                 <p>2. Click <strong>Create App</strong>. Give it any name (e.g., "My TunePort").</p>
                 <p>3. In settings, find <strong>Redirect URIs</strong> and paste the URI from step 1.</p>
                 <p>4. Check "Web API" and "Web Playback SDK" (optional) and save.</p>
@@ -128,13 +140,18 @@ const Onboarding: React.FC<{
       </div>
 
       <div className="mt-8">
-        <ShimmerButton
+        <button
           onClick={() => onSave(clientId)}
           disabled={!clientId}
-          className="w-full"
+          className={cn(
+            "w-full py-3 rounded-xl font-bold text-xs shadow-lg transition-all",
+            clientId 
+                ? "bg-tf-emerald text-white hover:bg-tf-emerald-dark hover:shadow-tf-emerald/20" 
+                : "bg-tf-gray text-tf-slate-muted cursor-not-allowed"
+          )}
         >
           Save & Connect
-        </ShimmerButton>
+        </button>
       </div>
     </div>
   );
