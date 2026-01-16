@@ -43,6 +43,10 @@ global.chrome = {
 global.fetch = jest.fn();
 
 import { SpotifyAuthService } from '../SpotifyAuthService';
+import { ChromeMessageService } from '../ChromeMessageService';
+import { TextEncoder } from 'util';
+
+global.TextEncoder = TextEncoder as any;
 
 describe('SpotifyAuthService', () => {
   beforeEach(() => {
