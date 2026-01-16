@@ -58,6 +58,7 @@ interface SettingsState {
   spotifyFallbackMode: 'auto' | 'ask' | 'never';
   enableDebugConsole: boolean;
   matchThreshold: number;
+  spotifyClientId: string;
 }
 
 const DEFAULT_SETTINGS: SettingsState = {
@@ -76,7 +77,8 @@ const DEFAULT_SETTINGS: SettingsState = {
   customPresets: [],
   spotifyFallbackMode: 'auto',
   enableDebugConsole: false,
-  matchThreshold: 0.7
+  matchThreshold: 0.7,
+  spotifyClientId: ''
 };
 
 const QUALITY_OPTIONS = [
@@ -247,13 +249,59 @@ export const SettingsPage: React.FC = () => {
             <div className="text-center py-6 bg-tf-gray/30 rounded-xl border border-dashed border-tf-slate-muted/30">
               <p className="text-tf-slate-muted font-medium mb-3 text-xs">Not connected</p>
               <button 
-                onClick={() => chrome.tabs.create({ url: chrome.runtime.getURL('popup/index.html') })}
+                onClick={() => {
+                  saveSettings().then(() => {
+                    SpotifyAuthService.connect(settings.spotifyClientId || undefined);
+                  });
+                }}
                 className="px-4 py-2 bg-tf-emerald text-white font-bold rounded-lg hover:bg-tf-emerald-dark transition-colors shadow-lg shadow-tf-emerald/20 text-xs"
               >
                 Connect Now
               </button>
             </div>
           )}
+          
+          <div className="mt-4 pt-4 border-t border-tf-border/50">
+             <details className="group">
+                <summary className="flex items-center gap-2 cursor-pointer text-xs font-bold text-tf-slate select-none list-none">
+                   <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" />
+                   Advanced: Bring Your Own App (Recommended)
+                </summary>
+                <div className="mt-3 space-y-4 pl-6">
+                   <p className="text-[10px] text-tf-slate-muted">
+                      Use your own Spotify Developer App to avoid rate limits and quotas.
+                   </p>
+                   
+                   <div>
+                      <label className="block text-[10px] font-bold text-tf-slate mb-1">Redirect URI (Copy this to Spotify)</label>
+                      <div className="flex gap-2">
+                         <input 
+                            readOnly 
+                            value={chrome.runtime.getURL('popup/auth-callback.html')}
+                            className="flex-1 px-3 py-2 text-xs border border-tf-border rounded-lg bg-tf-gray/30 text-tf-slate-muted font-mono"
+                         />
+                         <button
+                            onClick={() => {
+                               navigator.clipboard.writeText(chrome.runtime.getURL('popup/auth-callback.html'));
+                            }}
+                            className="p-2 text-tf-slate hover:bg-tf-gray/50 rounded-lg border border-tf-border"
+                            title="Copy to clipboard"
+                         >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                         </button>
+                      </div>
+                   </div>
+
+                   <TextField
+                      label="Client ID"
+                      value={settings.spotifyClientId}
+                      onChange={(v) => updateSetting('spotifyClientId', v)}
+                      placeholder="Paste your Client ID here"
+                      description="Leave empty to use the default shared ID (may be rate limited)."
+                   />
+                </div>
+             </details>
+          </div>
         </Section>
 
         {/* Default Options Section */}
