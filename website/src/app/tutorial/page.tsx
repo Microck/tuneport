@@ -1,32 +1,27 @@
-import { Metadata } from "next";
+"use client";
+
+import { useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, PlayCircle, Settings, CheckCircle } from "lucide-react";
+import { ArrowLeft, PlayCircle, Settings, CheckCircle, Download, LayoutTemplate, Link as LinkIcon, Key, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { Meteors } from "@/components/ui/meteors";
 import { TextAnimate } from "@/components/ui/text-animate";
 import { Highlighter } from "@/components/ui/highlighter";
-import { SetupSteps } from "@/components/sections/setup-steps";
+import { BentoGrid, BentoCard } from "@/components/ui/bento-grid";
 import { ShineBorder } from "@/components/ui/shine-border";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "TunePort Tutorial",
-  description: "Step-by-step guide to install TunePort, match tracks, and sync your library.",
-  openGraph: {
-    title: "TunePort Tutorial",
-    description: "Step-by-step guide to install TunePort, match tracks, and sync your library.",
-    url: "https://tuneflow.micr.dev/tutorial",
-    type: "article",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "TunePort Tutorial",
-    description: "Step-by-step guide to install TunePort, match tracks, and sync your library.",
-  },
-};
-
 export default function TutorialPage() {
+  const [copied, setCopied] = useState(false);
+  const redirectUri = "https://<extension-id>.chromiumapp.org/";
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(redirectUri);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="relative bg-white pb-12 pt-20 overflow-hidden">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -104,7 +99,44 @@ export default function TutorialPage() {
         </div>
 
         <div className="mb-10">
-             <SetupSteps />
+             <BentoGrid className="lg:auto-rows-[18rem]">
+                <BentoCard
+                    name="1. Install"
+                    className="col-span-3 lg:col-span-1"
+                    background={<div className="absolute inset-0 bg-gradient-to-br from-rose-50 to-transparent opacity-50" />}
+                    Icon={Download}
+                    description="Download the latest TunePort release, unzip it, and load it via chrome://extensions (Developer Mode)."
+                    href="https://github.com/Microck/tuneport/releases"
+                    cta="Download Release"
+                />
+                <BentoCard
+                    name="2. Create App"
+                    className="col-span-3 lg:col-span-1"
+                    background={<div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-50" />}
+                    Icon={LayoutTemplate}
+                    description="Go to the Spotify Developer Dashboard to create a new app. This gives you unlimited API access."
+                    href="https://developer.spotify.com/dashboard"
+                    cta="Open Dashboard"
+                />
+                <BentoCard
+                    name="3. Redirect URI"
+                    className="col-span-3 lg:col-span-1"
+                    background={<div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-50" />}
+                    Icon={LinkIcon}
+                    description={`Add "https://<extension-id>.chromiumapp.org/" to your app settings. Find your ID in the extension.`}
+                    cta={copied ? "Copied!" : "Copy URI Template"}
+                    onClick={handleCopy}
+                />
+                <BentoCard
+                    name="4. Client ID"
+                    className="col-span-3"
+                    background={<div className="absolute inset-0 bg-gradient-to-r from-slate-50 to-slate-100 opacity-50" />}
+                    Icon={Key}
+                    description="Copy the Client ID from your new Spotify App and paste it into the TunePort extension setup screen. You're done!"
+                    cta="Read Full Docs"
+                    href="/docs"
+                />
+            </BentoGrid>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 md:p-10">
@@ -137,6 +169,7 @@ export default function TutorialPage() {
             </Link>
             <Link href="/">
               <Button variant="ghost" size="lg" className="w-full sm:w-auto gap-2" data-animate="button">
+                  <ArrowLeft className="h-4 w-4" />
                   Back to Home
               </Button>
             </Link>
