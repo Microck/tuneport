@@ -8,7 +8,7 @@ interface SpotifyUser {
 }
 
 export class SpotifyAuthService {
-  private static readonly SPOTIFY_CLIENT_ID = '4aa180089db445ce8d6f762329a76f7e';
+  private static readonly SPOTIFY_CLIENT_ID = '4aa180089db445ce8d6f762329a76f7e'; // Fallback / Dev ID
 
   private static readonly SCOPES = [
     'playlist-read-private',
