@@ -66,10 +66,10 @@ export function Hero() {
             </AnimatedGradientText>
           </div>
 
-          <div className="my-8">
+          <div className="flex justify-center items-center my-8 w-full">
             <MorphingText
               texts={["Sync.", "Download.", "Disappear."]}
-              className="text-slate-900"
+              className="text-slate-900 w-full text-center"
             />
           </div>
           
