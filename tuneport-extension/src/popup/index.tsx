@@ -179,8 +179,8 @@ interface QualityPreset {
 }
 
 const QUALITY_PRESETS: QualityPreset[] = [
-  { id: 'opus', label: 'Opus', format: 'opus', description: 'Highest quality source (~141kbps). Recommended default.' },
-  { id: 'm4a', label: 'M4A', format: 'm4a', description: 'Native YouTube format (~128kbps). High quality and compatibility.' },
+  { id: 'opus', label: 'Opus', format: 'opus', description: 'Highest quality source (~141kbps). Note: Not supported by Spotify Local Files.' },
+  { id: 'm4a', label: 'M4A', format: 'm4a', description: 'Native YouTube format (~128kbps). Recommended for Spotify Local Files.' },
   { id: 'mp3', label: 'MP3', format: 'mp3', description: 'Universal compatibility. Re-encoded from source.' },
   { id: 'wav', label: 'WAV', format: 'wav', description: 'Uncompressed audio. Large files.' },
 ];
