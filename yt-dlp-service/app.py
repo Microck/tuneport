@@ -353,11 +353,13 @@ async def download(request: DownloadRequest, authorization: Optional[str] = Head
         'expires': time.time() + TOKEN_TTL_SECONDS
     }
 
+    actual_format = file_path.suffix[1:].upper()
+
     return DownloadResponse(
         status='ok',
         url=f'{PUBLIC_BASE_URL}/file/{token}',
         filename=file_path.name,
-        quality=fmt.upper() if fmt != 'best' else 'BEST'
+        quality=actual_format
     )
 
 

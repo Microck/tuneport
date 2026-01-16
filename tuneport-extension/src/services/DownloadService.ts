@@ -314,8 +314,13 @@ export class DownloadService {
   ): string {
     const rangeLabel = this.formatSegmentRange(segment);
     const baseTitle = segment.title || (rangeLabel ? `${title} (${rangeLabel})` : title);
-    const ext = quality.toLowerCase().includes('flac') ? 'flac' : 
-                quality.toLowerCase().includes('opus') ? 'opus' : 'mp3';
+    
+    const q = quality.toLowerCase();
+    const ext = q.includes('flac') ? 'flac' : 
+                q.includes('opus') ? 'opus' : 
+                q.includes('ogg') ? 'ogg' :
+                q.includes('wav') ? 'wav' :
+                q.includes('m4a') ? 'm4a' : 'mp3';
 
     if (artist) {
       return `${artist} - ${baseTitle}.${ext}`;
@@ -511,8 +516,13 @@ export class DownloadService {
 
   private static generateFilename(title: string, artist: string, quality: string): string {
     const sanitize = (str: string) => str.replace(/[<>:"/\\|?*]/g, '').trim();
-    const ext = quality.toLowerCase().includes('flac') ? 'flac' : 
-                quality.toLowerCase().includes('opus') ? 'opus' : 'mp3';
+    
+    const q = quality.toLowerCase();
+    const ext = q.includes('flac') ? 'flac' : 
+                q.includes('opus') ? 'opus' : 
+                q.includes('ogg') ? 'ogg' :
+                q.includes('wav') ? 'wav' :
+                q.includes('m4a') ? 'm4a' : 'mp3';
     
     let cleanTitle = sanitize(title);
     const cleanArtist = sanitize(artist);
