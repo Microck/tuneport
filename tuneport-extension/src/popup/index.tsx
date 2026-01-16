@@ -554,8 +554,32 @@ export const TunePortPopup: React.FC = () => {
 
   const logoUrl = useMemo(() => chrome.runtime.getURL('assets/logo.png'), []);
 
+  const handleOnboardingComplete = async (clientId: string) => {
+    // Create new settings object
+    const newSettings = { ...settings, spotifyClientId: clientId };
+    
+    // Update local state
+    setSettings(newSettings);
+    
+    try {
+      // Persist to storage immediately
+      await chrome.storage.local.set({
+        tuneport_settings: newSettings,
+        lucida_enabled: newSettings.lucidaEnabled
+      });
+      
+      // Notify background script
+      await ChromeMessageService.sendMessage({ type: 'SETTINGS_UPDATED', settings: newSettings });
+      
+      // Trigger Spotify auth
+      await SpotifyAuthService.connect(clientId);
+    } catch (error) {
+      console.error('Failed to complete onboarding:', error);
+    }
+  };
+
   if (!settings.spotifyClientId) {
-    return <Onboarding settings={settings} onSave={(clientId) => updateSetting('spotifyClientId', clientId)} />;
+    return <Onboarding settings={settings} onSave={handleOnboardingComplete} />;
   }
 
   useEffect(() => {
