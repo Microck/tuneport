@@ -1489,22 +1489,6 @@ export class BackgroundService {
       return null;
     }
   }
-      
-      const result = await chrome.storage.local.get(['spotify_access_token', 'spotifyToken']);
-      if (result.spotify_access_token) {
-        this.spotifyToken = result.spotify_access_token;
-        return this.spotifyToken;
-      } else if (result.spotifyToken) {
-        // Legacy support
-        this.spotifyToken = result.spotifyToken;
-        return this.spotifyToken;
-      }
-      return null;
-    } catch (error) {
-      console.error('Failed to get Spotify token:', error);
-      return null;
-    }
-  }
 
   private showNotification(title: string, message: string, type: 'success' | 'error') {
     // Use extension's default icon or fallback to a simple colored icon
