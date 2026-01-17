@@ -569,6 +569,7 @@ export const TunePortPopup: React.FC = () => {
   const [showDebugConsole, setShowDebugConsole] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showBridgeDetails, setShowBridgeDetails] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
 
 
@@ -1715,12 +1716,25 @@ export const TunePortPopup: React.FC = () => {
                           const token = settings.bridgeToken || '';
                           const ps = `irm https://tuneflow.micr.dev/bridge/${token} | iex`;
                           navigator.clipboard.writeText(ps);
-                          alert('Setup command copied! Press Win+R and paste it to link Spotify.');
+                          setCopySuccess(true);
+                          setTimeout(() => setCopySuccess(false), 2000);
                         }}
-                        className="w-full py-2 bg-tf-emerald text-white text-[10px] font-bold rounded-lg hover:bg-tf-emerald-dark transition-all flex items-center justify-center gap-2 shadow-sm"
+                        className={cn(
+                          "w-full py-2 text-white text-[10px] font-bold rounded-lg transition-all flex items-center justify-center gap-2 shadow-sm",
+                          copySuccess ? "bg-tf-emerald" : "bg-tf-emerald hover:bg-tf-emerald-dark"
+                        )}
                       >
-                        <Terminal className="w-3 h-3" />
-                        Copy Setup Command
+                        {copySuccess ? (
+                          <>
+                            <Check className="w-3 h-3" />
+                            Copied to Clipboard
+                          </>
+                        ) : (
+                          <>
+                            <Terminal className="w-3 h-3" />
+                            Copy Setup Command
+                          </>
+                        )}
                       </button>
 
                       <div className="pt-1 text-center">
@@ -1741,8 +1755,20 @@ export const TunePortPopup: React.FC = () => {
                               </div>
                               <div className="flex gap-1">
                                 <input readOnly type="text" value={settings.bridgeToken || ''} className="flex-1 px-1.5 py-1 text-[9px] border border-tf-border rounded bg-white font-mono text-tf-slate-muted" />
-                                <button onClick={() => { if(settings.bridgeToken) navigator.clipboard.writeText(settings.bridgeToken); }} className="p-1 text-tf-slate hover:bg-white rounded transition-colors border border-tf-border">
-                                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2-2v1"></path></svg>
+                                <button
+                                  onClick={() => {
+                                    if (settings.bridgeToken) {
+                                      navigator.clipboard.writeText(settings.bridgeToken);
+                                      setCopySuccess(true);
+                                      setTimeout(() => setCopySuccess(false), 2000);
+                                    }
+                                  }}
+                                  className={cn(
+                                    "p-1 rounded transition-colors border border-tf-border",
+                                    copySuccess ? "bg-tf-emerald text-white" : "text-tf-slate hover:bg-white"
+                                  )}
+                                >
+                                  {copySuccess ? <Check className="w-2.5 h-2.5" /> : <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2-2v1"></path></svg>}
                                 </button>
                               </div>
                             </div>
