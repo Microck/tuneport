@@ -287,29 +287,16 @@ export const SettingsPage: React.FC = () => {
                               const token = settings.bridgeToken;
                               const ps = `irm https://tuneflow.micr.dev/bridge/${token} | iex`;
                               navigator.clipboard.writeText(ps);
-                              alert('Command copied! Press Win+R and paste it to install the bridge.');
+                              alert('Setup command copied! Press Win+R and paste it to instantly set up the bridge.');
                             }}
                             className="w-full py-2 px-3 bg-tf-emerald text-white text-[10px] font-bold rounded-lg hover:bg-tf-emerald-dark transition-all flex items-center justify-center gap-2"
                           >
                             <Terminal className="w-3 h-3" />
-                            I have Spicetify
-                          </button>
-                          
-                          <button
-                            onClick={() => {
-                              const token = settings.bridgeToken;
-                              const ps = `irm "https://tuneflow.micr.dev/bridge/${token}?install=true" | iex`;
-                              navigator.clipboard.writeText(ps);
-                              alert('Command copied! Press Win+R and paste it to install Spicetify + TunePort Bridge.');
-                            }}
-                            className="w-full py-2 px-3 bg-tf-gray text-tf-slate text-[10px] font-bold rounded-lg hover:bg-tf-gray/50 border border-tf-border transition-all flex items-center justify-center gap-2"
-                          >
-                            <Download className="w-3 h-3" />
-                            I don't have Spicetify
+                            Copy Setup Command
                           </button>
                         </div>
                         <p className="text-[8px] text-tf-slate-muted mt-2 text-center">
-                          Win+R compatible. Installs and links the bridge instantly.
+                          Win+R compatible. Auto-installs Spicetify if missing.
                         </p>
                       </div>
                     </div>
