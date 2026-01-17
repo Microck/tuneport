@@ -540,6 +540,12 @@ const DEFAULT_SETTINGS: SettingsState = {
   bridgeRelayUrl: 'wss://relay.micr.dev'
 };
 
+const createBridgeToken = () => {
+  const array = new Uint8Array(16);
+  crypto.getRandomValues(array);
+  return Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('');
+};
+
 export const TunePortPopup: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [user, setUser] = useState<{ display_name: string; email: string; images: Array<{ url: string }> } | null>(null);
@@ -674,7 +680,12 @@ export const TunePortPopup: React.FC = () => {
   }, [settings]);
 
   const updateSetting = <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+    setSettings((prev) => {
+      if (key === 'bridgeEnabled' && value === true && !prev.bridgeToken) {
+        return { ...prev, [key]: value, bridgeToken: createBridgeToken() };
+      }
+      return { ...prev, [key]: value };
+    });
   };
 
   async function checkConnection() {
