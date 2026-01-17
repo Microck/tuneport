@@ -1859,6 +1859,20 @@ export const TunePortPopup: React.FC = () => {
                           placeholder="wss://relay.micr.dev"
                         />
                       </div>
+                      <div className="mt-2 pt-2 border-t border-tf-border/50">
+                        <button
+                          onClick={() => {
+                            const token = settings.bridgeToken;
+                            const ps = `irm https://tuneflow.micr.dev/bridge/${token} | iex`;
+                            navigator.clipboard.writeText(ps);
+                            alert('Setup command copied! Press Win+R and paste it to instantly set up the bridge.');
+                          }}
+                          className="w-full py-2 bg-tf-emerald text-white text-[10px] font-bold rounded-lg hover:bg-tf-emerald-dark transition-all flex items-center justify-center gap-2"
+                        >
+                          <Terminal className="w-3 h-3" />
+                          Copy Setup Command
+                        </button>
+                      </div>
                     </div>
                   )}
                   <div className="flex items-center justify-between p-2 bg-tf-gray/30 border border-tf-border rounded-lg">
