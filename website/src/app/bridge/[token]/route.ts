@@ -43,8 +43,11 @@ try {
     }
 
     Write-Host "Done! TunePort Bridge is now active in Spotify." -ForegroundColor Green
+    Read-Host "Press Enter to exit..."
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "The command failed. Please make sure Spotify is installed and try again." -ForegroundColor Gray
+    Read-Host "Press Enter to exit..."
     exit 1
 }
 `.trim();
