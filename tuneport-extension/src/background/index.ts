@@ -5,6 +5,8 @@ import { LucidaService } from '../services/LucidaService';
 import { AudioFormat } from '../services/CobaltService';
 import { YouTubeMetadataService, YouTubeMusicMetadata } from '../services/YouTubeMetadataService';
 import { applyDownloadCompletion, applyDownloadInterruption } from './download-utils';
+import { buildBridgeMessage, canBridge } from './bridge-utils';
+import { sendBridgeMessage } from '../services/BridgeService';
 import type { Segment, SegmentMode } from '../services/SegmentParser';
 import { addSegmentsToSpotify, SegmentSummary } from '../services/SegmentSpotify';
 
@@ -268,6 +270,9 @@ export class BackgroundService {
     spotifyFallbackMode: 'auto' | 'ask' | 'never';
     matchThreshold: number;
     downloadMode: 'always' | 'missing_only';
+    bridgeEnabled: boolean;
+    bridgeToken: string;
+    bridgeRelayUrl: string;
   }> {
     try {
       const result = await chrome.storage.local.get(['tuneport_settings']);
@@ -277,7 +282,10 @@ export class BackgroundService {
         defaultPlaylist: '',
         spotifyFallbackMode: 'auto' as const,
         matchThreshold: 0.85,
-        downloadMode: 'missing_only' as const
+        downloadMode: 'missing_only' as const,
+        bridgeEnabled: false,
+        bridgeToken: '',
+        bridgeRelayUrl: 'wss://relay.micr.dev'
       };
       return { ...defaults, ...result.tuneport_settings };
     } catch {
@@ -287,7 +295,10 @@ export class BackgroundService {
         defaultPlaylist: '', 
         spotifyFallbackMode: 'auto', 
         matchThreshold: 0.85,
-        downloadMode: 'missing_only'
+        downloadMode: 'missing_only',
+        bridgeEnabled: false,
+        bridgeToken: '',
+        bridgeRelayUrl: 'wss://relay.micr.dev'
       };
     }
   }
@@ -634,13 +645,28 @@ export class BackgroundService {
             enabled: true,
             quality: downloadResult.quality,
             source: downloadResult.source,
-            filename: downloadResult.filename || downloadResult.filenames?.[0],
+            filename: downloadResult.fullPath || downloadResult.filename || downloadResult.filenames?.[0],
             fileCount: fileCount > 1 ? fileCount : undefined
           };
 
           if (!downloadResult.isLossless && LucidaService.isEnabled()) {
             console.info('Lossless not available, used YouTube source');
           }
+
+          if (canBridge(settings.bridgeEnabled, spotifyMatchFound, downloadResult)) {
+            try {
+              const filename = downloadResult.fullPath || downloadResult.filename || '';
+              await sendBridgeMessage(
+                settings.bridgeToken,
+                buildBridgeMessage(filename, playlistId),
+                { relayUrl: settings.bridgeRelayUrl }
+              );
+              this.log('[Bridge] Sent local track to relay');
+            } catch (error) {
+              this.log('[Bridge] Failed to send local track', 'warn');
+            }
+          }
+
 
           job.progress = 85;
           this.activeJobs.set(jobId, { ...job });
@@ -1344,7 +1370,25 @@ export class BackgroundService {
       return;
     }
 
+    let settings: Awaited<ReturnType<typeof this.getSettings>>;
     try {
+      settings = await this.getSettings();
+    } catch {
+      settings = {
+        enableDownload: false,
+        defaultQuality: 'm4a',
+        defaultPlaylist: '',
+        spotifyFallbackMode: 'auto',
+        matchThreshold: 0.85,
+        downloadMode: 'missing_only',
+        bridgeEnabled: false,
+        bridgeToken: '',
+        bridgeRelayUrl: 'wss://relay.micr.dev'
+      };
+    }
+
+    try {
+
       job.status = 'searching';
       job.currentStep = 'Searching Spotify with confirmed metadata...';
       this.activeJobs.set(jobId, { ...job });
@@ -1403,9 +1447,24 @@ export class BackgroundService {
             enabled: true,
             quality: downloadResult.quality,
             source: downloadResult.source,
-            filename: downloadResult.filename || downloadResult.filenames?.[0],
+            filename: downloadResult.fullPath || downloadResult.filename || downloadResult.filenames?.[0],
             fileCount: fileCount > 1 ? fileCount : undefined
           };
+
+          if (canBridge(settings.bridgeEnabled, false, downloadResult)) {
+            try {
+              const filename = downloadResult.fullPath || downloadResult.filename || '';
+              await sendBridgeMessage(
+                settings.bridgeToken,
+                buildBridgeMessage(filename, job.playlistId),
+                { relayUrl: settings.bridgeRelayUrl }
+              );
+              this.log('[Bridge] Sent local track to relay');
+            } catch (error) {
+              this.log('[Bridge] Failed to send local track', 'warn');
+            }
+          }
+
           job.progress = 85;
           this.activeJobs.set(jobId, { ...job });
           this.monitorDownloadJob(jobId, downloadIds, result.duplicate, true);

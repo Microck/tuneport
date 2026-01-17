@@ -21,6 +21,7 @@ export interface DownloadResult {
   downloadId?: number;
   downloadIds?: number[];
   filenames?: string[];
+  fullPath?: string;
 }
 
 export interface DownloadOptions {
@@ -251,11 +252,13 @@ export class DownloadService {
 
       this.monitorDownload(downloadId);
 
-      return {
-        ...result,
-        filename: sanitizedFilename,
-        downloadId
-      };
+    return {
+      ...result,
+      filename: sanitizedFilename,
+      fullPath,
+      downloadId
+    };
+
     } catch (error) {
       console.error('[DownloadService] Download exception:', error);
       return {
@@ -466,6 +469,7 @@ export class DownloadService {
     return {
       ...ytDlpResult,
       filename: sanitizedFilename,
+      fullPath,
       downloadId
     };
   }

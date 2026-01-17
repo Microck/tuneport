@@ -4,7 +4,7 @@ import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
 import { Highlighter } from "@/components/ui/highlighter";
 import { Marquee } from "@/components/ui/marquee";
 import { motion } from "framer-motion";
-import { ScanSearch, ShieldCheck, Zap, FileAudio } from "lucide-react";
+import { ScanSearch, ShieldCheck, Zap, FileAudio, Plug } from "lucide-react";
 
 function InstantSyncBackground() {
   return (
@@ -138,6 +138,15 @@ const features = [
     cta: "View code",
     className: "col-span-3 lg:col-span-1 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
     background: <PrivacyFirstBackground />,
+  },
+  {
+    Icon: Plug,
+    name: "Bridge Mode",
+    description: "Relay + spicetify bridge to auto-add local files into playlists.",
+    href: "/docs",
+    cta: "Bridge docs",
+    className: "col-span-3 lg:col-span-1 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
+    background: <InstantSyncBackground />,
   },
   ];
 

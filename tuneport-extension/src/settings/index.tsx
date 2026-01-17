@@ -19,7 +19,8 @@ import {
   Plus,
   Trash2,
   HelpCircle,
-  Search
+  Search,
+  Link
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { SpotifyAuthService } from '../services/SpotifyAuthService';
@@ -59,6 +60,9 @@ interface SettingsState {
   enableDebugConsole: boolean;
   matchThreshold: number;
   spotifyClientId: string;
+  bridgeEnabled: boolean;
+  bridgeToken: string;
+  bridgeRelayUrl: string;
 }
 
 const DEFAULT_SETTINGS: SettingsState = {
@@ -78,7 +82,16 @@ const DEFAULT_SETTINGS: SettingsState = {
   spotifyFallbackMode: 'auto',
   enableDebugConsole: false,
   matchThreshold: 0.7,
-  spotifyClientId: ''
+  spotifyClientId: '',
+  bridgeEnabled: false,
+  bridgeToken: '',
+  bridgeRelayUrl: 'wss://relay.micr.dev'
+};
+
+const createBridgeToken = () => {
+  const array = new Uint8Array(16);
+  crypto.getRandomValues(array);
+  return Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('');
 };
 
 const QUALITY_OPTIONS = [
@@ -191,8 +204,14 @@ export const SettingsPage: React.FC = () => {
   };
 
   const updateSetting = <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+    setSettings((prev) => {
+      if (key === 'bridgeEnabled' && value === true && !prev.bridgeToken) {
+        return { ...prev, [key]: value, bridgeToken: createBridgeToken() };
+      }
+      return { ...prev, [key]: value };
+    });
   };
+
 
   return (
     <div className="min-h-[600px] w-full bg-tf-white font-sans text-tf-slate">
@@ -422,7 +441,58 @@ export const SettingsPage: React.FC = () => {
           </div>
         </Section>
 
-        {/* Spotify Local Files Tutorial */}
+        <Section icon={Link} title="Bridge">
+          <div className="space-y-4">
+            <ToggleField
+              label="Enable Bridge"
+              description="Allow external apps to control TunePort"
+              value={settings.bridgeEnabled}
+              onChange={(v) => updateSetting('bridgeEnabled', v)}
+            />
+            
+            {settings.bridgeEnabled && (
+              <div className="bg-tf-gray/30 border border-tf-border rounded-xl p-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-[10px] font-bold text-tf-slate">Bridge Token</label>
+                  <span className="text-[9px] font-bold text-tf-emerald bg-tf-emerald/10 px-2 py-0.5 rounded-full border border-tf-emerald/20 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-tf-emerald animate-pulse" />
+                    ACTIVE
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <input 
+                    readOnly 
+                    type="text"
+                    value={settings.bridgeToken || ''}
+                    className="flex-1 px-3 py-2 text-xs border border-tf-border rounded-lg bg-white text-tf-slate-muted font-mono"
+                    placeholder="No token available"
+                  />
+                  <button
+                    onClick={() => navigator.clipboard.writeText(settings.bridgeToken)}
+                    className="p-2 text-tf-slate hover:bg-tf-gray/50 rounded-lg border border-tf-border bg-white transition-colors"
+                    title="Copy Token"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2-2v1"></path></svg>
+                  </button>
+                </div>
+                <p className="text-[9px] text-tf-slate-muted mt-2 leading-relaxed">
+                  Use this token to authenticate external tools. Keep it secret.
+                </p>
+                <div className="mt-3">
+                  <label className="block text-[10px] font-bold text-tf-slate mb-1">Relay URL</label>
+                  <input
+                    type="text"
+                    value={settings.bridgeRelayUrl}
+                    onChange={(e) => updateSetting('bridgeRelayUrl', e.target.value)}
+                    className="w-full px-3 py-2 text-xs border border-tf-border rounded-lg bg-white"
+                    placeholder="wss://relay.micr.dev"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </Section>
+
         <Section icon={HelpCircle} title="Sync with Spotify">
           <SpotifyLocalFilesTutorial />
         </Section>

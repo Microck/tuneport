@@ -18,6 +18,7 @@ import {
   Download,
   ChevronDown,
   ChevronUp,
+  ArrowLeft,
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Settings,
   User,
@@ -42,7 +43,8 @@ import type { Segment, SegmentMode } from '../services/SegmentParser';
 const Onboarding: React.FC<{
   settings: SettingsState;
   onSave: (clientId: string) => void;
-}> = ({ settings, onSave }) => {
+  onBack: () => void;
+}> = ({ settings, onSave, onBack }) => {
   const [clientId, setClientId] = useState('');
   const [showGuide, setShowGuide] = useState(false);
   const redirectUri = chrome.identity.getRedirectURL();
@@ -52,13 +54,20 @@ const Onboarding: React.FC<{
   };
 
   return (
-    <div className="flex flex-col h-full bg-tf-white min-h-[500px] text-tf-slate p-6 overflow-y-auto">
+    <div className="flex flex-col h-full bg-tf-white min-h-[500px] text-tf-slate p-6 overflow-y-auto relative">
+      <button 
+        onClick={onBack}
+        className="absolute top-6 left-6 p-2 hover:bg-tf-gray rounded-full transition-colors text-tf-slate-muted hover:text-tf-slate"
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </button>
+
       <div className="flex flex-col items-center mb-8 mt-4">
         <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg border border-tf-border mb-4">
           <img src={chrome.runtime.getURL('assets/logo.png')} alt="" className="w-10 h-10 drop-shadow-md" />
         </div>
         <h1 className="text-2xl font-bold serif italic text-tf-slate">
-          Welcome to TunePort
+          Set up your Spotify App
         </h1>
         <p className="text-tf-slate-muted text-xs mt-2 text-center max-w-[240px] leading-relaxed">
           Set up your own Spotify App to get started. This ensures higher rate limits and persistent login.
@@ -497,6 +506,9 @@ interface SettingsState {
   downloadMode: 'always' | 'missing_only';
   spotifyClientId?: string;
   spotifyClientSecret?: string;
+  bridgeEnabled?: boolean;
+  bridgeToken?: string;
+  bridgeRelayUrl?: string;
 }
 
 const DEFAULT_SETTINGS: SettingsState = {
@@ -520,7 +532,10 @@ const DEFAULT_SETTINGS: SettingsState = {
   matchThreshold: 0.85,
   downloadMode: 'missing_only',
   spotifyClientId: '',
-  spotifyClientSecret: ''
+  spotifyClientSecret: '',
+  bridgeEnabled: false,
+  bridgeToken: '',
+  bridgeRelayUrl: 'wss://relay.micr.dev'
 };
 
 export const TunePortPopup: React.FC = () => {
@@ -550,6 +565,7 @@ export const TunePortPopup: React.FC = () => {
   const [playlistSearch, setPlaylistSearch] = useState('');
   const [debugLogs, setDebugLogs] = useState<Array<{ time: string; message: string; type: 'info' | 'error' | 'warn' }>>([]);
   const [showDebugConsole, setShowDebugConsole] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
 
   const logoUrl = useMemo(() => chrome.runtime.getURL('assets/logo.png'), []);
@@ -563,6 +579,10 @@ export const TunePortPopup: React.FC = () => {
       if (result.lucida_enabled !== undefined) {
         setSettings(prev => ({ ...prev, lucidaEnabled: result.lucida_enabled }));
       }
+      
+      if (!result.tuneport_settings?.spotifyClientId) {
+        setShowOnboarding(true);
+      }
     } catch (error) {
       console.error('Failed to load settings:', error);
     }
@@ -574,6 +594,7 @@ export const TunePortPopup: React.FC = () => {
     
     // Update local state
     setSettings(newSettings);
+    setShowOnboarding(false);
     
     try {
       // Persist to storage immediately
@@ -585,23 +606,13 @@ export const TunePortPopup: React.FC = () => {
       // Notify background script
       await ChromeMessageService.sendMessage({ type: 'SETTINGS_UPDATED', settings: newSettings });
       
-      // Force reload settings to clear onboarding screen immediately
       loadSettings();
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
     }
   };
 
-  if (!settings.spotifyClientId) {
-    return <Onboarding settings={settings} onSave={handleOnboardingComplete} />;
-  }
-
   useEffect(() => {
-    checkConnection();
-    loadJobs();
-    getCurrentUrl();
-    loadSettings();
-    
     const interval = setInterval(() => {
       loadJobs();
       if (activeTab === 'activity' && showDebugConsole) {
@@ -611,14 +622,21 @@ export const TunePortPopup: React.FC = () => {
     return () => clearInterval(interval);
   }, [activeTab, showDebugConsole]);
 
-  const loadDebugLogs = async () => {
+  useEffect(() => {
+    checkConnection();
+    loadJobs();
+    getCurrentUrl();
+    loadSettings();
+  }, []);
+
+  async function loadDebugLogs() {
     try {
       const response = await ChromeMessageService.sendMessage({ type: 'GET_DEBUG_LOGS' });
       if (response.logs) setDebugLogs(response.logs);
     } catch (error) {
       console.error('Failed to load debug logs:', error);
     }
-  };
+  }
 
   const clearDebugLogs = async () => {
     try {
@@ -654,7 +672,7 @@ export const TunePortPopup: React.FC = () => {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
 
-  const checkConnection = async () => {
+  async function checkConnection() {
     try {
       const response = await SpotifyAuthService.checkConnection();
       setIsConnected(response.connected);
@@ -663,25 +681,25 @@ export const TunePortPopup: React.FC = () => {
     } catch (error) {
       console.error('Failed to check connection:', error);
     }
-  };
+  }
 
-  const loadPlaylists = async () => {
+  async function loadPlaylists() {
     try {
       const response = await ChromeMessageService.sendMessage({ type: 'GET_SPOTIFY_PLAYLISTS' });
       if (response.success) setPlaylists(response.playlists);
     } catch (error) {
       console.error('Failed to load playlists:', error);
     }
-  };
+  }
 
-  const loadJobs = async () => {
+  async function loadJobs() {
     try {
       const response = await ChromeMessageService.sendMessage({ type: 'GET_ACTIVE_JOBS' });
       if (response.jobs) setJobs(response.jobs);
     } catch (error) {
       console.error('Failed to load jobs:', error);
     }
-  };
+  }
 
   const confirmFallback = async (jobId: string) => {
     try {
@@ -701,7 +719,7 @@ export const TunePortPopup: React.FC = () => {
     }
   };
 
-  const getCurrentUrl = async () => {
+  async function getCurrentUrl() {
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (tab?.url) {
@@ -713,7 +731,7 @@ export const TunePortPopup: React.FC = () => {
     } catch (error) {
       console.error('Failed to get current URL:', error);
     }
-  };
+  }
 
   const fetchVideoMetadata = async (url: string) => {
     try {
@@ -851,6 +869,7 @@ export const TunePortPopup: React.FC = () => {
     return [...QUALITY_PRESETS, ...customPresets];
   }, [settings.customPresets]);
 
+
   const handleConnect = async () => {
     setIsAuthenticating(true);
     try {
@@ -901,7 +920,6 @@ export const TunePortPopup: React.FC = () => {
           } : undefined
         }
       });
-      // Always switch to activity tab to show feedback
       setActiveTab('activity');
       if (response.success) {
         loadJobs();
@@ -911,11 +929,19 @@ export const TunePortPopup: React.FC = () => {
     }
   };
 
+  const handleEditClientId = () => {
+    setShowOnboarding(true);
+  };
+
+  if (showOnboarding) {
+    return <Onboarding settings={settings} onSave={handleOnboardingComplete} onBack={() => setShowOnboarding(false)} />;
+  }
 
   const isYouTube = currentUrl.includes('youtube.com') || currentUrl.includes('youtu.be');
 
   if (!isConnected) {
     return (
+
       <div className="flex flex-col items-center justify-center min-h-[500px] p-8 bg-tf-white relative overflow-hidden">
         <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-tf-emerald/5 rounded-full blur-3xl" />
         <div className="absolute bottom-[-10%] left-[-10%] w-64 h-64 bg-tf-rose/5 rounded-full blur-3xl" />
@@ -946,7 +972,7 @@ export const TunePortPopup: React.FC = () => {
           </p>
         </motion.div>
 
-        <ShimmerButton onClick={handleConnect} disabled={isAuthenticating} className="mb-12">
+        <ShimmerButton onClick={handleConnect} disabled={isAuthenticating} className="mb-6">
           {isAuthenticating ? (
             <Loader2 className="animate-spin" />
           ) : (
@@ -955,6 +981,13 @@ export const TunePortPopup: React.FC = () => {
             </>
           )}
         </ShimmerButton>
+
+        <button
+          onClick={handleEditClientId}
+          className="px-3 py-1 bg-white hover:bg-tf-gray border border-tf-border rounded-full text-[10px] font-bold text-tf-slate-muted hover:text-tf-emerald transition-all shadow-sm mb-10"
+        >
+          Edit Client ID
+        </button>
 
         <div className="grid grid-cols-2 gap-4 w-full max-w-sm relative z-10">
           <BentoCard delay={0.4} className="bg-white/50 glass border-none">
@@ -1528,11 +1561,19 @@ export const TunePortPopup: React.FC = () => {
               className="space-y-4"
             >
               <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
-                    <User className="w-4 h-4" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
+                      <User className="w-4 h-4" />
+                    </div>
+                    <h2 className="text-sm font-bold text-tf-slate">Account</h2>
                   </div>
-                  <h2 className="text-sm font-bold text-tf-slate">Account</h2>
+                  <button
+                    onClick={handleEditClientId}
+                    className="px-3 py-1 bg-white hover:bg-tf-gray border border-tf-border rounded-full text-[10px] font-bold text-tf-slate-muted hover:text-tf-emerald transition-all"
+                  >
+                    Edit Client ID
+                  </button>
                 </div>
                 {user ? (
                   <div className="flex items-center justify-between p-3 bg-tf-gray/50 rounded-xl">
