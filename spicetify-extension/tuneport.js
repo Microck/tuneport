@@ -114,20 +114,15 @@ const addToPlaylist = async (playlistId, trackUri) => {
 
 const refreshLocalFiles = async () => {
   try {
-    const sources = await Spicetify.Platform.LocalFilesAPI.getSources();
-    const tuneportFolder = sources.folders?.find(f => f.path?.toLowerCase().includes('tuneport'));
-    if (tuneportFolder) {
-      console.log('[tuneport] refreshing folder:', tuneportFolder.path);
-      await Spicetify.Platform.LocalFilesAPI.removeFolder(tuneportFolder.path);
-      await sleep(500);
-      await Spicetify.Platform.LocalFilesAPI.addFolder(tuneportFolder.path);
-      await sleep(1000);
-    }
+    const api = Spicetify.Platform.LocalFilesAPI;
+    console.log('[tuneport] toggling local files to refresh...');
+    await api.setIsEnabled(false);
+    await sleep(500);
+    await api.setIsEnabled(true);
+    await sleep(1500);
+    console.log('[tuneport] local files refreshed');
   } catch (e) {
-    console.log('[tuneport] folder refresh failed, using _emitUpdate fallback');
-    try {
-      Spicetify.Platform.LocalFilesAPI._emitUpdate();
-    } catch {}
+    console.log('[tuneport] refresh failed:', e.message);
   }
 };
 
