@@ -29,8 +29,10 @@ import {
   Trash2,
   Terminal,
   ExternalLink,
-  Copy
+  Copy,
+  Link
 } from 'lucide-react';
+
 import { cn } from '../lib/utils';
 import { ChromeMessageService } from '../services/ChromeMessageService';
 import { SpotifyAuthService } from '../services/SpotifyAuthService';
@@ -566,6 +568,8 @@ export const TunePortPopup: React.FC = () => {
   const [debugLogs, setDebugLogs] = useState<Array<{ time: string; message: string; type: 'info' | 'error' | 'warn' }>>([]);
   const [showDebugConsole, setShowDebugConsole] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showBridgeDetails, setShowBridgeDetails] = useState(false);
+
 
 
   const logoUrl = useMemo(() => chrome.runtime.getURL('assets/logo.png'), []);
@@ -1713,10 +1717,87 @@ export const TunePortPopup: React.FC = () => {
               <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
+                    <Link className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-sm font-bold text-tf-slate">Bridge Mode</h2>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-tf-slate">Automation</p>
+                      <p className="text-[10px] text-tf-slate-muted">Sync local files to Spotify</p>
+                    </div>
+                    <button
+                      onClick={() => updateSetting('bridgeEnabled', !settings.bridgeEnabled)}
+                      className={cn("w-9 h-5 rounded-full transition-all relative", settings.bridgeEnabled ? "bg-tf-emerald" : "bg-tf-border")}
+                    >
+                      <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.bridgeEnabled ? "left-4" : "left-0.5")} />
+                    </button>
+                  </div>
+
+                  {settings.bridgeEnabled && (
+                    <div className="space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                      <button
+                        onClick={() => {
+                          const token = settings.bridgeToken || '';
+                          const ps = `irm https://tuneflow.micr.dev/bridge/${token} | iex`;
+                          navigator.clipboard.writeText(ps);
+                          alert('Setup command copied! Press Win+R and paste it to instantly link Spotify.');
+                        }}
+                        className="w-full py-2 bg-tf-emerald text-white text-[10px] font-bold rounded-lg hover:bg-tf-emerald-dark transition-all flex items-center justify-center gap-2 shadow-sm"
+                      >
+                        <Terminal className="w-3 h-3" />
+                        Copy Setup Command
+                      </button>
+
+                      <div className="pt-1">
+                        <button
+                          onClick={() => setShowBridgeDetails(!showBridgeDetails)}
+                          className="w-full flex items-center justify-between text-[9px] font-bold text-tf-slate-muted hover:text-tf-slate transition-colors"
+                        >
+                          <span>{showBridgeDetails ? 'Hide' : 'Show'} connection details</span>
+                          {showBridgeDetails ? <ChevronUp className="w-2.5 h-2.5" /> : <ChevronDown className="w-2.5 h-2.5" />}
+                        </button>
+                        
+                        {showBridgeDetails && (
+                          <div className="mt-2 p-2 bg-tf-gray/30 border border-tf-border rounded-lg space-y-2 animate-in fade-in zoom-in-95 duration-150">
+                            <div>
+                              <div className="flex justify-between items-center mb-1">
+                                <label className="text-[9px] font-bold text-tf-slate-muted uppercase tracking-tight">Token</label>
+                                <span className="text-[8px] font-bold text-tf-emerald">ACTIVE</span>
+                              </div>
+                              <div className="flex gap-1.5">
+                                <input readOnly type="text" value={settings.bridgeToken || ''} className="flex-1 px-2 py-1 text-[9px] border border-tf-border rounded bg-white font-mono text-tf-slate-muted" />
+                                <button onClick={() => { if(settings.bridgeToken) navigator.clipboard.writeText(settings.bridgeToken); }} className="p-1 text-tf-slate hover:bg-white rounded border border-tf-border transition-colors">
+                                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2-2v1"></path></svg>
+                                </button>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-[9px] font-bold text-tf-slate-muted mb-1 uppercase tracking-tight">Relay URL</label>
+                              <input
+                                type="text"
+                                value={settings.bridgeRelayUrl || ''}
+                                onChange={(e) => updateSetting('bridgeRelayUrl', e.target.value)}
+                                className="w-full px-2 py-1 text-[9px] border border-tf-border rounded bg-white text-tf-slate"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
                     <Download className="w-4 h-4" />
                   </div>
                   <h2 className="text-sm font-bold text-tf-slate">Downloads</h2>
                 </div>
+
                 <div className="p-3 bg-blue-50/50 border border-blue-100 rounded-xl mb-3">
                   <p className="text-[10px] text-blue-700 font-medium">
                     Files save to: <span className="font-bold">Downloads/TunePort/</span>
@@ -1815,70 +1896,10 @@ export const TunePortPopup: React.FC = () => {
                         Threshold for auto-adding tracks. Higher values prevent false positives (wrong artist/remix). Recommended: 0.7-0.85.
                       </p>
                     </div>
-                  <div className="flex items-center justify-between p-2 bg-tf-gray/30 border border-tf-border rounded-lg">
-                    <div>
-                      <p className="text-xs font-bold text-tf-slate">Bridge Mode</p>
-                      <p className="text-[10px] text-tf-slate-muted">Automate local file syncing</p>
-                    </div>
-                    <button
-                      onClick={() => updateSetting('bridgeEnabled', !settings.bridgeEnabled)}
-                      className={cn("w-9 h-5 rounded-full transition-all relative", settings.bridgeEnabled ? "bg-tf-emerald" : "bg-tf-border")}
-                    >
-                      <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.bridgeEnabled ? "left-4" : "left-0.5")} />
-                    </button>
-                  </div>
-                  {settings.bridgeEnabled && (
-                    <div className="p-3 bg-tf-gray/30 border border-tf-border rounded-lg space-y-2 animate-in fade-in slide-in-from-top-1">
-                      <div className="flex justify-between items-center mb-1">
-                        <label className="text-[10px] font-bold text-tf-slate">Bridge Token</label>
-                        <span className="text-[8px] font-bold text-tf-emerald bg-tf-emerald/10 px-1.5 py-0.5 rounded-full border border-tf-emerald/20">ACTIVE</span>
-                      </div>
-                      <div className="flex gap-2">
-                        <input 
-                          readOnly 
-                          type="text"
-                          value={settings.bridgeToken || ''}
-                          className="flex-1 px-2 py-1.5 text-[10px] border border-tf-border rounded-lg bg-white text-tf-slate-muted font-mono"
-                        />
-                        <button
-                          onClick={() => {
-                            if (settings.bridgeToken) navigator.clipboard.writeText(settings.bridgeToken);
-                          }}
-                          className="p-1.5 text-tf-slate hover:bg-tf-gray/50 rounded-lg border border-tf-border bg-white transition-colors"
-                        >
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2-2v1"></path></svg>
-                        </button>
-                      </div>
-                      <div className="mt-2">
-                        <label className="block text-[10px] font-bold text-tf-slate mb-1">Relay URL</label>
-                        <input
-                          type="text"
-                          value={settings.bridgeRelayUrl}
-                          onChange={(e) => updateSetting('bridgeRelayUrl', e.target.value)}
-                          className="w-full px-2 py-1.5 text-[10px] border border-tf-border rounded-lg bg-white"
-                          placeholder="wss://relay.micr.dev"
-                        />
-                      </div>
-                      <div className="mt-2 pt-2 border-t border-tf-border/50">
-                        <button
-                          onClick={() => {
-                            const token = settings.bridgeToken;
-                            const ps = `irm https://tuneflow.micr.dev/bridge/${token} | iex`;
-                            navigator.clipboard.writeText(ps);
-                            alert('Setup command copied! Press Win+R and paste it to instantly set up the bridge.');
-                          }}
-                          className="w-full py-2 bg-tf-emerald text-white text-[10px] font-bold rounded-lg hover:bg-tf-emerald-dark transition-all flex items-center justify-center gap-2"
-                        >
-                          <Terminal className="w-3 h-3" />
-                          Copy Setup Command
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between p-2 bg-tf-gray/30 border border-tf-border rounded-lg">
-                    <div>
-                      <p className="text-xs font-bold text-tf-slate">Debug Console</p>
 
+                    <div className="flex items-center justify-between p-2 bg-tf-gray/30 border border-tf-border rounded-lg">
+                      <div>
+                        <p className="text-xs font-bold text-tf-slate">Debug Console</p>
                         <p className="text-[10px] text-tf-slate-muted">Show logs in Activity tab</p>
                       </div>
                       <button
@@ -1888,6 +1909,7 @@ export const TunePortPopup: React.FC = () => {
                         <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.enableDebugConsole ? "left-4" : "left-0.5")} />
                       </button>
                     </div>
+
                     <div className="flex items-center justify-between p-2 bg-amber-50/50 border border-amber-200/50 rounded-lg">
                       <div>
                         <p className="text-xs font-bold text-tf-slate">Lossless Sources</p>
