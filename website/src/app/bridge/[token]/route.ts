@@ -51,7 +51,7 @@ try {
     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Microck/tuneport/main/spicetify-extension/tuneport.js" -OutFile $targetFile
 
     Write-Host "Configuring token..." -ForegroundColor Gray
-    (Get-Content $targetFile) -replace "STATIC_TOKEN = .+", "STATIC_TOKEN = '${token}'" | Set-Content $targetFile
+    (Get-Content $targetFile) -replace "STATIC_TOKEN = ''", "STATIC_TOKEN = '${token}'" | Set-Content $targetFile
 
     Write-Host "Applying Spicetify changes..." -ForegroundColor Gray
     # Try apply, if it fails (never backed up), run backup apply
