@@ -149,7 +149,14 @@ const scanAndMatch = async (filename, playlistId) => {
   const match = findBestMatch(filename, tracks);
   console.log('[tuneport] best fuzzy match:', match?.track?.name, 'score:', match?.score);
   
-  if (match && match.score >= 0.85) {
+  if (match && match.score >= 0.95) {
+    // For Japanese/Chinese characters, require even higher score (near exact)
+    // because fuzzy matching is unreliable for CJK
+    const hasCJK = /[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf]/.test(match.track.name);
+    if (hasCJK && match.score < 0.99) {
+      console.log('[tuneport] CJK detected, rejecting score:', match.score);
+      return false;
+    }
     await addToPlaylist(playlistId, match.track.uri);
     notify('Tuneport: local track added');
     return true;
