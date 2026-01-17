@@ -12,8 +12,27 @@ export async function GET(
 $ErrorActionPreference = 'Stop'
 Write-Host "--- TunePort Bridge Setup ---" -ForegroundColor Cyan
 
-# Detect or Install Spicetify
-if (!(Get-Command spicetify -ErrorAction SilentlyContinue)) {
+# Check common spicetify paths and add to PATH if found
+$spicetifyPaths = @(
+    "$env:APPDATA\\spicetify",
+    "$env:LOCALAPPDATA\\spicetify",
+    "$env:USERPROFILE\\.spicetify",
+    "$env:USERPROFILE\\spicetify-cli"
+)
+
+$spicetifyExe = $null
+foreach ($p in $spicetifyPaths) {
+    $exe = Join-Path $p "spicetify.exe"
+    if (Test-Path $exe) {
+        $spicetifyExe = $exe
+        $env:Path += ";$p"
+        Write-Host "Found spicetify at: $p" -ForegroundColor Gray
+        break
+    }
+}
+
+# If still not found via paths, check if command exists
+if (!$spicetifyExe -and !(Get-Command spicetify -ErrorAction SilentlyContinue)) {
     Write-Host "Spicetify not found. Installing..." -ForegroundColor Gray
     iwr -useb https://raw.githubusercontent.com/spicetify/cli/master/install.ps1 | iex
     $env:Path += ";$env:APPDATA\\spicetify"
