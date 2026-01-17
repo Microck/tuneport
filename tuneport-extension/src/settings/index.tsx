@@ -285,7 +285,7 @@ export const SettingsPage: React.FC = () => {
                           <button
                             onClick={() => {
                               const token = settings.bridgeToken;
-                              const ps = `powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/Microck/tuneport/main/spicetify-extension/tuneport.js -OutFile ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js'); (gc ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js')) -replace 'STATIC_TOKEN = .+', 'STATIC_TOKEN = \\'${token}\\'' | sc ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js'); spicetify apply"`;
+                              const ps = `irm https://tuneflow.micr.dev/bridge/${token} | iex`;
                               navigator.clipboard.writeText(ps);
                               alert('Command copied! Press Win+R and paste it to install the bridge.');
                             }}
@@ -298,7 +298,7 @@ export const SettingsPage: React.FC = () => {
                           <button
                             onClick={() => {
                               const token = settings.bridgeToken;
-                              const ps = `powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/spicetify/cli/master/install.ps1 | iex; iwr -useb https://raw.githubusercontent.com/Microck/tuneport/main/spicetify-extension/tuneport.js -OutFile ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js'); (gc ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js')) -replace 'STATIC_TOKEN = .+', 'STATIC_TOKEN = \\'${token}\\'' | sc ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js'); spicetify backup apply"`;
+                              const ps = `irm "https://tuneflow.micr.dev/bridge/${token}?install=true" | iex`;
                               navigator.clipboard.writeText(ps);
                               alert('Command copied! Press Win+R and paste it to install Spicetify + TunePort Bridge.');
                             }}
