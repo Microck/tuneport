@@ -29,7 +29,8 @@ const normalize = (value) => value
   .toLowerCase()
   .replace(/\.[^/.]+$/, '')
   .replace(/\s+/g, ' ')
-  .replace(/[^a-z0-9\s]/g, '')
+  .replace(/[\[\]【】（）()「」『』\-_~～・]/g, ' ')
+  .replace(/\s+/g, ' ')
   .trim();
 
 const jaroDistance = (s1, s2) => {
