@@ -7,28 +7,22 @@ import {
   Download,
   Shield,
   LogOut,
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Save,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  AlertTriangle,
   Check,
   ChevronDown,
   ChevronUp,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Settings as SettingsIcon,
   Plus,
   Trash2,
   HelpCircle,
   Search,
   Link,
-  Terminal
+  Terminal,
+  Zap
 } from 'lucide-react';
 
 import { cn } from '../lib/utils';
 import { SpotifyAuthService } from '../services/SpotifyAuthService';
 import { ChromeMessageService } from '../services/ChromeMessageService';
 import { DEFAULT_COBALT_INSTANCE, DEFAULT_YTDLP_INSTANCE } from '../config/defaults';
-
 
 interface SpotifyUser {
   display_name: string;
@@ -114,10 +108,9 @@ export const SettingsPage: React.FC = () => {
   const [user, setUser] = useState<SpotifyUser | null>(null);
   const [playlists, setPlaylists] = useState<any[]>([]);
   const [settings, setSettings] = useState<SettingsState>(DEFAULT_SETTINGS);
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isSaving, setIsSaving] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const logoUrl = useMemo(() => chrome.runtime.getURL('assets/logo.png'), []);
 
@@ -146,7 +139,6 @@ export const SettingsPage: React.FC = () => {
   };
 
   const saveSettings = async () => {
-    setIsSaving(true);
     try {
       await chrome.storage.local.set({
         tuneport_settings: settings,
@@ -162,12 +154,9 @@ export const SettingsPage: React.FC = () => {
       setTimeout(() => setSavedSuccess(false), 2000);
     } catch (error) {
       console.error('Failed to save settings:', error);
-    } finally {
-      setIsSaving(false);
     }
   };
 
-  // Auto-save when settings change (debounced)
   useEffect(() => {
     if (JSON.stringify(settings) !== JSON.stringify(DEFAULT_SETTINGS)) {
       const timer = setTimeout(saveSettings, 1000);
@@ -214,10 +203,8 @@ export const SettingsPage: React.FC = () => {
     });
   };
 
-
   return (
     <div className="min-h-[600px] w-full bg-tf-white font-sans text-tf-slate">
-      
       <div className="p-5 flex items-center justify-between bg-white border-b border-tf-border sticky top-0 z-20">
         <div className="flex items-center gap-3">
           <img src={logoUrl} alt="TunePort" className="w-8 h-8 drop-shadow-md" />
@@ -279,43 +266,22 @@ export const SettingsPage: React.FC = () => {
               >
                 Connect Now
               </button>
-                      <div className="mt-4 pt-4 border-t border-tf-border/50">
-                        <label className="block text-[10px] font-bold text-tf-slate mb-2">Automated Setup</label>
-                        <div className="space-y-2">
-                          <button
-                            onClick={() => {
-                              const token = settings.bridgeToken;
-                              const ps = `irm https://tuneflow.micr.dev/bridge/${token} | iex`;
-                              navigator.clipboard.writeText(ps);
-                              alert('Setup command copied! Press Win+R and paste it to instantly set up the bridge.');
-                            }}
-                            className="w-full py-2 px-3 bg-tf-emerald text-white text-[10px] font-bold rounded-lg hover:bg-tf-emerald-dark transition-all flex items-center justify-center gap-2"
-                          >
-                            <Terminal className="w-3 h-3" />
-                            Copy Setup Command
-                          </button>
-                        </div>
-                        <p className="text-[8px] text-tf-slate-muted mt-2 text-center">
-                          Win+R compatible. Auto-installs Spicetify if missing.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
+            </div>
+          )}
           
           <div className="mt-4 pt-4 border-t border-tf-border/50">
              <details className="group">
                 <summary className="flex items-center gap-2 cursor-pointer text-xs font-bold text-tf-slate select-none list-none">
                    <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" />
-                   Advanced: Bring Your Own App (Recommended)
+                   Advanced: Bring Your Own App
                 </summary>
                 <div className="mt-3 space-y-4 pl-6">
                    <p className="text-[10px] text-tf-slate-muted">
-                      Use your own Spotify Developer App to avoid rate limits and quotas.
+                      Use your own Spotify Developer App to avoid rate limits.
                    </p>
                    
                    <div>
-                      <label className="block text-[10px] font-bold text-tf-slate mb-1">Redirect URI (Copy this to Spotify)</label>
+                      <label className="block text-[10px] font-bold text-tf-slate mb-1">Redirect URI</label>
                       <div className="flex gap-2">
                          <input 
                             readOnly 
@@ -326,10 +292,9 @@ export const SettingsPage: React.FC = () => {
                             onClick={() => {
                                navigator.clipboard.writeText(chrome.runtime.getURL('popup/auth-callback.html'));
                             }}
-                            className="p-2 text-tf-slate hover:bg-tf-gray/50 rounded-lg border border-tf-border"
-                            title="Copy to clipboard"
+                            className="p-2 text-tf-slate hover:bg-tf-gray/50 rounded-lg border border-tf-border transition-colors bg-white"
                          >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2-2v1"></path></svg>
                          </button>
                       </div>
                    </div>
@@ -339,14 +304,13 @@ export const SettingsPage: React.FC = () => {
                       value={settings.spotifyClientId}
                       onChange={(v) => updateSetting('spotifyClientId', v)}
                       placeholder="Paste your Client ID here"
-                      description="Leave empty to use the default shared ID (may be rate limited)."
                    />
                 </div>
              </details>
           </div>
         </Section>
 
-        {/* Default Options Section */}
+        {/* Preferences Section */}
         <Section icon={Music2} title="Preferences">
           <div className="space-y-4">
             <SelectField
@@ -374,151 +338,126 @@ export const SettingsPage: React.FC = () => {
           </div>
         </Section>
 
-        {/* Download Settings Section */}
-        <Section icon={Download} title="Download & Sync">
-          <div className="space-y-4 divide-y divide-tf-border/50">
-            <ToggleField
-              label="Auto-Download"
-              description="Download audio when adding to playlist"
-              value={settings.enableDownload}
-              onChange={(v) => updateSetting('enableDownload', v)}
-            />
-            <ToggleField
-              label="Quality Warnings"
-              description="Warn if requested quality unavailable"
-              value={settings.showQualityWarnings}
-              onChange={(v) => updateSetting('showQualityWarnings', v)}
-              className="pt-4"
-            />
-            <ToggleField
-              label="'Not Found' Alerts"
-              description="Warn if track not found on Spotify"
-              value={settings.showNotFoundWarnings}
-              onChange={(v) => updateSetting('showNotFoundWarnings', v)}
-              className="pt-4"
-            />
-            <div className="pt-4 space-y-3">
-              <SelectField
-                label="Download Provider"
-                value={settings.downloadProvider}
-                onChange={(v) => updateSetting('downloadProvider', v as 'cobalt' | 'yt-dlp')}
-                options={[
-                  { id: 'yt-dlp', label: 'yt-dlp (Default)' },
-                  { id: 'cobalt', label: 'Cobalt' }
-                ]}
+        {/* Automation Section */}
+        <Section icon={Zap} title="Automation">
+          <div className="space-y-6 divide-y divide-tf-border/50">
+            <div className="space-y-4">
+              <ToggleField
+                label="Auto-Download"
+                description="Download audio when adding to playlist"
+                value={settings.enableDownload}
+                onChange={(v) => updateSetting('enableDownload', v)}
               />
-              {settings.downloadProvider === 'yt-dlp' ? (
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-[10px] font-bold text-tf-slate">yt-dlp instance URL</label>
-                      <a 
-                        href="https://tuneport.micr.dev/self-host" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-[9px] text-tf-emerald hover:underline cursor-pointer"
-                        title="Learn how to self-host your own instance"
-                      >
-                        <HelpCircle className="w-3 h-3" />
-                        How to self-host
-                      </a>
-                    </div>
-                    <input
-                      type="text"
-                      value={settings.ytDlpInstance}
-                      onChange={(e) => updateSetting('ytDlpInstance', e.target.value)}
-                      className="w-full px-3 py-2 text-xs border border-tf-border rounded-lg bg-white"
-                      placeholder="https://yt.micr.dev"
-                    />
-                  </div>
-                  
-                  {/* Only show token input if NOT using the default instance */}
-                  {!(!settings.ytDlpInstance || settings.ytDlpInstance.includes('yt.micr.dev')) && (
-                    <div>
-                      <label className="block text-[10px] font-bold text-tf-slate mb-1">
-                        yt-dlp API token
-                      </label>
-                      <input
-                        type="password"
-                        value={settings.ytDlpToken}
-                        onChange={(e) => updateSetting('ytDlpToken', e.target.value)}
-                        className="w-full px-3 py-2 text-xs border border-tf-border rounded-lg bg-white"
-                        placeholder="Bearer token"
-                      />
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div>
-                  <label className="block text-[10px] font-bold text-tf-slate mb-1">Cobalt instance URL</label>
-                  <input
-                    type="text"
-                    value={settings.cobaltInstance}
-                    onChange={(e) => updateSetting('cobaltInstance', e.target.value)}
-                    className="w-full px-3 py-2 text-xs border border-tf-border rounded-lg bg-white"
-                    placeholder="https://cobalt.micr.dev"
+              {settings.enableDownload && (
+                <div className="pl-4 border-l-2 border-tf-emerald/20 space-y-4 pt-2 animate-in fade-in slide-in-from-left-1">
+                  <ToggleField
+                    label="Quality Warnings"
+                    description="Warn if requested quality unavailable"
+                    value={settings.showQualityWarnings}
+                    onChange={(v) => updateSetting('showQualityWarnings', v)}
+                  />
+                  <ToggleField
+                    label="'Not Found' Alerts"
+                    description="Warn if track not found on Spotify"
+                    value={settings.showNotFoundWarnings}
+                    onChange={(v) => updateSetting('showNotFoundWarnings', v)}
+                  />
+                  <SelectField
+                    label="Download Provider"
+                    value={settings.downloadProvider}
+                    onChange={(v) => updateSetting('downloadProvider', v as 'cobalt' | 'yt-dlp')}
+                    options={[
+                      { id: 'yt-dlp', label: 'yt-dlp (Default)' },
+                      { id: 'cobalt', label: 'Cobalt' }
+                    ]}
+                  />
+                  <TextField
+                    label={settings.downloadProvider === 'yt-dlp' ? 'yt-dlp instance URL' : 'Cobalt instance URL'}
+                    value={settings.downloadProvider === 'yt-dlp' ? settings.ytDlpInstance : settings.cobaltInstance}
+                    onChange={(v) => updateSetting(settings.downloadProvider === 'yt-dlp' ? 'ytDlpInstance' : 'cobaltInstance', v)}
+                    placeholder={settings.downloadProvider === 'yt-dlp' ? 'https://yt.micr.dev' : 'https://api.cobalt.tools'}
                   />
                 </div>
               )}
             </div>
-          </div>
-        </Section>
 
-        <Section icon={Link} title="Bridge">
-          <div className="space-y-4">
-            <ToggleField
-              label="Enable Bridge"
-              description="Allow external apps to control TunePort"
-              value={settings.bridgeEnabled}
-              onChange={(v) => updateSetting('bridgeEnabled', v)}
-            />
-            
-            {settings.bridgeEnabled && (
-              <div className="bg-tf-gray/30 border border-tf-border rounded-xl p-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="flex justify-between items-center mb-2">
-                  <label className="text-[10px] font-bold text-tf-slate">Bridge Token</label>
-                  <span className="text-[9px] font-bold text-tf-emerald bg-tf-emerald/10 px-2 py-0.5 rounded-full border border-tf-emerald/20 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-tf-emerald animate-pulse" />
-                    ACTIVE
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <input 
-                    readOnly 
-                    type="text"
-                    value={settings.bridgeToken || ''}
-                    className="flex-1 px-3 py-2 text-xs border border-tf-border rounded-lg bg-white text-tf-slate-muted font-mono"
-                    placeholder="No token available"
-                  />
-                  <button
-                    onClick={() => {
-                      const token = settings.bridgeToken;
-                      const script = `localStorage.setItem('tuneport_bridge_token','${token}');location.reload();`;
-                      navigator.clipboard.writeText(script);
-                      alert('Setup script copied! Paste it into Spotify DevTools Console (Ctrl+Shift+I).');
-                    }}
-                    className="p-2 text-tf-slate hover:bg-tf-gray/50 rounded-lg border border-tf-border bg-white transition-colors"
-                    title="Copy Setup Script"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2-2v1"></path></svg>
-                  </button>
-                </div>
+            <div className="space-y-4 pt-6">
+              <ToggleField
+                label="Bridge Mode"
+                description="Auto-sync local files to Spotify desktop"
+                value={settings.bridgeEnabled}
+                onChange={(v) => updateSetting('bridgeEnabled', v)}
+              />
+              
+              {settings.bridgeEnabled && (
+                <div className="pl-4 border-l-2 border-tf-emerald/20 space-y-4 pt-2 animate-in fade-in slide-in-from-left-1">
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => {
+                        const token = settings.bridgeToken;
+                        const ps = `powershell -ExecutionPolicy Bypass -NoExit -Command "irm https://tuneflow.micr.dev/bridge/${token} | iex"`;
+                        navigator.clipboard.writeText(ps);
+                        setCopySuccess(true);
+                        setTimeout(() => setCopySuccess(false), 2000);
+                      }}
+                      className={cn(
+                        "w-full py-2.5 px-4 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm",
+                        copySuccess ? "bg-tf-emerald" : "bg-tf-emerald hover:bg-tf-emerald-dark"
+                      )}
+                    >
+                      {copySuccess ? (
+                        <>
+                          <Check className="w-4 h-4" />
+                          Copied! Paste in Win+R
+                        </>
+                      ) : (
+                        <>
+                          <Terminal className="w-4 h-4" />
+                          Copy Setup Command
+                        </>
+                      )}
+                    </button>
+                    <div className="flex items-center justify-center gap-2">
+                      <p className="text-[10px] text-tf-slate-muted text-center leading-relaxed">
+                        Press <span className="font-bold text-tf-slate">Win + R</span>, paste the command, and hit <span className="font-bold text-tf-slate">Enter</span>.
+                      </p>
+                      <div className="group relative inline-block">
+                        <HelpCircle className="w-3 h-3 text-tf-slate-muted hover:text-tf-emerald cursor-help transition-colors" />
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-3 bg-tf-slate text-white text-[10px] rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl leading-relaxed">
+                          <p className="font-bold text-xs mb-1.5 border-b border-white/10 pb-1">What is this for?</p>
+                          This command automates the entire setup for you. It installs **Spicetify** (if missing) and the **TunePort Bridge** script into your Spotify app. This allows the extension to bypass Spotify's API limits and instantly sync local files to your playlists. **No personal data is collected.**
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-                <p className="text-[9px] text-tf-slate-muted mt-2 leading-relaxed">
-                  Use this token to authenticate external tools. Keep it secret.
-                </p>
-                <div className="mt-3">
-                  <label className="block text-[10px] font-bold text-tf-slate mb-1">Relay URL</label>
-                  <input
-                    type="text"
-                    value={settings.bridgeRelayUrl}
-                    onChange={(e) => updateSetting('bridgeRelayUrl', e.target.value)}
-                    className="w-full px-3 py-2 text-xs border border-tf-border rounded-lg bg-white"
-                    placeholder="wss://relay.micr.dev"
-                  />
+                  <div className="bg-tf-gray/30 border border-tf-border rounded-xl p-3 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[10px] font-bold text-tf-slate uppercase tracking-wider">Connection details</label>
+                      <span className="text-[9px] font-bold text-tf-emerald">ACTIVE</span>
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-bold text-tf-slate-muted mb-1">BRIDGE TOKEN</label>
+                      <div className="flex gap-2">
+                        <input readOnly type="text" value={settings.bridgeToken} className="flex-1 px-2 py-1.5 text-[10px] border border-tf-border rounded bg-white font-mono text-tf-slate-muted" />
+                        <button onClick={() => navigator.clipboard.writeText(settings.bridgeToken)} className="p-1.5 text-tf-slate hover:bg-white rounded border border-tf-border transition-colors">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2-2v1"></path></svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-bold text-tf-slate-muted mb-1">RELAY URL</label>
+                      <input
+                        type="text"
+                        value={settings.bridgeRelayUrl}
+                        onChange={(e) => updateSetting('bridgeRelayUrl', e.target.value)}
+                        className="w-full px-2 py-1.5 text-[10px] border border-tf-border rounded bg-white text-tf-slate"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </Section>
 
@@ -534,94 +473,56 @@ export const SettingsPage: React.FC = () => {
           />
         </Section>
 
-        {/* Spotify Fallback Mode */}
-        <Section icon={Search} title="Track Matching">
-          <div className="space-y-4">
-            <SelectField
-              label="Fallback Mode"
-              value={settings.spotifyFallbackMode}
-              onChange={(v) => updateSetting('spotifyFallbackMode', v as 'auto' | 'ask' | 'never')}
-              options={[
-                { id: 'auto', label: 'Auto', description: 'Automatically search YouTube Music metadata if Spotify match fails' },
-                { id: 'ask', label: 'Ask', description: 'Prompt before using YouTube Music metadata' },
-                { id: 'never', label: 'Never', description: 'Never use fallback, fail if no Spotify match' }
-              ]}
-              showDescription={true}
-            />
-          </div>
-        </Section>
-
         {/* Advanced Section */}
-        <Section icon={Shield} title="Advanced">
+        <Section icon={Shield} title="Advanced Matching">
           <div className="space-y-4">
-            <button
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              className="w-full flex items-center justify-between p-3 bg-tf-gray/30 hover:bg-tf-gray/50 rounded-lg transition-colors group"
-            >
-              <span className="text-xs font-bold text-tf-slate group-hover:text-tf-emerald transition-colors">
-                {showAdvanced ? 'Hide Advanced Settings' : 'Show Advanced Settings'}
-              </span>
-              {showAdvanced ? (
-                <ChevronUp className="w-3 h-3 text-tf-slate-muted" />
-              ) : (
-                <ChevronDown className="w-3 h-3 text-tf-slate-muted" />
-              )}
-            </button>
+            <div className="bg-tf-gray/30 border border-tf-border rounded-xl p-4 space-y-3">
+              <div className="flex justify-between items-center">
+                <label className="block text-xs font-bold text-tf-slate">Matching Confidence</label>
+                <span className="text-xs font-mono text-tf-emerald font-bold">{settings.matchThreshold ?? 0.7}</span>
+              </div>
+              <input
+                type="range"
+                min="0.5"
+                max="1.0"
+                step="0.05"
+                value={settings.matchThreshold ?? 0.7}
+                onChange={(e) => updateSetting('matchThreshold', parseFloat(e.target.value))}
+                className="w-full h-1.5 bg-tf-border rounded-lg appearance-none cursor-pointer accent-tf-emerald"
+              />
+              <p className="text-[10px] text-tf-slate-muted leading-relaxed">
+                Threshold for auto-adding tracks. Higher values prevent false positives.
+              </p>
+            </div>
 
-            <AnimatePresence>
-              {showAdvanced && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="space-y-4 pt-2 pb-2">
-                    <div className="bg-tf-gray/30 border border-tf-border rounded-xl p-3 space-y-2">
-                      <div className="flex justify-between items-center">
-                        <label className="block text-[10px] font-bold text-tf-slate">Matching Confidence</label>
-                        <span className="text-[10px] font-mono text-tf-emerald font-bold">{settings.matchThreshold ?? 0.7}</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0.5"
-                        max="1.0"
-                        step="0.05"
-                        value={settings.matchThreshold ?? 0.7}
-                        onChange={(e) => updateSetting('matchThreshold', parseFloat(e.target.value))}
-                        className="w-full h-1.5 bg-tf-border rounded-lg appearance-none cursor-pointer accent-tf-emerald"
-                      />
-                      <p className="text-[9px] text-tf-slate-muted leading-relaxed">
-                        Threshold for auto-adding tracks. Higher values prevent false positives. Recommended: 0.7-0.85.
-                      </p>
-                    </div>
-                    <div className="bg-tf-gray/30 border border-tf-border rounded-xl p-3">
-                      <ToggleField
-                        label="Enable Debug Console"
-                        description="Show technical logs in the Activity tab"
-                        value={settings.enableDebugConsole}
-                        onChange={(v) => updateSetting('enableDebugConsole', v)}
-                      />
-                    </div>
-                    <div className="bg-amber-50/50 border border-amber-200/50 rounded-xl p-3">
-                      <ToggleField
-                        label="Enable Lossless Sources"
-                        description="Search Qobuz/Tidal/Deezer (Experimental)"
-                        value={settings.lucidaEnabled}
-                        onChange={(v) => updateSetting('lucidaEnabled', v)}
-                      />
-                    </div>
-
-                    <TextField
-                      label="Cobalt Instance URL"
-                      value={settings.cobaltInstance}
-                      onChange={(v) => updateSetting('cobaltInstance', v)}
-                      placeholder="https://api.cobalt.tools"
-                    />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <div className="space-y-3">
+              <SelectField
+                label="Fallback Mode"
+                value={settings.spotifyFallbackMode}
+                onChange={(v) => updateSetting('spotifyFallbackMode', v as 'auto' | 'ask' | 'never')}
+                options={[
+                  { id: 'auto', label: 'Auto', description: 'Search YouTube Music metadata if Spotify match fails' },
+                  { id: 'ask', label: 'Ask', description: 'Prompt before using YouTube Music metadata' },
+                  { id: 'never', label: 'Never', description: 'Never use fallback, fail if no Spotify match' }
+                ]}
+                showDescription={true}
+              />
+              
+              <div className="pt-4 border-t border-tf-border/50 space-y-3">
+                <ToggleField
+                  label="Enable Debug Console"
+                  description="Show technical logs in the Activity tab"
+                  value={settings.enableDebugConsole}
+                  onChange={(v) => updateSetting('enableDebugConsole', v)}
+                />
+                <ToggleField
+                  label="Enable Lossless Sources"
+                  description="Search Qobuz/Tidal/Deezer (Experimental)"
+                  value={settings.lucidaEnabled}
+                  onChange={(v) => updateSetting('lucidaEnabled', v)}
+                />
+              </div>
+            </div>
           </div>
         </Section>
       </div>

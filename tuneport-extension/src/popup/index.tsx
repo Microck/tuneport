@@ -21,15 +21,7 @@ import {
   MousePointer2,
   Terminal,
   LogOut,
-  Link,
-  Youtube,
-  Sparkles,
-  Loader2,
-  ChevronRight,
-  ArrowLeft,
-  AlertCircle,
-  CheckCircle2,
-  XCircle
+  Link
 } from 'lucide-react';
 
 import { cn } from '../lib/utils';
@@ -37,10 +29,35 @@ import { SpotifyAuthService } from '../services/SpotifyAuthService';
 import { ChromeMessageService } from '../services/ChromeMessageService';
 import { DEFAULT_COBALT_INSTANCE, DEFAULT_YTDLP_INSTANCE } from '../config/defaults';
 
-interface SpotifyUser {
-  display_name: string;
-  email: string;
-  images: Array<{ url: string }>;
+interface Segment {
+  start: number;
+  end: number;
+  title: string;
+}
+
+type SegmentMode = 'single' | 'multiple';
+
+interface Job {
+  id: string;
+  status: 'pending' | 'downloading' | 'converting' | 'uploading' | 'completed' | 'failed' | 'awaiting_fallback';
+  progress: number;
+  title: string;
+  artist: string;
+  thumbnail: string;
+  error?: string;
+  downloadInfo?: {
+    enabled: boolean;
+    quality: string;
+    source: string;
+    filename: string;
+    fileCount?: number;
+  };
+  fallbackMetadata?: {
+    title: string;
+    artist: string;
+    album: string;
+    thumbnail: string;
+  };
 }
 
 interface QualityPreset {
@@ -51,23 +68,11 @@ interface QualityPreset {
   isCustom?: boolean;
 }
 
-interface Job {
-  jobId: string;
-  status: 'queued' | 'searching' | 'adding' | 'downloading' | 'completed' | 'failed' | 'awaiting_fallback';
-  progress: number;
-  trackInfo?: {
-    title: string;
-    artist: string;
-  };
-  thumbnail?: string;
-  error?: string;
-}
-
-const QUALITY_PRESETS: QualityPreset[] = [
-  { id: 'm4a', label: 'M4A', format: 'm4a', description: 'Native YouTube format (~128kbps). Recommended default for Spotify.' },
-  { id: 'opus', label: 'Opus', format: 'opus', description: 'Highest quality source (~141kbps). Note: Not supported by Spotify Local Files.' },
-  { id: 'mp3', label: 'MP3', format: 'mp3', description: 'Universal compatibility. Re-encoded from source.' },
-  { id: 'wav', label: 'WAV', format: 'wav', description: 'Uncompressed audio. Very large files.' },
+const QUALITY_OPTIONS = [
+  { id: 'best', label: 'Opus', description: 'Native YouTube quality. ~128kbps Opus, equivalent to MP3 320kbps.' },
+  { id: 'mp3', label: 'MP3', description: 'Universal compatibility. Re-encoded from source.' },
+  { id: 'ogg', label: 'OGG Vorbis', description: 'Open format. Good for Linux/FOSS applications.' },
+  { id: 'wav', label: 'WAV', description: 'Uncompressed audio. Large files.' }
 ];
 
 const FILE_NAMING_OPTIONS = [
@@ -75,6 +80,165 @@ const FILE_NAMING_OPTIONS = [
   { id: 'title-artist', label: 'Title - Artist' },
   { id: 'title', label: 'Title only' }
 ];
+
+const SpotifyLocalFilesTutorial: React.FC = () => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  return (
+    <div className="space-y-3">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between p-3 bg-tf-gray/30 hover:bg-tf-gray/50 rounded-lg transition-colors"
+      >
+        <span className="text-xs font-bold text-tf-slate">How to enable Spotify Local Files</span>
+        {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+      </button>
+      
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-xs space-y-3">
+              <p className="text-tf-slate font-medium">
+                Spotify doesn&apos;t scan local files by default. Follow these steps:
+              </p>
+              <ol className="list-decimal list-inside space-y-2 text-tf-slate-muted">
+                <li>Open the <span className="font-bold text-tf-slate">Spotify desktop app</span></li>
+                <li>Click your profile picture → <span className="font-bold text-tf-slate">Settings</span></li>
+                <li>Scroll to <span className="font-bold text-tf-slate">Library</span></li>
+                <li>Toggle <span className="font-bold text-tf-emerald">Show Local Files</span> ON</li>
+                <li>Under &quot;Show songs from&quot;, enable your <span className="font-bold text-tf-slate">Downloads</span> folder</li>
+                <li>Or click <span className="font-bold text-tf-slate">Add a source</span> and navigate to your Downloads/TunePort folder</li>
+              </ol>
+              <p className="text-[10px] text-tf-slate-muted pt-2 border-t border-blue-100">
+                Downloaded files are saved to: <span className="font-mono">Downloads/TunePort/</span>
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const CustomPresetsManager: React.FC<{
+  presets: QualityPreset[];
+  onChange: (presets: QualityPreset[]) => void;
+}> = ({ presets, onChange }) => {
+  const [isAdding, setIsAdding] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newFormat, setNewFormat] = useState('mp3');
+  
+  const MAX_PRESETS = 5;
+  const canAdd = presets.length < MAX_PRESETS;
+  
+  const handleAdd = () => {
+    if (!newName.trim() || !canAdd) return;
+    
+    const newPreset: QualityPreset = {
+      id: `custom-${Date.now()}`,
+      label: newName.trim(),
+      format: newFormat,
+      isCustom: true
+    };
+    
+    onChange([...presets, newPreset]);
+    setNewName('');
+    setNewFormat('mp3');
+    setIsAdding(false);
+  };
+  
+  const handleDelete = (id: string) => {
+    onChange(presets.filter(p => p.id !== id));
+  };
+  
+  return (
+    <div className="space-y-3">
+      <p className="text-[10px] text-tf-slate-muted">
+        Create up to {MAX_PRESETS} custom presets for quick access.
+      </p>
+      
+      {presets.length > 0 && (
+        <div className="space-y-2">
+          {presets.map((preset) => (
+            <div
+              key={preset.id}
+              className="flex items-center justify-between p-3 bg-tf-gray/30 rounded-lg"
+            >
+              <div>
+                <p className="text-xs font-bold text-tf-slate">{preset.label}</p>
+                <p className="text-[10px] text-tf-slate-muted">{preset.format.toUpperCase()}</p>
+              </div>
+              <button
+                onClick={() => handleDelete(preset.id)}
+                className="p-1.5 text-tf-rose hover:bg-tf-rose/10 rounded-lg transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      
+      {isAdding ? (
+        <div className="p-3 bg-tf-gray/30 rounded-lg space-y-3">
+          <input
+            type="text"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Preset name"
+            className="w-full px-3 py-2 bg-white border border-tf-border rounded-lg text-xs focus:outline-none focus:border-tf-emerald"
+            maxLength={20}
+          />
+          <select
+            value={newFormat}
+            onChange={(e) => setNewFormat(e.target.value)}
+            className="w-full px-3 py-2 bg-white border border-tf-border rounded-lg text-xs focus:outline-none focus:border-tf-emerald"
+          >
+            <option value="best">Opus (Best)</option>
+            <option value="opus">Opus</option>
+            <option value="mp3">MP3</option>
+            <option value="ogg">OGG</option>
+            <option value="wav">WAV</option>
+          </select>
+          <div className="flex gap-2">
+            <button
+              onClick={handleAdd}
+              disabled={!newName.trim()}
+              className="flex-1 py-2 bg-tf-emerald text-white text-xs font-bold rounded-lg disabled:opacity-50"
+            >
+              Save
+            </button>
+            <button
+              onClick={() => { setIsAdding(false); setNewName(''); }}
+              className="flex-1 py-2 bg-tf-gray text-tf-slate text-xs font-bold rounded-lg"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => setIsAdding(true)}
+          disabled={!canAdd}
+          className={cn(
+            "w-full flex items-center justify-center gap-2 p-3 rounded-lg text-xs font-bold transition-colors",
+            canAdd
+              ? "bg-tf-emerald/10 text-tf-emerald hover:bg-tf-emerald/20"
+              : "bg-tf-gray text-tf-slate-muted cursor-not-allowed"
+          )}
+        >
+          <Plus className="w-3.5 h-3.5" />
+          {canAdd ? 'Add Custom Preset' : `Maximum ${MAX_PRESETS} presets reached`}
+        </button>
+      )}
+    </div>
+  );
+};
 
 interface SettingsState {
   defaultPlaylist: string;
@@ -121,7 +285,6 @@ const DEFAULT_SETTINGS: SettingsState = {
   enableDebugConsole: false,
   matchThreshold: 0.85,
   downloadMode: 'missing_only',
-  spotifyClientId: '',
   bridgeEnabled: false,
   bridgeToken: '',
   bridgeRelayUrl: 'wss://relay.micr.dev'
@@ -133,399 +296,413 @@ const createBridgeToken = () => {
   return Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('');
 };
 
-const ShimmerButton: React.FC<{
-  children: React.ReactNode;
-  onClick?: () => void;
-  disabled?: boolean;
-  className?: string;
-}> = ({ children, onClick, disabled, className }) => {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={cn(
-        'shimmer-button group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden',
-        'rounded-2xl px-8 py-4 whitespace-nowrap',
-        'text-white font-bold text-lg mono tracking-wide',
-        'bg-gradient-to-r from-tf-emerald to-tf-emerald-dark',
-        'transform-gpu transition-all duration-300 ease-in-out',
-        'hover:scale-[1.02] hover:shadow-2xl hover:shadow-tf-emerald/30',
-        'active:scale-95',
-        'disabled:opacity-50 disabled:cursor-not-allowed',
-        className
-      )}
-    >
-      <span className="relative z-10 flex items-center gap-2">{children}</span>
-    </button>
-  );
-};
-
-const OrbitingCircles: React.FC<{
-  className?: string;
-  children?: React.ReactNode;
-  reverse?: boolean;
-  duration?: number;
-  radius?: number;
-  path?: boolean;
-  iconSize?: number;
-  speed?: number;
-}> = ({
-  className,
-  children,
-  reverse,
-  duration = 20,
-  radius = 80,
-  path = true,
-  iconSize = 30,
-  speed = 1,
-}) => {
-  const calculatedDuration = duration / speed;
-  return (
-    <div className={cn("relative flex items-center justify-center", className)}>
-      {path && (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          version="1.1"
-          className="pointer-events-none absolute inset-0 size-full overflow-visible"
-        >
-          <circle
-            className="stroke-tf-emerald/10 stroke-[1px]"
-            cx="50%"
-            cy="50%"
-            r={radius}
-            fill="none"
-          />
-        </svg>
-      )}
-      {React.Children.map(children, (child, index) => {
-        const angle = (360 / React.Children.count(children)) * index;
-        return (
-          <div
-            style={
-              {
-                "--duration": `${calculatedDuration}s`,
-                "--radius": `${radius}px`,
-                "--angle": angle,
-                "--icon-size": `${iconSize}px`,
-              } as React.CSSProperties
-            }
-            className={cn(
-              "animate-orbit absolute flex size-[var(--icon-size)] transform-gpu items-center justify-center rounded-full",
-              { "[animation-direction:reverse]": reverse }
-            )}
-          >
-            {child}
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-
-const BentoCard: React.FC<{
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-}> = ({ children, className, delay = 0 }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay }}
-    className={cn(
-      'tf-card group relative overflow-hidden bg-white p-5 shadow-sm rounded-2xl border border-tf-border',
-      className
-    )}
-  >
-    {children}
-  </motion.div>
-);
-
-const SpotifyLocalFilesTutorial: React.FC = () => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  
-  return (
-    <div className="space-y-3">
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-3 bg-tf-gray/30 hover:bg-tf-gray/50 rounded-lg transition-colors"
-      >
-        <div className="flex items-center gap-2">
-          <HelpCircle className="w-3.5 h-3.5 text-tf-emerald" />
-          <span className="text-xs font-bold text-tf-slate">How to enable Spotify Local Files</span>
-        </div>
-        {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-      </button>
-      
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
-          >
-            <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-xs space-y-3">
-              <p className="text-tf-slate font-medium">
-                Local Files is <span className="font-bold text-tf-rose">disabled by default</span> in Spotify. To see your downloads:
-              </p>
-              <ol className="list-decimal list-inside space-y-2 text-tf-slate-muted">
-                <li>Open the <span className="font-bold text-tf-slate">Spotify desktop app</span></li>
-                <li>Click your profile picture → <span className="font-bold text-tf-slate">Settings</span></li>
-                <li>Scroll to <span className="font-bold text-tf-slate">Library</span> section</li>
-                <li>Toggle <span className="font-bold text-tf-emerald">Show Local Files</span> ON</li>
-                <li>Click <span className="font-bold text-tf-slate">Add a source</span></li>
-                <li>Navigate to <span className="font-mono text-tf-slate">Downloads → TunePort</span> and select it</li>
-              </ol>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
-const Onboarding: React.FC<{
-  settings: SettingsState;
-  onSave: (clientId: string) => void;
-  onBack: () => void;
-}> = ({ onSave, onBack }) => {
-  const [clientId, setClientId] = useState('');
-  const [showGuide, setShowGuide] = useState(false);
-
-  return (
-    <div className="flex flex-col h-full bg-tf-white min-h-[500px] text-tf-slate p-6 overflow-y-auto relative">
-      <button 
-        onClick={onBack}
-        className="absolute top-6 left-6 p-2 hover:bg-tf-gray rounded-full transition-colors text-tf-slate-muted hover:text-tf-slate"
-      >
-        <ArrowLeft className="w-5 h-5" />
-      </button>
-
-      <div className="flex flex-col items-center mb-8 mt-4">
-        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg border border-tf-border mb-4">
-          <img src={chrome.runtime.getURL('assets/logo.png')} alt="" className="w-10 h-10 drop-shadow-md" />
-        </div>
-        <h1 className="text-2xl font-bold serif italic text-tf-slate">Spotify App Setup</h1>
-        <p className="text-tf-slate-muted text-xs mt-2 text-center max-w-[240px] leading-relaxed font-medium">Use your own Spotify App for high rate limits.</p>
-      </div>
-
-      <div className="space-y-6 flex-1">
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-tf-slate uppercase tracking-wider">1. Redirect URI</label>
-          <div className="flex gap-2">
-            <div className="flex-1 bg-white rounded-lg p-3 text-[10px] font-mono text-tf-slate-muted truncate border border-tf-border shadow-sm">{`chrome-extension://${chrome.runtime.id}/popup/auth-callback.html`}</div>
-            <button onClick={() => navigator.clipboard.writeText(`chrome-extension://${chrome.runtime.id}/popup/auth-callback.html`)} className="p-3 bg-white hover:bg-tf-gray rounded-lg border border-tf-border transition-colors text-tf-emerald shadow-sm"><Copy className="w-4 h-4" /></button>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-tf-slate uppercase tracking-wider">2. Client ID</label>
-          <input type="text" value={clientId} onChange={(e) => setClientId(e.target.value)} placeholder="Paste Client ID here" className="w-full bg-white rounded-lg p-3 text-xs text-tf-slate border border-tf-border focus:border-tf-emerald focus:outline-none transition-all shadow-sm" />
-        </div>
-      </div>
-
-      <div className="mt-8">
-        <button onClick={() => onSave(clientId)} disabled={!clientId} className={cn("w-full py-3 rounded-xl font-bold text-xs shadow-lg transition-all", clientId ? "bg-tf-emerald text-white hover:bg-tf-emerald-dark" : "bg-tf-gray text-tf-slate-muted cursor-not-allowed")}>Save Configuration</button>
-      </div>
-    </div>
-  );
-};
 
 export const TunePortPopup: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
-  const [user, setUser] = useState<SpotifyUser | null>(null);
+  const [user, setUser] = useState<{ display_name: string; email: string; images: Array<{ url: string }> } | null>(null);
   const [playlists, setPlaylists] = useState<any[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'sync' | 'activity' | 'settings'>('sync');
+  const [selectedQuality, setSelectedQuality] = useState<string>('m4a');
+  const [enableDownload, setEnableDownload] = useState(true);
+  const [segmentsEnabled, setSegmentsEnabled] = useState(false);
+  const [segmentMode, setSegmentMode] = useState<'auto' | 'manual'>('auto');
+  const [manualSegmentMode, setManualSegmentMode] = useState<SegmentMode>('multiple');
+  const [segmentInput, setSegmentInput] = useState('');
+  const [detectedSegments, setDetectedSegments] = useState<Segment[]>([]);
+  const [manualSegments, setManualSegments] = useState<Segment[]>([]);
+  const [selectedSegmentIndexes, setSelectedSegmentIndexes] = useState<number[]>([]);
+  const [showQualityDropdown, setShowQualityDropdown] = useState(false);
   const [settings, setSettings] = useState<SettingsState>(DEFAULT_SETTINGS);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
-  const [videoMetadata, setVideoMetadata] = useState<any>(null);
+  const [videoMetadata, setVideoMetadata] = useState<{ title: string; artist: string; thumbnail: string } | null>(null);
   const [showPlaylistDropdown, setShowPlaylistDropdown] = useState(false);
   const [selectedPlaylist, setSelectedPlaylist] = useState<any | null>(null);
   const [playlistSearch, setPlaylistSearch] = useState('');
+  const [debugLogs, setDebugLogs] = useState<Array<{ time: string; message: string; type: 'info' | 'error' | 'warn' }>>([]);
+  const [showDebugConsole, setShowDebugConsole] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [showBridgeDetails, setShowBridgeDetails] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [currentUrl, setCurrentUrl] = useState('');
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   const logoUrl = useMemo(() => chrome.runtime.getURL('assets/logo.png'), []);
 
   const loadSettings = async () => {
     try {
       const result = await chrome.storage.local.get(['tuneport_settings', 'lucida_enabled']);
-      if (result.tuneport_settings) setSettings({ ...DEFAULT_SETTINGS, ...result.tuneport_settings });
-      if (!result.tuneport_settings?.spotifyClientId) setShowOnboarding(true);
-    } catch (e) { console.error(e); }
+      if (result.tuneport_settings) {
+        setSettings({ ...DEFAULT_SETTINGS, ...result.tuneport_settings });
+      }
+      if (result.lucida_enabled !== undefined) {
+        setSettings(prev => ({ ...prev, lucidaEnabled: result.lucida_enabled }));
+      }
+      
+      if (!result.tuneport_settings?.spotifyClientId) {
+        setShowOnboarding(true);
+      }
+    } catch (error) {
+      console.error('Failed to load settings:', error);
+    }
   };
 
-  const checkConnection = async () => {
+  const handleOnboardingComplete = async (clientId: string) => {
+    const newSettings = { ...settings, spotifyClientId: clientId };
+    setSettings(newSettings);
+    setShowOnboarding(false);
+    
+    try {
+      await chrome.storage.local.set({
+        tuneport_settings: newSettings,
+        lucida_enabled: newSettings.lucidaEnabled
+      });
+      await ChromeMessageService.sendMessage({ type: 'SETTINGS_UPDATED', settings: newSettings });
+      loadSettings();
+    } catch (error) {
+      console.error('Failed to complete onboarding:', error);
+    }
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadJobs();
+      if (activeTab === 'activity' && showDebugConsole) {
+        loadDebugLogs();
+      }
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [activeTab, showDebugConsole]);
+
+  useEffect(() => {
+    checkConnection();
+    loadJobs();
+    getCurrentUrl();
+    loadSettings();
+  }, []);
+
+  async function loadDebugLogs() {
+    try {
+      const response = await ChromeMessageService.sendMessage({ type: 'GET_DEBUG_LOGS' });
+      if (response.logs) setDebugLogs(response.logs);
+    } catch (error) {
+      console.error('Failed to load debug logs:', error);
+    }
+  }
+
+  const clearDebugLogs = async () => {
+    try {
+      await ChromeMessageService.sendMessage({ type: 'CLEAR_DEBUG_LOGS' });
+      setDebugLogs([]);
+    } catch (error) {
+      console.error('Failed to clear debug logs:', error);
+    }
+  };
+
+  const saveSettings = async () => {
+    try {
+      await chrome.storage.local.set({
+        tuneport_settings: settings,
+        lucida_enabled: settings.lucidaEnabled
+      });
+      await ChromeMessageService.sendMessage({ type: 'SETTINGS_UPDATED', settings });
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 2000);
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'settings') {
+      const timer = setTimeout(saveSettings, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [settings]);
+
+  const updateSetting = <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => {
+    setSettings((prev) => {
+      if (key === 'bridgeEnabled' && value === true && !prev.bridgeToken) {
+        return { ...prev, [key]: value, bridgeToken: createBridgeToken() };
+      }
+      return { ...prev, [key]: value };
+    });
+  };
+
+  async function checkConnection() {
     try {
       const response = await SpotifyAuthService.checkConnection();
       setIsConnected(response.connected);
       setUser(response.user || null);
-      if (response.connected) {
-        const pResp = await ChromeMessageService.sendMessage({ type: 'GET_SPOTIFY_PLAYLISTS' });
-        if (pResp.success) setPlaylists(pResp.playlists);
-      }
-    } catch (error) { console.error(error); }
-  };
+      if (response.connected) loadPlaylists();
+    } catch (error) {
+      console.error('Failed to check connection:', error);
+    }
+  }
 
-  const loadJobs = async () => {
+  async function loadPlaylists() {
+    try {
+      const response = await ChromeMessageService.sendMessage({ type: 'GET_SPOTIFY_PLAYLISTS' });
+      if (response.success) setPlaylists(response.playlists);
+    } catch (error) {
+      console.error('Failed to load playlists:', error);
+    }
+  }
+
+  async function loadJobs() {
     try {
       const response = await ChromeMessageService.sendMessage({ type: 'GET_ACTIVE_JOBS' });
       if (response.jobs) setJobs(response.jobs);
-    } catch (error) { console.error(error); }
+    } catch (error) {
+      console.error('Failed to load jobs:', error);
+    }
+  }
+
+  const confirmFallback = async (jobId: string) => {
+    try {
+      await ChromeMessageService.sendMessage({ type: 'CONFIRM_FALLBACK', jobId });
+      loadJobs();
+    } catch (error) {
+      console.error('Failed to confirm fallback:', error);
+    }
   };
 
-  useEffect(() => {
-    loadSettings();
-    checkConnection();
-    loadJobs();
-    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+  const rejectFallback = async (jobId: string) => {
+    try {
+      await ChromeMessageService.sendMessage({ type: 'REJECT_FALLBACK', jobId });
+      loadJobs();
+    } catch (error) {
+      console.error('Failed to reject fallback:', error);
+    }
+  };
+
+  async function getCurrentUrl() {
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (tab?.url) {
         setCurrentUrl(tab.url);
         if (tab.url.includes('youtube.com') || tab.url.includes('youtu.be')) {
-          const videoIdMatch = tab.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
-          if (videoIdMatch) {
-            fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoIdMatch[1]}&format=json`)
-              .then(r => r.json())
-              .then(data => setVideoMetadata({ title: data.title, artist: data.author_name, thumbnail: data.thumbnail_url }))
-              .catch(() => {});
-          }
+          fetchVideoMetadata(tab.url);
         }
       }
-    });
-    const interval = setInterval(loadJobs, 2000);
-    return () => clearInterval(interval);
-  }, []);
+    } catch (error) {
+      console.error('Failed to get current URL:', error);
+    }
+  }
 
-  const updateSetting = <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => {
-    setSettings(prev => {
-      const next = { ...prev, [key]: value };
-      if (key === 'bridgeEnabled' && value && !prev.bridgeToken) next.bridgeToken = createBridgeToken();
-      chrome.storage.local.set({ tuneport_settings: next });
-      ChromeMessageService.sendMessage({ type: 'SETTINGS_UPDATED', settings: next });
-      return next;
-    });
+  const fetchVideoMetadata = async (url: string) => {
+    try {
+      const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+      if (!videoMetadata && videoIdMatch) {
+        const videoId = videoIdMatch[1];
+        const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+        const data = await response.json();
+        setVideoMetadata({
+          title: data.title,
+          artist: data.author_name,
+          thumbnail: data.thumbnail_url
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch video metadata:', error);
+    }
   };
 
-  const handleSync = async (playlistId: string) => {
-    const resp = await ChromeMessageService.sendMessage({
-      type: 'ADD_TRACK_TO_PLAYLIST',
-      data: { youtubeUrl: currentUrl, playlistId, download: settings.enableDownload, downloadOptions: { format: settings.defaultQuality } }
-    });
-    if (resp.success) setActiveTab('activity');
+  const handleSync = async () => {
+    if (!selectedPlaylist) return;
+    try {
+      const response = await ChromeMessageService.sendMessage({
+        type: 'SYNC_VIDEO',
+        url: currentUrl,
+        playlistId: selectedPlaylist.id,
+        quality: selectedQuality,
+        segments: segmentsEnabled ? (segmentMode === 'auto' ? detectedSegments : manualSegments) : undefined
+      });
+      if (response.success) {
+        setActiveTab('activity');
+        loadJobs();
+      }
+    } catch (error) {
+      console.error('Failed to sync video:', error);
+    }
   };
 
-  const filteredPlaylists = useMemo(() => {
-    let filtered = playlists;
-    if (settings.visiblePlaylists && settings.visiblePlaylists.length > 0) filtered = filtered.filter(p => settings.visiblePlaylists.includes(p.id));
-    if (playlistSearch) filtered = filtered.filter(p => p.name.toLowerCase().includes(playlistSearch.toLowerCase()));
-    return filtered;
-  }, [playlists, playlistSearch, settings.visiblePlaylists]);
+  const handleDisconnect = async () => {
+    await SpotifyAuthService.disconnect();
+    setIsConnected(false);
+    setUser(null);
+  };
 
-  if (showOnboarding) return <Onboarding settings={settings} onSave={id => { updateSetting('spotifyClientId', id); setShowOnboarding(false); }} onBack={() => setShowOnboarding(false)} />;
-
-  if (!isConnected) return (
-    <div className="flex flex-col items-center justify-center min-h-[500px] p-8 bg-tf-white relative overflow-hidden">
-      <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-tf-emerald/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-64 h-64 bg-tf-rose/5 rounded-full blur-3xl" />
-      <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mb-12 relative">
-        <div className="absolute inset-0 bg-tf-emerald/20 blur-2xl rounded-full scale-150 animate-pulse" />
-        <img src={logoUrl} className="w-24 h-24 relative z-10 drop-shadow-2xl" />
-      </motion.div>
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10 relative z-10">
-        <h1 className="text-5xl font-bold italic mb-3">TunePort</h1>
-        <p className="text-tf-slate-muted max-w-[240px] mx-auto font-medium">Synchronize your musical discovery.</p>
-      </motion.div>
-      <ShimmerButton onClick={() => SpotifyAuthService.connect(settings.spotifyClientId)} disabled={isAuthenticating}>
-        Connect Spotify <ChevronRight className="w-5 h-5 ml-1" />
-      </ShimmerButton>
-      <button onClick={() => setShowOnboarding(true)} className="mt-8 text-[10px] font-bold text-tf-slate-muted hover:text-tf-emerald transition-colors uppercase tracking-widest">Edit Client ID</button>
-      <div className="grid grid-cols-2 gap-4 w-full max-w-sm mt-12 relative z-10">
-        <BentoCard delay={0.4} className="bg-white/50 glass border-none"><Sparkles className="w-6 h-6 text-tf-emerald mb-2" /><p className="text-[10px] font-semibold">Precise track synchronization.</p></BentoCard>
-        <BentoCard delay={0.5} className="bg-white/50 glass border-none"><Zap className="w-6 h-6 text-tf-rose mb-2" /><p className="text-[10px] font-semibold">Seamless library expansion.</p></BentoCard>
-      </div>
-    </div>
-  );
+  const handleEditClientId = () => {
+    setShowOnboarding(true);
+  };
 
   return (
     <div className="w-[380px] min-h-[580px] bg-tf-white flex flex-col font-sans overflow-hidden">
-      <div className="p-5 flex items-center justify-between border-b border-tf-border bg-white sticky top-0 z-50">
-        <div className="flex items-center gap-3"><img src={logoUrl} className="w-8 h-8" /><div><h2 className="text-xl font-bold italic">TunePort</h2></div></div>
-        <button onClick={() => SpotifyAuthService.disconnect().then(checkConnection)} className="p-2 text-tf-slate-muted hover:text-tf-rose"><LogOut className="w-5 h-5" /></button>
-      </div>
-
-      <div className="flex p-2 bg-tf-gray mx-5 my-4 rounded-2xl gap-1">
-        {(['sync', 'activity', 'settings'] as const).map(tab => (
-          <button key={tab} onClick={() => setActiveTab(tab)} className={cn("flex-1 py-2 rounded-xl text-[10px] font-bold uppercase mono", activeTab === tab ? "bg-white text-tf-emerald shadow-sm" : "text-tf-slate-muted hover:text-tf-slate transition-colors")}>{tab}</button>
-        ))}
-      </div>
-
-      <div className="flex-1 overflow-y-auto px-5 pb-8">
+      <div className="flex-1 overflow-y-auto px-5 py-6">
         <AnimatePresence mode="wait">
           {activeTab === 'sync' ? (
-            <motion.div key="sync" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-4">
-              <div className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-tf-border shadow-sm">
-                {videoMetadata?.thumbnail ? <img src={videoMetadata.thumbnail} className="w-16 h-16 rounded-xl object-cover shadow-sm" /> : <div className="w-16 h-16 rounded-xl bg-tf-gray flex items-center justify-center"><Youtube className="w-8 h-8 text-tf-slate-muted" /></div>}
-                <div className="flex-1 truncate"><p className="text-[10px] text-tf-slate-muted truncate font-medium">{videoMetadata?.artist || 'YouTube'}</p><h3 className="text-sm font-bold truncate text-tf-slate">{videoMetadata?.title || 'Ready to sync'}</h3></div>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="relative">
-                  <button onClick={() => setShowPlaylistDropdown(!showPlaylistDropdown)} className="w-full flex items-center justify-between p-3 rounded-2xl border border-tf-border bg-white hover:border-tf-emerald transition-all">
-                    <div className="flex items-center gap-3 overflow-hidden">
-                      {selectedPlaylist?.images?.[0]?.url ? <img src={selectedPlaylist.images[0].url} className="w-8 h-8 rounded-lg object-cover" /> : <div className="w-8 h-8 rounded-lg bg-tf-emerald/10 flex items-center justify-center"><Music2 className="w-4 h-4 text-tf-emerald" /></div>}
-                      <span className="text-[11px] font-bold text-tf-slate truncate">{selectedPlaylist?.name || 'Select target playlist'}</span>
+            <motion.div key="sync" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
+            </motion.div>
+          ) : activeTab === 'activity' ? (
+            <motion.div key="activity" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="settings"
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              className="space-y-4"
+            >
+              <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
+                      <User className="w-4 h-4" />
                     </div>
-                    <ChevronDown className={cn("w-4 h-4 text-tf-slate-muted transition-transform", showPlaylistDropdown && "rotate-180")} />
+                    <h2 className="text-sm font-bold text-tf-slate">Account</h2>
+                  </div>
+                  <button
+                    onClick={handleEditClientId}
+                    className="px-3 py-1 bg-white hover:bg-tf-gray border border-tf-border rounded-full text-[10px] font-bold text-tf-slate-muted hover:text-tf-emerald transition-all"
+                  >
+                    Edit Client ID
                   </button>
-                  {showPlaylistDropdown && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-tf-border rounded-xl shadow-xl z-20 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
-                      <div className="p-2 border-b"><div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-tf-slate-muted" /><input type="text" value={playlistSearch} onChange={e => setPlaylistSearch(e.target.value)} placeholder="Search playlists..." className="w-full pl-8 pr-3 py-2 text-[11px] bg-tf-gray/50 border border-tf-border rounded-lg focus:outline-none focus:border-tf-emerald" /></div></div>
-                      <div className="max-h-48 overflow-y-auto">
-                        {filteredPlaylists.map(pl => (
-                          <button key={pl.id} onClick={() => { setSelectedPlaylist(pl); setShowPlaylistDropdown(false); }} className={cn("w-full flex items-center gap-3 p-2.5 text-left hover:bg-tf-gray transition-colors", selectedPlaylist?.id === pl.id && "bg-tf-emerald/5")}>
-                            {pl.images?.[0]?.url ? <img src={pl.images[0].url} className="w-8 h-8 rounded-lg object-cover" /> : <div className="w-8 h-8 rounded-lg bg-tf-emerald/10 flex items-center justify-center"><Music2 className="w-4 h-4 text-tf-emerald" /></div>}
-                            <span className="text-[11px] font-bold text-tf-slate truncate">{pl.name}</span>
-                          </button>
-                        ))}
+                </div>
+                {user ? (
+                  <div className="flex items-center justify-between p-3 bg-tf-gray/50 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      {user.images?.[0]?.url ? (
+                        <img src={user.images[0].url} alt="" className="w-8 h-8 rounded-full ring-2 ring-white" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-tf-emerald/10 flex items-center justify-center">
+                          <User className="w-4 h-4 text-tf-emerald" />
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-bold text-tf-slate text-xs">{user.display_name}</p>
+                        <p className="text-[10px] text-tf-slate-muted">{user.email}</p>
+                      </div>
+                    </div>
+                    <button onClick={handleDisconnect} className="p-2 text-tf-rose hover:bg-tf-rose/5 rounded-lg transition-all"><LogOut className="w-4 h-4" /></button>
+                  </div>
+                ) : (
+                  <div className="text-center py-4 bg-tf-gray/30 rounded-xl border border-dashed border-tf-slate-muted/30">
+                    <p className="text-xs text-tf-slate-muted mb-2">Not connected</p>
+                    <button onClick={() => SpotifyAuthService.connect(settings.spotifyClientId)} className="px-4 py-1.5 bg-tf-emerald text-white text-[10px] font-bold rounded-lg">Connect Now</button>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
+                    <Music2 className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-sm font-bold text-tf-slate">Preferences</h2>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-tf-slate mb-1">Default Playlist</label>
+                    <select
+                      value={settings.defaultPlaylist}
+                      onChange={(e) => updateSetting('defaultPlaylist', e.target.value)}
+                      className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
+                    >
+                      <option value="">Ask every time</option>
+                      {playlists.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-tf-slate mb-1">Default Quality</label>
+                    <select
+                      value={settings.defaultQuality}
+                      onChange={(e) => updateSetting('defaultQuality', e.target.value)}
+                      className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
+                    >
+                      {QUALITY_OPTIONS.map(q => <option key={q.id} value={q.id}>{q.label}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-tf-slate mb-1">File Naming</label>
+                    <select
+                      value={settings.fileNamingFormat}
+                      onChange={(e) => updateSetting('fileNamingFormat', e.target.value)}
+                      className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
+                    >
+                      {FILE_NAMING_OPTIONS.map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
+                    <Zap className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-sm font-bold text-tf-slate">Automation</h2>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-tf-slate">Auto-Download</p>
+                      <p className="text-[10px] text-tf-slate-muted">Save audio when adding to playlist</p>
+                    </div>
+                    <button
+                      onClick={() => updateSetting('enableDownload', !settings.enableDownload)}
+                      className={cn("w-9 h-5 rounded-full transition-all relative", settings.enableDownload ? "bg-tf-emerald" : "bg-tf-border")}
+                    >
+                      <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.enableDownload ? "left-4" : "left-0.5")} />
+                    </button>
+                  </div>
+
+                  {settings.enableDownload && (
+                    <div className="flex items-center justify-between p-2 bg-tf-gray/30 border border-tf-border rounded-lg animate-in fade-in slide-in-from-top-1">
+                      <div>
+                        <p className="text-[11px] font-bold text-tf-slate">Download Mode</p>
+                      </div>
+                      <div className="flex bg-white/50 rounded-lg p-0.5 border border-tf-border">
+                        <button
+                          onClick={() => updateSetting('downloadMode', 'always')}
+                          className={cn(
+                            "px-2 py-1 text-[9px] font-bold rounded-md transition-all",
+                            settings.downloadMode === 'always' ? "bg-white shadow text-tf-slate" : "text-tf-slate-muted hover:text-tf-slate"
+                          )}
+                        >
+                          Always
+                        </button>
+                        <button
+                          onClick={() => updateSetting('downloadMode', 'missing_only')}
+                          className={cn(
+                            "px-2 py-1 text-[9px] font-bold rounded-md transition-all",
+                            settings.downloadMode === 'missing_only' ? "bg-white shadow text-tf-slate" : "text-tf-slate-muted hover:text-tf-slate"
+                          )}
+                        >
+                          Missing
+                        </button>
                       </div>
                     </div>
                   )}
-                </div>
-                <button onClick={() => selectedPlaylist && handleSync(selectedPlaylist.id)} disabled={!selectedPlaylist} className={cn("w-full py-4 rounded-2xl font-bold text-sm transition-all shadow-lg", selectedPlaylist ? "bg-tf-emerald text-white shadow-tf-emerald/20 hover:bg-tf-emerald-dark" : "bg-tf-gray text-tf-slate-muted cursor-not-allowed")}>Sync to Spotify</button>
-              </div>
-            </motion.div>
-          ) : activeTab === 'activity' ? (
-            <motion.div key="activity" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-4">
-              {jobs.length === 0 ? <div className="text-center py-20"><Activity className="w-12 h-12 text-tf-border mx-auto mb-4" /><p className="text-xs font-bold text-tf-slate-muted uppercase tracking-widest">Silent Queue</p></div> : jobs.map(job => (
-                <div key={job.jobId} className="p-4 rounded-2xl border border-tf-border bg-white shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-center mb-3">
-                    <div className="min-w-0 flex-1"><h4 className="text-xs font-bold text-tf-slate truncate">{job.trackInfo?.title || 'Processing track...'}</h4><p className="text-[9px] text-tf-slate-muted font-bold uppercase tracking-tighter mt-0.5">{job.status}</p></div>
-                    {job.status === 'completed' ? <CheckCircle2 className="w-5 h-5 text-tf-emerald flex-shrink-0" /> : job.status === 'failed' ? <XCircle className="w-5 h-5 text-tf-rose flex-shrink-0" /> : <Loader2 className="w-5 h-5 text-tf-emerald animate-spin flex-shrink-0" />}
-                  </div>
-                  <div className="w-full bg-tf-gray h-1.5 rounded-full overflow-hidden shadow-inner"><motion.div initial={{ width: 0 }} animate={{ width: `${job.progress}%` }} className="bg-tf-emerald h-full transition-all" /></div>
-                </div>
-              ))}
-            </motion.div>
-          ) : (
-            <motion.div key="settings" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-4">
-              <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
-                <div className="flex items-center gap-3 mb-4"><Zap className="w-4 h-4 text-tf-slate" /><h2 className="text-sm font-bold text-tf-slate">Automation</h2></div>
-                <div className="space-y-4">
+
                   <div className="flex items-center justify-between">
-                    <div><p className="text-xs font-bold text-tf-slate">Auto-Download</p><p className="text-[10px] text-tf-slate-muted font-medium">Save audio when adding to playlist</p></div>
-                    <button onClick={() => updateSetting('enableDownload', !settings.enableDownload)} className={cn("w-9 h-5 rounded-full relative transition-all", settings.enableDownload ? "bg-tf-emerald" : "bg-tf-border")}><div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.enableDownload ? "left-4" : "left-0.5")} /></button>
+                    <div>
+                      <p className="text-xs font-bold text-tf-slate">Bridge Mode</p>
+                      <p className="text-[10px] text-tf-slate-muted">Auto-sync local files to Spotify</p>
+                    </div>
+                    <button
+                      onClick={() => updateSetting('bridgeEnabled', !settings.bridgeEnabled)}
+                      className={cn("w-9 h-5 rounded-full transition-all relative", settings.bridgeEnabled ? "bg-tf-emerald" : "bg-tf-border")}
+                    >
+                      <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.bridgeEnabled ? "left-4" : "left-0.5")} />
+                    </button>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div><p className="text-xs font-bold text-tf-slate">Bridge Mode</p><p className="text-[10px] text-tf-slate-muted font-medium">Sync local files to Spotify Desktop</p></div>
-                    <button onClick={() => updateSetting('bridgeEnabled', !settings.bridgeEnabled)} className={cn("w-9 h-5 rounded-full relative transition-all", settings.bridgeEnabled ? "bg-tf-emerald" : "bg-tf-border")}><div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.bridgeEnabled ? "left-4" : "left-0.5")} /></button>
-                  </div>
+
                   {settings.bridgeEnabled && (
-                    <div className="pt-2 animate-in fade-in slide-in-from-top-1 duration-200 space-y-3">
+                    <div className="pt-2 animate-in fade-in slide-in-from-top-1 duration-200">
                       <button
                         onClick={() => {
                           const token = settings.bridgeToken || '';
@@ -534,41 +711,241 @@ export const TunePortPopup: React.FC = () => {
                           setCopySuccess(true);
                           setTimeout(() => setCopySuccess(false), 2000);
                         }}
-                        className={cn("w-full py-2.5 text-white text-[10px] font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm shadow-tf-emerald/10", copySuccess ? "bg-tf-emerald" : "bg-tf-emerald hover:bg-tf-emerald-dark")}
+                        className={cn(
+                          "w-full py-2 text-white text-[10px] font-bold rounded-lg transition-all flex items-center justify-center gap-2 shadow-sm",
+                          copySuccess ? "bg-tf-emerald" : "bg-tf-emerald hover:bg-tf-emerald-dark"
+                        )}
                       >
-                        {copySuccess ? <><Check className="w-3.5 h-3.5" />Copied! Paste in Win+R</> : <><Terminal className="w-3.5 h-3.5" />Copy Setup Command</>}
+                        {copySuccess ? (
+                          <>
+                            <Check className="w-3 h-3" />
+                            Copied! Paste in Win+R
+                          </>
+                        ) : (
+                          <>
+                            <Terminal className="w-3 h-3" />
+                            Copy Setup Command
+                          </>
+                        )}
                       </button>
-                      <div className="flex items-center justify-center gap-1.5"><p className="text-[8px] text-tf-slate-muted font-medium uppercase tracking-tighter">Press <span className="font-bold text-tf-slate">Win + R</span>, paste, and hit <span className="font-bold text-tf-slate">Enter</span>.</p><div className="group relative inline-block"><HelpCircle className="w-3 h-3 text-tf-slate-muted hover:text-tf-emerald cursor-help transition-colors" /><div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-tf-slate text-white text-[9px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-xl leading-relaxed"><p className="font-bold mb-1">What does this do?</p>This command automatically installs Spicetify and the TunePort bridge script to your Spotify app.</div></div></div>
-                      <button onClick={() => setShowBridgeDetails(!showBridgeDetails)} className="w-full flex items-center justify-between text-[10px] font-bold text-tf-slate-muted hover:text-tf-slate transition-colors uppercase tracking-widest mt-1"><span>{showBridgeDetails ? 'Hide' : 'Show'} details</span>{showBridgeDetails ? <ChevronUp className="w-2.5 h-2.5" /> : <ChevronDown className="w-2.5 h-2.5" />}</button>
-                      {showBridgeDetails && (
-                        <div className="mt-2 p-3 bg-tf-gray/30 border border-tf-border rounded-xl space-y-3 animate-in fade-in zoom-in-95 duration-200">
-                          <div><label className="text-[8px] font-bold text-tf-slate-muted uppercase mb-1 flex justify-between items-center">Token <span className="text-tf-emerald">ACTIVE</span></label><div className="flex gap-1.5"><input readOnly type="text" value={settings.bridgeToken} className="flex-1 px-2 py-1 text-[9px] border border-tf-border rounded-lg bg-white font-mono text-tf-slate-muted" /><button onClick={() => { if(settings.bridgeToken) navigator.clipboard.writeText(settings.bridgeToken); setCopySuccess(true); setTimeout(() => setCopySuccess(false), 2000); }} className={cn("p-1.5 rounded-lg border transition-all shadow-sm", copySuccess ? "bg-tf-emerald text-white border-tf-emerald" : "bg-white text-tf-slate border-tf-border hover:bg-tf-gray/50")}><Check className={cn("w-3 h-3", !copySuccess && "hidden")} /><Copy className={cn("w-3 h-3", copySuccess && "hidden")} /></button></div></div>
-                          <div><label className="block text-[8px] font-bold text-tf-slate-muted uppercase mb-1">Relay URL</label><input type="text" value={settings.bridgeRelayUrl} onChange={(e) => updateSetting('bridgeRelayUrl', e.target.value)} className="w-full px-2 py-1.5 text-[9px] border border-tf-border rounded-lg bg-white text-tf-slate font-medium" /></div>
+
+                      <div className="pt-1 text-center space-y-2">
+                        <div className="flex items-center justify-center gap-1">
+                          <p className="text-[8px] text-tf-slate-muted font-medium">
+                            Press <span className="font-bold text-tf-slate">Win + R</span>, paste the command, and hit <span className="font-bold text-tf-slate">Enter</span>.
+                          </p>
+                          <div className="group relative inline-block">
+                            <HelpCircle className="w-2.5 h-2.5 text-tf-slate-muted hover:text-tf-emerald cursor-help transition-colors" />
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-tf-slate text-white text-[9px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-xl leading-relaxed">
+                              <p className="font-bold mb-1 text-left">What does this do?</p>
+                              <p className="text-left">This command automatically installs Spicetify and the TunePort bridge script to your Spotify desktop app. It allows the extension to instantly add downloaded files to your playlists. No data is collected.</p>
+                            </div>
+                          </div>
                         </div>
-                      )}
+                        <button
+                          onClick={() => setShowBridgeDetails(!showBridgeDetails)}
+                          className="inline-flex items-center gap-1 text-[9px] font-bold text-tf-slate-muted hover:text-tf-slate transition-colors"
+                        >
+                          <span>{showBridgeDetails ? 'Hide' : 'Show'} details</span>
+                          {showBridgeDetails ? <ChevronUp className="w-2 h-2" /> : <ChevronDown className="w-2 h-2" />}
+                        </button>
+                        
+                        {showBridgeDetails && (
+                          <div className="mt-2 p-2 bg-tf-gray/30 border border-tf-border rounded-lg space-y-2 animate-in fade-in zoom-in-95 duration-150 text-left">
+                            <div>
+                              <div className="flex justify-between items-center mb-1">
+                                <label className="text-[8px] font-bold text-tf-slate-muted uppercase">Token</label>
+                                <span className="text-[8px] font-bold text-tf-emerald">ACTIVE</span>
+                              </div>
+                              <div className="flex gap-1">
+                                <input readOnly type="text" value={settings.bridgeToken || ''} className="flex-1 px-1.5 py-1 text-[9px] border border-tf-border rounded bg-white font-mono text-tf-slate-muted" />
+                                <button
+                                  onClick={() => {
+                                    if (settings.bridgeToken) {
+                                      navigator.clipboard.writeText(settings.bridgeToken);
+                                      setCopySuccess(true);
+                                      setTimeout(() => setCopySuccess(false), 2000);
+                                    }
+                                  }}
+                                  className={cn(
+                                    "p-1 rounded transition-colors border border-tf-border",
+                                    copySuccess ? "bg-tf-emerald text-white" : "text-tf-slate hover:bg-white"
+                                  )}
+                                >
+                                  {copySuccess ? <Check className="w-2.5 h-2.5" /> : <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2-2v1"></path></svg>}
+                                </button>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-[8px] font-bold text-tf-slate-muted uppercase mb-1">Relay</label>
+                              <input
+                                type="text"
+                                value={settings.bridgeRelayUrl || ''}
+                                onChange={(e) => updateSetting('bridgeRelayUrl', e.target.value)}
+                                className="w-full px-1.5 py-1 text-[9px] border border-tf-border rounded bg-white text-tf-slate"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
 
               <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
-                <div className="flex items-center gap-3 mb-4"><Shield className="w-4 h-4 text-tf-slate" /><h2 className="text-sm font-bold text-tf-slate">Advanced</h2></div>
-                <button onClick={() => setShowAdvanced(!showAdvanced)} className="w-full flex items-center justify-between p-2.5 bg-tf-gray/30 hover:bg-tf-gray/50 rounded-xl transition-all"><span className="text-xs font-bold text-tf-slate">Matching Confidence</span>{showAdvanced ? <ChevronUp className="w-3.5 h-3.5 text-tf-slate-muted" /> : <ChevronDown className="w-3.5 h-3.5 text-tf-slate-muted" />}</button>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
+                    <Music2 className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-sm font-bold text-tf-slate">Visible Playlists</h2>
+                </div>
+                <p className="text-[10px] text-tf-slate-muted mb-3">Select which playlists appear in sync. Leave empty to show all.</p>
+                <div className="max-h-40 overflow-y-auto space-y-1">
+                  {playlists.map(p => (
+                    <label key={p.id} className="flex items-center gap-2 p-2 hover:bg-tf-gray/30 rounded-lg cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={settings.visiblePlaylists.length === 0 || settings.visiblePlaylists.includes(p.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            const current = settings.visiblePlaylists || [];
+                            updateSetting('visiblePlaylists', [...current, p.id]);
+                          } else {
+                            const newList = (settings.visiblePlaylists || []).filter((id: string) => id !== p.id);
+                            updateSetting('visiblePlaylists', newList);
+                          }
+                        }}
+                        className="w-3.5 h-3.5 rounded border-tf-border text-tf-emerald focus:ring-tf-emerald/20"
+                      />
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        {p.images?.[0]?.url ? (
+                          <div className="w-6 h-6 rounded overflow-hidden flex-shrink-0">
+                            <img src={p.images[0].url} alt="" className="w-full h-full object-cover object-center" />
+                          </div>
+                        ) : (
+                          <div className="w-6 h-6 rounded bg-tf-emerald/10 flex items-center justify-center flex-shrink-0">
+                            <Music2 className="w-3 h-3 text-tf-emerald" />
+                          </div>
+                        )}
+                        <span className="text-[11px] font-medium text-tf-slate truncate">{p.name}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
+                    <Shield className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-sm font-bold text-tf-slate">Advanced</h2>
+                </div>
+                <button
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="w-full flex items-center justify-between p-2 bg-tf-gray/30 hover:bg-tf-gray/50 rounded-lg transition-colors"
+                >
+                  <span className="text-xs font-bold text-tf-slate">{showAdvanced ? 'Hide' : 'Show'} Advanced</span>
+                  {showAdvanced ? <ChevronUp className="w-3 h-3 text-tf-slate-muted" /> : <ChevronDown className="w-3 h-3 text-tf-slate-muted" />}
+                </button>
                 {showAdvanced && (
-                  <div className="mt-3 space-y-3 p-1 animate-in fade-in slide-in-from-top-1">
-                    <div className="flex justify-between items-center"><label className="text-[10px] font-bold text-tf-slate-muted">Threshold</label><span className="text-[11px] font-mono font-bold text-tf-emerald">{settings.matchThreshold}</span></div>
-                    <input type="range" min="0.5" max="1.0" step="0.05" value={settings.matchThreshold} onChange={(e) => updateSetting('matchThreshold', parseFloat(e.target.value))} className="w-full h-1.5 bg-tf-border rounded-lg appearance-none cursor-pointer accent-tf-emerald" />
+                  <div className="mt-3 space-y-3">
+                    <div className="p-3 bg-tf-gray/30 border border-tf-border rounded-lg space-y-2">
+                      <div className="flex justify-between items-center">
+                        <label className="block text-[10px] font-bold text-tf-slate">Matching Confidence</label>
+                        <span className="text-[10px] font-mono text-tf-emerald font-bold">{settings.matchThreshold ?? 0.7}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.5"
+                        max="1.0"
+                        step="0.05"
+                        value={settings.matchThreshold ?? 0.7}
+                        onChange={(e) => updateSetting('matchThreshold', parseFloat(e.target.value))}
+                        className="w-full h-1.5 bg-tf-border rounded-lg appearance-none cursor-pointer accent-tf-emerald"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 bg-tf-gray/30 border border-tf-border rounded-lg">
+                      <div>
+                        <p className="text-xs font-bold text-tf-slate">Debug Console</p>
+                        <p className="text-[10px] text-tf-slate-muted">Show logs in Activity tab</p>
+                      </div>
+                      <button
+                        onClick={() => updateSetting('enableDebugConsole', !settings.enableDebugConsole)}
+                        className={cn("w-9 h-5 rounded-full transition-all relative", settings.enableDebugConsole ? "bg-tf-emerald" : "bg-tf-border")}
+                      >
+                        <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.enableDebugConsole ? "left-4" : "left-0.5")} />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 bg-amber-50/50 border border-amber-200/50 rounded-lg">
+                      <div>
+                        <p className="text-xs font-bold text-tf-slate">Lossless Sources</p>
+                        <p className="text-[10px] text-tf-slate-muted">Experimental (Qobuz/Tidal)</p>
+                      </div>
+                      <button
+                        onClick={() => updateSetting('lucidaEnabled', !settings.lucidaEnabled)}
+                        className={cn("w-9 h-5 rounded-full transition-all relative", settings.lucidaEnabled ? "bg-tf-emerald" : "bg-tf-border")}
+                      >
+                        <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.lucidaEnabled ? "left-4" : "left-0.5")} />
+                      </button>
+                    </div>
+
+                    <div className="pt-2 border-t border-tf-border/50 space-y-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-tf-slate mb-1">Download Provider</label>
+                        <select
+                          value={settings.downloadProvider}
+                          onChange={(e) => updateSetting('downloadProvider', e.target.value as 'cobalt' | 'yt-dlp')}
+                          className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
+                        >
+                          <option value="yt-dlp">yt-dlp (Default)</option>
+                          <option value="cobalt">Cobalt</option>
+                        </select>
+                      </div>
+
+                      {settings.downloadProvider === 'yt-dlp' ? (
+                        <div className="space-y-3">
+                          <input
+                            type="text"
+                            value={settings.ytDlpInstance}
+                            onChange={(e) => updateSetting('ytDlpInstance', e.target.value)}
+                            className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
+                            placeholder="https://yt.micr.dev"
+                          />
+                        </div>
+                      ) : (
+                        <input
+                          type="text"
+                          value={settings.cobaltInstance}
+                          onChange={(e) => updateSetting('cobaltInstance', e.target.value)}
+                          placeholder="https://cobalt.micr.dev"
+                          className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
+                        />
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
-              <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm"><SpotifyLocalFilesTutorial /></div>
+
+              <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
+                    <HelpCircle className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-sm font-bold text-tf-slate">Sync with Spotify</h2>
+                </div>
+                <SpotifyLocalFilesTutorial />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
       <div className="p-3 text-center border-t border-tf-border bg-tf-gray-light">
-        <p className="text-[9px] font-bold text-tf-slate-muted mono uppercase tracking-widest flex items-center justify-center gap-2 animate-pulse-slow">
+        <p className="text-[9px] font-bold text-tf-slate-muted mono uppercase tracking-[0.1em] flex items-center justify-center gap-1.5">
           <MousePointer2 className="w-3 h-3" /> Right-click videos to sync
         </p>
       </div>
