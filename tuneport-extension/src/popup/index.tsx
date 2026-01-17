@@ -576,6 +576,7 @@ export const TunePortPopup: React.FC = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showBridgeDetails, setShowBridgeDetails] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [bridgeConnStatus, setBridgeConnStatus] = useState<'idle' | 'checking' | 'connected' | 'disconnected'>('idle');
 
 
 
@@ -1804,6 +1805,33 @@ export const TunePortPopup: React.FC = () => {
                                 className="w-full px-1.5 py-1 text-[9px] border border-tf-border rounded bg-white text-tf-slate"
                               />
                             </div>
+                            <button
+                              onClick={async () => {
+                                setBridgeConnStatus('checking');
+                                try {
+                                  const relay = (settings.bridgeRelayUrl || 'wss://relay.micr.dev').replace('wss://', 'https://').replace('ws://', 'http://');
+                                  const res = await fetch(`${relay}/status/${settings.bridgeToken}`);
+                                  const data = await res.json();
+                                  setBridgeConnStatus(data.connected ? 'connected' : 'disconnected');
+                                } catch {
+                                  setBridgeConnStatus('disconnected');
+                                }
+                                setTimeout(() => setBridgeConnStatus('idle'), 3000);
+                              }}
+                              disabled={bridgeConnStatus === 'checking'}
+                              className={cn(
+                                "w-full py-1.5 text-[9px] font-bold rounded transition-all flex items-center justify-center gap-1.5 border",
+                                bridgeConnStatus === 'checking' && "bg-tf-gray text-tf-slate-muted border-tf-border",
+                                bridgeConnStatus === 'connected' && "bg-tf-emerald/10 text-tf-emerald border-tf-emerald",
+                                bridgeConnStatus === 'disconnected' && "bg-red-50 text-red-500 border-red-200",
+                                bridgeConnStatus === 'idle' && "bg-white text-tf-slate border-tf-border hover:bg-tf-gray"
+                              )}
+                            >
+                              {bridgeConnStatus === 'checking' && <><Loader2 className="w-2.5 h-2.5 animate-spin" /> Checking...</>}
+                              {bridgeConnStatus === 'connected' && <><CheckCircle2 className="w-2.5 h-2.5" /> Spicetify Connected</>}
+                              {bridgeConnStatus === 'disconnected' && <><XCircle className="w-2.5 h-2.5" /> Not Connected</>}
+                              {bridgeConnStatus === 'idle' && <><Link className="w-2.5 h-2.5" /> Test Connection</>}
+                            </button>
                           </div>
                         )}
                       </div>
