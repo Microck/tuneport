@@ -83,8 +83,10 @@ const jaroWinkler = (s1, s2) => {
 };
 
 const scoreTrack = (filename, track) => {
-  const base = normalize(filename);
-  const title = normalize(track?.title || '');
+  // Strip folder path and extension from filename
+  let base = filename.replace(/^.*[\\\/]/, '').replace(/\.[^/.]+$/, '');
+  base = normalize(base);
+  const title = normalize(track?.name || track?.title || '');
   const artist = normalize((track?.artists || []).map(a => a?.name).filter(Boolean).join(' '));
   const combined = `${artist} ${title}`.trim();
   return Math.max(
@@ -110,10 +112,11 @@ const addToPlaylist = async (playlistId, trackUri) => {
 
 const scanAndMatch = async (filename, playlistId) => {
   const tracks = await Spicetify.Platform.LocalFilesAPI.getTracks();
-  console.log('[tuneport] scanning', tracks.length, 'local tracks for:', filename);
+  const cleanName = filename.replace(/^.*[\\\/]/, '').replace(/\.[^/.]+$/, '');
+  console.log('[tuneport] scanning', tracks.length, 'local tracks for:', cleanName);
   const match = findBestMatch(filename, tracks);
   console.log('[tuneport] best match:', match?.track?.name, 'score:', match?.score);
-  if (match && match.score >= 0.7) {
+  if (match && match.score >= 0.6) {
     await addToPlaylist(playlistId, match.track.uri);
     notify('Tuneport: local track added');
     return true;
