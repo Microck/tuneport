@@ -110,6 +110,25 @@ const addToPlaylist = async (playlistId, trackUri) => {
   await Spicetify.Platform.PlaylistAPI.add(playlistId, [trackUri]);
 };
 
+const refreshLocalFiles = async () => {
+  try {
+    const sources = await Spicetify.Platform.LocalFilesAPI.getSources();
+    const tuneportFolder = sources.folders?.find(f => f.path?.toLowerCase().includes('tuneport'));
+    if (tuneportFolder) {
+      console.log('[tuneport] refreshing folder:', tuneportFolder.path);
+      await Spicetify.Platform.LocalFilesAPI.removeFolder(tuneportFolder.path);
+      await sleep(500);
+      await Spicetify.Platform.LocalFilesAPI.addFolder(tuneportFolder.path);
+      await sleep(1000);
+    }
+  } catch (e) {
+    console.log('[tuneport] folder refresh failed, using _emitUpdate fallback');
+    try {
+      Spicetify.Platform.LocalFilesAPI._emitUpdate();
+    } catch {}
+  }
+};
+
 const scanAndMatch = async (filename, playlistId) => {
   const tracks = await Spicetify.Platform.LocalFilesAPI.getTracks();
   const cleanName = filename.replace(/^.*[\\\/]/, '').replace(/\.[^/.]+$/, '');
@@ -132,13 +151,19 @@ const handleAddLocalTrack = async (payload) => {
     return;
   }
 
+  await refreshLocalFiles();
+  
   let attempts = 0;
   const maxAttempts = 6;
   while (attempts < maxAttempts) {
     const matched = await scanAndMatch(filename, playlistId);
     if (matched) return;
     attempts += 1;
-    await sleep(5000);
+    if (attempts < maxAttempts) {
+      console.log('[tuneport] no match, retrying in 5s... (attempt', attempts, '/', maxAttempts, ')');
+      await sleep(5000);
+      await refreshLocalFiles();
+    }
   }
 
   notify('Tuneport: no local match after retries', 'error');
