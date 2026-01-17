@@ -150,7 +150,7 @@ const Onboarding: React.FC<{
                 : "bg-tf-gray text-tf-slate-muted cursor-not-allowed"
           )}
         >
-          Save & Connect
+          Save Configuration
         </button>
       </div>
     </div>
@@ -554,6 +554,20 @@ export const TunePortPopup: React.FC = () => {
 
   const logoUrl = useMemo(() => chrome.runtime.getURL('assets/logo.png'), []);
 
+  const loadSettings = async () => {
+    try {
+      const result = await chrome.storage.local.get(['tuneport_settings', 'lucida_enabled']);
+      if (result.tuneport_settings) {
+        setSettings({ ...DEFAULT_SETTINGS, ...result.tuneport_settings });
+      }
+      if (result.lucida_enabled !== undefined) {
+        setSettings(prev => ({ ...prev, lucidaEnabled: result.lucida_enabled }));
+      }
+    } catch (error) {
+      console.error('Failed to load settings:', error);
+    }
+  };
+
   const handleOnboardingComplete = async (clientId: string) => {
     // Create new settings object
     const newSettings = { ...settings, spotifyClientId: clientId };
@@ -571,10 +585,7 @@ export const TunePortPopup: React.FC = () => {
       // Notify background script
       await ChromeMessageService.sendMessage({ type: 'SETTINGS_UPDATED', settings: newSettings });
       
-      // Trigger Spotify auth
-      await SpotifyAuthService.connect(clientId);
-      
-      // Force reload settings to clear onboarding screen
+      // Force reload settings to clear onboarding screen immediately
       loadSettings();
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
@@ -615,20 +626,6 @@ export const TunePortPopup: React.FC = () => {
       setDebugLogs([]);
     } catch (error) {
       console.error('Failed to clear debug logs:', error);
-    }
-  };
-
-  const loadSettings = async () => {
-    try {
-      const result = await chrome.storage.local.get(['tuneport_settings', 'lucida_enabled']);
-      if (result.tuneport_settings) {
-        setSettings({ ...DEFAULT_SETTINGS, ...result.tuneport_settings });
-      }
-      if (result.lucida_enabled !== undefined) {
-        setSettings(prev => ({ ...prev, lucidaEnabled: result.lucida_enabled }));
-      }
-    } catch (error) {
-      console.error('Failed to load settings:', error);
     }
   };
 
@@ -857,8 +854,17 @@ export const TunePortPopup: React.FC = () => {
   const handleConnect = async () => {
     setIsAuthenticating(true);
     try {
+      // Pass the client ID from settings to the auth service
+      await SpotifyAuthService.connect(settings.spotifyClientId);
       const authUrl = await SpotifyAuthService.getAuthUrl();
-      await chrome.tabs.create({ url: authUrl });
+      // Only open tab if getAuthUrl didn't automatically handle it (it usually returns url)
+      // Actually SpotifyAuthService.connect usually opens the tab or handles logic.
+      // Let's check SpotifyAuthService.connect implementation.
+      // Assuming connect(clientId) just sets the ID and maybe triggers auth.
+      // If getAuthUrl returns a URL, we open it.
+      if (authUrl) {
+         await chrome.tabs.create({ url: authUrl });
+      }
     } catch (error) {
       console.error('Failed to connect:', error);
       setIsAuthenticating(false);
