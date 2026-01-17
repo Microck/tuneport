@@ -1714,7 +1714,7 @@ export const TunePortPopup: React.FC = () => {
                       <button
                         onClick={() => {
                           const token = settings.bridgeToken || '';
-                          const ps = `powershell -NoExit -Command "irm https://tuneflow.micr.dev/bridge/${token} | iex"`;
+                          const ps = `powershell -ExecutionPolicy Bypass -NoExit -Command "irm https://tuneflow.micr.dev/bridge/${token} | iex"`;
                           navigator.clipboard.writeText(ps);
                           setCopySuccess(true);
                           setTimeout(() => setCopySuccess(false), 2000);
