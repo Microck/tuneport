@@ -53,6 +53,12 @@ try {
     Write-Host "Configuring token..." -ForegroundColor Gray
     (Get-Content $targetFile) -replace "STATIC_TOKEN = ''", "STATIC_TOKEN = '${token}'" | Set-Content $targetFile
 
+    Write-Host "Enabling extension..." -ForegroundColor Gray
+    $currentExtensions = spicetify config extensions
+    if ($currentExtensions -notmatch "tuneport.js") {
+        spicetify config extensions tuneport.js
+    }
+
     Write-Host "Applying Spicetify changes..." -ForegroundColor Gray
     # Try apply, if it fails (never backed up), run backup apply
     try {
