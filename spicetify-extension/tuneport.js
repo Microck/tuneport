@@ -150,9 +150,10 @@ const onMessage = async (event) => {
 const connect = () => {
   const token = getToken();
   if (!token) {
-    notify('Tuneport: missing bridge token', 'error');
+    console.log('[tuneport] missing bridge token. set it via spicetify menu.');
     return;
   }
+
 
   const url = `${RELAY_BASE}?token=${encodeURIComponent(token)}`;
   ws = new WebSocket(url);
@@ -167,12 +168,21 @@ const connect = () => {
 };
 
 const ensureReady = () => {
-  const isReady = window.Spicetify && Spicetify.Platform && Spicetify.Platform.LocalFilesAPI;
+  const isReady = window.Spicetify && Spicetify.Platform && Spicetify.Platform.LocalFilesAPI && Spicetify.Menu;
   if (isReady) {
+    new Spicetify.Menu.Item('TunePort Bridge Token', false, () => {
+      const token = prompt('Enter TunePort Bridge Token:', getToken());
+      if (token !== null) {
+        localStorage.setItem(STORAGE_KEY, token.trim());
+        location.reload();
+      }
+    }).register();
+
     connect();
     return;
   }
   setTimeout(ensureReady, 1000);
 };
+
 
 ensureReady();
