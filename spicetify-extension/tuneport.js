@@ -142,7 +142,11 @@ const handleAddLocalTrack = async (payload) => {
 
 const onMessage = async (event) => {
   try {
-    const message = JSON.parse(event.data);
+    let data = event.data;
+    if (data instanceof Blob) {
+      data = await data.text();
+    }
+    const message = JSON.parse(data);
     if (message.action !== 'ADD_LOCAL_TRACK') return;
     await handleAddLocalTrack(message.payload || {});
   } catch (error) {
