@@ -107,7 +107,8 @@ const findBestMatch = (filename, tracks) => {
 };
 
 const addToPlaylist = async (playlistId, trackUri) => {
-  await Spicetify.Platform.PlaylistAPI.add(playlistId, [trackUri]);
+  const playlistUri = playlistId.startsWith('spotify:playlist:') ? playlistId : `spotify:playlist:${playlistId}`;
+  await Spicetify.Platform.PlaylistAPI.add(playlistUri, [trackUri], {});
 };
 
 const refreshLocalFiles = async () => {
