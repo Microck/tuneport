@@ -284,9 +284,9 @@ export const SettingsPage: React.FC = () => {
                         <button
                           onClick={() => {
                             const token = settings.bridgeToken;
-                            const ps = `Invoke-WebRequest -Uri https://raw.githubusercontent.com/Microck/tuneport/main/spicetify-extension/tuneport.js -OutFile "$((spicetify -c | Split-Path)\\Extensions\\tuneport.js)"; (Get-Content "$((spicetify -c | Split-Path)\\Extensions\\tuneport.js)") -replace "STATIC_TOKEN = ''", "STATIC_TOKEN = '${token}'" | Set-Content "$((spicetify -c | Split-Path)\\Extensions\\tuneport.js)"; spicetify apply`;
+                            const ps = `powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/Microck/tuneport/main/spicetify-extension/tuneport.js -OutFile ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js'); (gc ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js')) -replace 'STATIC_TOKEN = .+', 'STATIC_TOKEN = \\'${token}\\'' | sc ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js'); spicetify apply"`;
                             navigator.clipboard.writeText(ps);
-                            alert('Setup command copied! Paste it into PowerShell/Terminal.');
+                            alert('Setup command copied! You can paste this in a Terminal OR press Win+R and paste it there.');
                           }}
                           className="w-full py-2 px-3 bg-tf-emerald text-white text-[10px] font-bold rounded-lg hover:bg-tf-emerald-dark transition-all flex items-center justify-center gap-2"
                         >
