@@ -109,10 +109,11 @@ const addToPlaylist = async (playlistId, trackUri) => {
 };
 
 const scanAndMatch = async (filename, playlistId) => {
-  await Spicetify.Platform.LocalFilesAPI.scan();
   const tracks = await Spicetify.Platform.LocalFilesAPI.getTracks();
+  console.log('[tuneport] scanning', tracks.length, 'local tracks for:', filename);
   const match = findBestMatch(filename, tracks);
-  if (match && match.score >= 0.9) {
+  console.log('[tuneport] best match:', match?.track?.name, 'score:', match?.score);
+  if (match && match.score >= 0.7) {
     await addToPlaylist(playlistId, match.track.uri);
     notify('Tuneport: local track added');
     return true;
