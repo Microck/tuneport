@@ -468,13 +468,19 @@ export const SettingsPage: React.FC = () => {
                     placeholder="No token available"
                   />
                   <button
-                    onClick={() => navigator.clipboard.writeText(settings.bridgeToken)}
+                    onClick={() => {
+                      const token = settings.bridgeToken;
+                      const script = `localStorage.setItem('tuneport_bridge_token','${token}');location.reload();`;
+                      navigator.clipboard.writeText(script);
+                      alert('Setup script copied! Paste it into Spotify DevTools Console (Ctrl+Shift+I).');
+                    }}
                     className="p-2 text-tf-slate hover:bg-tf-gray/50 rounded-lg border border-tf-border bg-white transition-colors"
-                    title="Copy Token"
+                    title="Copy Setup Script"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2-2v1"></path></svg>
                   </button>
                 </div>
+
                 <p className="text-[9px] text-tf-slate-muted mt-2 leading-relaxed">
                   Use this token to authenticate external tools. Keep it secret.
                 </p>
