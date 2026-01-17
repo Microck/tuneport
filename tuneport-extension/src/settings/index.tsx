@@ -281,20 +281,35 @@ export const SettingsPage: React.FC = () => {
               </button>
                       <div className="mt-4 pt-4 border-t border-tf-border/50">
                         <label className="block text-[10px] font-bold text-tf-slate mb-2">Automated Setup</label>
-                        <button
-                          onClick={() => {
-                            const token = settings.bridgeToken;
-                            const ps = `powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/Microck/tuneport/main/spicetify-extension/tuneport.js -OutFile ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js'); (gc ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js')) -replace 'STATIC_TOKEN = .+', 'STATIC_TOKEN = \\'${token}\\'' | sc ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js'); spicetify apply"`;
-                            navigator.clipboard.writeText(ps);
-                            alert('Setup command copied! You can paste this in a Terminal OR press Win+R and paste it there.');
-                          }}
-                          className="w-full py-2 px-3 bg-tf-emerald text-white text-[10px] font-bold rounded-lg hover:bg-tf-emerald-dark transition-all flex items-center justify-center gap-2"
-                        >
-                          <Terminal className="w-3 h-3" />
-                          Copy One-Click Command
-                        </button>
+                        <div className="space-y-2">
+                          <button
+                            onClick={() => {
+                              const token = settings.bridgeToken;
+                              const ps = `powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/Microck/tuneport/main/spicetify-extension/tuneport.js -OutFile ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js'); (gc ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js')) -replace 'STATIC_TOKEN = .+', 'STATIC_TOKEN = \\'${token}\\'' | sc ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js'); spicetify apply"`;
+                              navigator.clipboard.writeText(ps);
+                              alert('Command copied! Press Win+R and paste it to install the bridge.');
+                            }}
+                            className="w-full py-2 px-3 bg-tf-emerald text-white text-[10px] font-bold rounded-lg hover:bg-tf-emerald-dark transition-all flex items-center justify-center gap-2"
+                          >
+                            <Terminal className="w-3 h-3" />
+                            I have Spicetify
+                          </button>
+                          
+                          <button
+                            onClick={() => {
+                              const token = settings.bridgeToken;
+                              const ps = `powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/spicetify/cli/master/install.ps1 | iex; iwr -useb https://raw.githubusercontent.com/Microck/tuneport/main/spicetify-extension/tuneport.js -OutFile ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js'); (gc ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js')) -replace 'STATIC_TOKEN = .+', 'STATIC_TOKEN = \\'${token}\\'' | sc ((spicetify -c | Split-Path) + '\\Extensions\\tuneport.js'); spicetify backup apply"`;
+                              navigator.clipboard.writeText(ps);
+                              alert('Command copied! Press Win+R and paste it to install Spicetify + TunePort Bridge.');
+                            }}
+                            className="w-full py-2 px-3 bg-tf-gray text-tf-slate text-[10px] font-bold rounded-lg hover:bg-tf-gray/50 border border-tf-border transition-all flex items-center justify-center gap-2"
+                          >
+                            <Download className="w-3 h-3" />
+                            I don't have Spicetify
+                          </button>
+                        </div>
                         <p className="text-[8px] text-tf-slate-muted mt-2 text-center">
-                          Installs and links the Spicetify script instantly.
+                          Win+R compatible. Installs and links the bridge instantly.
                         </p>
                       </div>
                     </div>
