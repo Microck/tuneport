@@ -1815,9 +1815,56 @@ export const TunePortPopup: React.FC = () => {
                         Threshold for auto-adding tracks. Higher values prevent false positives (wrong artist/remix). Recommended: 0.7-0.85.
                       </p>
                     </div>
-                    <div className="flex items-center justify-between p-2 bg-tf-gray/30 border border-tf-border rounded-lg">
-                      <div>
-                        <p className="text-xs font-bold text-tf-slate">Debug Console</p>
+                  <div className="flex items-center justify-between p-2 bg-tf-gray/30 border border-tf-border rounded-lg">
+                    <div>
+                      <p className="text-xs font-bold text-tf-slate">Bridge Mode</p>
+                      <p className="text-[10px] text-tf-slate-muted">Automate local file syncing</p>
+                    </div>
+                    <button
+                      onClick={() => updateSetting('bridgeEnabled', !settings.bridgeEnabled)}
+                      className={cn("w-9 h-5 rounded-full transition-all relative", settings.bridgeEnabled ? "bg-tf-emerald" : "bg-tf-border")}
+                    >
+                      <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.bridgeEnabled ? "left-4" : "left-0.5")} />
+                    </button>
+                  </div>
+                  {settings.bridgeEnabled && (
+                    <div className="p-3 bg-tf-gray/30 border border-tf-border rounded-lg space-y-2 animate-in fade-in slide-in-from-top-1">
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="text-[10px] font-bold text-tf-slate">Bridge Token</label>
+                        <span className="text-[8px] font-bold text-tf-emerald bg-tf-emerald/10 px-1.5 py-0.5 rounded-full border border-tf-emerald/20">ACTIVE</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <input 
+                          readOnly 
+                          type="text"
+                          value={settings.bridgeToken || ''}
+                          className="flex-1 px-2 py-1.5 text-[10px] border border-tf-border rounded-lg bg-white text-tf-slate-muted font-mono"
+                        />
+                        <button
+                          onClick={() => {
+                            if (settings.bridgeToken) navigator.clipboard.writeText(settings.bridgeToken);
+                          }}
+                          className="p-1.5 text-tf-slate hover:bg-tf-gray/50 rounded-lg border border-tf-border bg-white transition-colors"
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2-2v1"></path></svg>
+                        </button>
+                      </div>
+                      <div className="mt-2">
+                        <label className="block text-[10px] font-bold text-tf-slate mb-1">Relay URL</label>
+                        <input
+                          type="text"
+                          value={settings.bridgeRelayUrl}
+                          onChange={(e) => updateSetting('bridgeRelayUrl', e.target.value)}
+                          className="w-full px-2 py-1.5 text-[10px] border border-tf-border rounded-lg bg-white"
+                          placeholder="wss://relay.micr.dev"
+                        />
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between p-2 bg-tf-gray/30 border border-tf-border rounded-lg">
+                    <div>
+                      <p className="text-xs font-bold text-tf-slate">Debug Console</p>
+
                         <p className="text-[10px] text-tf-slate-muted">Show logs in Activity tab</p>
                       </div>
                       <button
