@@ -1,5 +1,14 @@
 # changelog
 
+## unreleased
+
+bridge automation: relay server + spicetify script for local file playlist adds.
+
+### changes
+
+- **bridge relay**: added websocket relay and spicetify bridge script.
+- **bridge settings**: new settings section for token, relay url, and enable toggle.
+
 ## v4.1.0
 
 **release date:** 2026-01-16

@@ -46,6 +46,8 @@ unlike other sync tools, tuneport also offers **simultaneous downloads**. it che
 -   **custom quality presets**: create up to 5 custom download presets with format descriptions.
 -   **duplicate guard**: checks destination playlist before adding to prevent clutter.
 -   **privacy**: runs entirely in the browser. no backend server. no data collection.
+-   **bridge automation**: relay + spicetify bridge for local file playlist adds.
+
 
 ---
 
