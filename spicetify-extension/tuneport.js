@@ -134,9 +134,26 @@ const scanAndMatch = async (filename, playlistId) => {
   const tracks = await Spicetify.Platform.LocalFilesAPI.getTracks();
   const cleanName = filename.replace(/^.*[\\\/]/, '').replace(/\.[^/.]+$/, '');
   console.log('[tuneport] scanning', tracks.length, 'local tracks for:', cleanName);
+  
+  const normalizedSearch = normalize(cleanName);
+  const exactMatch = tracks.find(t => {
+    const trackName = normalize(t?.name || '');
+    return trackName === normalizedSearch || 
+           trackName.includes(normalizedSearch) || 
+           normalizedSearch.includes(trackName);
+  });
+  
+  if (exactMatch) {
+    console.log('[tuneport] exact match found:', exactMatch.name);
+    await addToPlaylist(playlistId, exactMatch.uri);
+    notify('Tuneport: local track added');
+    return true;
+  }
+  
   const match = findBestMatch(filename, tracks);
-  console.log('[tuneport] best match:', match?.track?.name, 'score:', match?.score);
-  if (match && match.score >= 0.6) {
+  console.log('[tuneport] best fuzzy match:', match?.track?.name, 'score:', match?.score);
+  
+  if (match && match.score >= 0.85) {
     await addToPlaylist(playlistId, match.track.uri);
     notify('Tuneport: local track added');
     return true;
