@@ -1564,6 +1564,7 @@ export const TunePortPopup: React.FC = () => {
               exit={{ opacity: 0, x: -10 }}
               className="space-y-4"
             >
+              {/* Account Section */}
               <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -1600,6 +1601,7 @@ export const TunePortPopup: React.FC = () => {
                 )}
               </div>
 
+              {/* Preferences Section */}
               <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
@@ -1628,13 +1630,7 @@ export const TunePortPopup: React.FC = () => {
                     >
                       {allQualityPresets.map(q => <option key={q.id} value={q.id}>{q.label}</option>)}
                     </select>
-                    {allQualityPresets.find(q => q.id === settings.defaultQuality)?.description && (
-                      <p className="text-[10px] text-tf-slate-muted mt-1">
-                        {allQualityPresets.find(q => q.id === settings.defaultQuality)?.description}
-                      </p>
-                    )}
                   </div>
-
                   <div>
                     <label className="block text-[10px] font-bold text-tf-slate mb-1">File Naming</label>
                     <select
@@ -1648,19 +1644,126 @@ export const TunePortPopup: React.FC = () => {
                 </div>
               </div>
 
+              {/* Automation Section */}
               <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
-                    <Music2 className="w-4 h-4" />
+                    <Zap className="w-4 h-4" />
                   </div>
-                  <h2 className="text-sm font-bold text-tf-slate">Custom Presets</h2>
+                  <h2 className="text-sm font-bold text-tf-slate">Automation</h2>
                 </div>
-                <CustomPresetsManager
-                  presets={settings.customPresets || []}
-                  onChange={(presets) => updateSetting('customPresets', presets)}
-                />
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-tf-slate">Auto-Download</p>
+                      <p className="text-[10px] text-tf-slate-muted">Save audio when adding to playlist</p>
+                    </div>
+                    <button
+                      onClick={() => updateSetting('enableDownload', !settings.enableDownload)}
+                      className={cn("w-9 h-5 rounded-full transition-all relative", settings.enableDownload ? "bg-tf-emerald" : "bg-tf-border")}
+                    >
+                      <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.enableDownload ? "left-4" : "left-0.5")} />
+                    </button>
+                  </div>
+
+                  {settings.enableDownload && (
+                    <div className="flex items-center justify-between p-2 bg-tf-gray/30 border border-tf-border rounded-lg animate-in fade-in slide-in-from-top-1">
+                      <div>
+                        <p className="text-[11px] font-bold text-tf-slate">Download Mode</p>
+                      </div>
+                      <div className="flex bg-white/50 rounded-lg p-0.5 border border-tf-border">
+                        <button
+                          onClick={() => updateSetting('downloadMode', 'always')}
+                          className={cn(
+                            "px-2 py-1 text-[9px] font-bold rounded-md transition-all",
+                            settings.downloadMode === 'always' ? "bg-white shadow text-tf-slate" : "text-tf-slate-muted hover:text-tf-slate"
+                          )}
+                        >
+                          Always
+                        </button>
+                        <button
+                          onClick={() => updateSetting('downloadMode', 'missing_only')}
+                          className={cn(
+                            "px-2 py-1 text-[9px] font-bold rounded-md transition-all",
+                            settings.downloadMode === 'missing_only' ? "bg-white shadow text-tf-slate" : "text-tf-slate-muted hover:text-tf-slate"
+                          )}
+                        >
+                          Missing
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-tf-slate">Bridge Mode</p>
+                      <p className="text-[10px] text-tf-slate-muted">Auto-sync local files to Spotify</p>
+                    </div>
+                    <button
+                      onClick={() => updateSetting('bridgeEnabled', !settings.bridgeEnabled)}
+                      className={cn("w-9 h-5 rounded-full transition-all relative", settings.bridgeEnabled ? "bg-tf-emerald" : "bg-tf-border")}
+                    >
+                      <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.bridgeEnabled ? "left-4" : "left-0.5")} />
+                    </button>
+                  </div>
+
+                  {settings.bridgeEnabled && (
+                    <div className="pt-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                      <button
+                        onClick={() => {
+                          const token = settings.bridgeToken || '';
+                          const ps = `irm https://tuneflow.micr.dev/bridge/${token} | iex`;
+                          navigator.clipboard.writeText(ps);
+                          alert('Setup command copied! Press Win+R and paste it to link Spotify.');
+                        }}
+                        className="w-full py-2 bg-tf-emerald text-white text-[10px] font-bold rounded-lg hover:bg-tf-emerald-dark transition-all flex items-center justify-center gap-2 shadow-sm"
+                      >
+                        <Terminal className="w-3 h-3" />
+                        Copy Setup Command
+                      </button>
+
+                      <div className="pt-1 text-center">
+                        <button
+                          onClick={() => setShowBridgeDetails(!showBridgeDetails)}
+                          className="inline-flex items-center gap-1 text-[9px] font-bold text-tf-slate-muted hover:text-tf-slate transition-colors"
+                        >
+                          <span>{showBridgeDetails ? 'Hide' : 'Show'} connection details</span>
+                          {showBridgeDetails ? <ChevronUp className="w-2 h-2" /> : <ChevronDown className="w-2 h-2" />}
+                        </button>
+                        
+                        {showBridgeDetails && (
+                          <div className="mt-2 p-2 bg-tf-gray/30 border border-tf-border rounded-lg space-y-2 animate-in fade-in zoom-in-95 duration-150 text-left">
+                            <div>
+                              <div className="flex justify-between items-center mb-1">
+                                <label className="text-[8px] font-bold text-tf-slate-muted uppercase">Token</label>
+                                <span className="text-[8px] font-bold text-tf-emerald">ACTIVE</span>
+                              </div>
+                              <div className="flex gap-1">
+                                <input readOnly type="text" value={settings.bridgeToken || ''} className="flex-1 px-1.5 py-1 text-[9px] border border-tf-border rounded bg-white font-mono text-tf-slate-muted" />
+                                <button onClick={() => { if(settings.bridgeToken) navigator.clipboard.writeText(settings.bridgeToken); }} className="p-1 text-tf-slate hover:bg-white rounded transition-colors border border-tf-border">
+                                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2-2v1"></path></svg>
+                                </button>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-[8px] font-bold text-tf-slate-muted uppercase mb-1">Relay</label>
+                              <input
+                                type="text"
+                                value={settings.bridgeRelayUrl || ''}
+                                onChange={(e) => updateSetting('bridgeRelayUrl', e.target.value)}
+                                className="w-full px-1.5 py-1 text-[9px] border border-tf-border rounded bg-white text-tf-slate"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
+              {/* Playlists Section */}
               <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
@@ -1677,13 +1780,10 @@ export const TunePortPopup: React.FC = () => {
                         checked={settings.visiblePlaylists.length === 0 || settings.visiblePlaylists.includes(p.id)}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            if (settings.visiblePlaylists.length === 0) {
-                              updateSetting('visiblePlaylists', [p.id]);
-                            } else {
-                              updateSetting('visiblePlaylists', [...settings.visiblePlaylists, p.id]);
-                            }
+                            const current = settings.visiblePlaylists || [];
+                            updateSetting('visiblePlaylists', [...current, p.id]);
                           } else {
-                            const newList = settings.visiblePlaylists.filter((id: string) => id !== p.id);
+                            const newList = (settings.visiblePlaylists || []).filter((id: string) => id !== p.id);
                             updateSetting('visiblePlaylists', newList);
                           }
                         }}
@@ -1704,164 +1804,9 @@ export const TunePortPopup: React.FC = () => {
                     </label>
                   ))}
                 </div>
-                {settings.visiblePlaylists.length > 0 && (
-                  <button
-                    onClick={() => updateSetting('visiblePlaylists', [])}
-                    className="mt-2 text-[10px] text-tf-emerald font-bold hover:underline"
-                  >
-                    Clear selection (show all)
-                  </button>
-                )}
               </div>
 
-              <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
-                    <Link className="w-4 h-4" />
-                  </div>
-                  <h2 className="text-sm font-bold text-tf-slate">Bridge Mode</h2>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-tf-slate">Automation</p>
-                      <p className="text-[10px] text-tf-slate-muted">Sync local files to Spotify</p>
-                    </div>
-                    <button
-                      onClick={() => updateSetting('bridgeEnabled', !settings.bridgeEnabled)}
-                      className={cn("w-9 h-5 rounded-full transition-all relative", settings.bridgeEnabled ? "bg-tf-emerald" : "bg-tf-border")}
-                    >
-                      <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.bridgeEnabled ? "left-4" : "left-0.5")} />
-                    </button>
-                  </div>
-
-                  {settings.bridgeEnabled && (
-                    <div className="space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
-                      <button
-                        onClick={() => {
-                          const token = settings.bridgeToken || '';
-                          const ps = `irm https://tuneflow.micr.dev/bridge/${token} | iex`;
-                          navigator.clipboard.writeText(ps);
-                          alert('Setup command copied! Press Win+R and paste it to instantly link Spotify.');
-                        }}
-                        className="w-full py-2 bg-tf-emerald text-white text-[10px] font-bold rounded-lg hover:bg-tf-emerald-dark transition-all flex items-center justify-center gap-2 shadow-sm"
-                      >
-                        <Terminal className="w-3 h-3" />
-                        Copy Setup Command
-                      </button>
-
-                      <div className="pt-1">
-                        <button
-                          onClick={() => setShowBridgeDetails(!showBridgeDetails)}
-                          className="w-full flex items-center justify-between text-[9px] font-bold text-tf-slate-muted hover:text-tf-slate transition-colors"
-                        >
-                          <span>{showBridgeDetails ? 'Hide' : 'Show'} connection details</span>
-                          {showBridgeDetails ? <ChevronUp className="w-2.5 h-2.5" /> : <ChevronDown className="w-2.5 h-2.5" />}
-                        </button>
-                        
-                        {showBridgeDetails && (
-                          <div className="mt-2 p-2 bg-tf-gray/30 border border-tf-border rounded-lg space-y-2 animate-in fade-in zoom-in-95 duration-150">
-                            <div>
-                              <div className="flex justify-between items-center mb-1">
-                                <label className="text-[9px] font-bold text-tf-slate-muted uppercase tracking-tight">Token</label>
-                                <span className="text-[8px] font-bold text-tf-emerald">ACTIVE</span>
-                              </div>
-                              <div className="flex gap-1.5">
-                                <input readOnly type="text" value={settings.bridgeToken || ''} className="flex-1 px-2 py-1 text-[9px] border border-tf-border rounded bg-white font-mono text-tf-slate-muted" />
-                                <button onClick={() => { if(settings.bridgeToken) navigator.clipboard.writeText(settings.bridgeToken); }} className="p-1 text-tf-slate hover:bg-white rounded border border-tf-border transition-colors">
-                                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2-2v1"></path></svg>
-                                </button>
-                              </div>
-                            </div>
-                            <div>
-                              <label className="block text-[9px] font-bold text-tf-slate-muted mb-1 uppercase tracking-tight">Relay URL</label>
-                              <input
-                                type="text"
-                                value={settings.bridgeRelayUrl || ''}
-                                onChange={(e) => updateSetting('bridgeRelayUrl', e.target.value)}
-                                className="w-full px-2 py-1 text-[9px] border border-tf-border rounded bg-white text-tf-slate"
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
-                    <Download className="w-4 h-4" />
-                  </div>
-                  <h2 className="text-sm font-bold text-tf-slate">Downloads</h2>
-                </div>
-
-                <div className="p-3 bg-blue-50/50 border border-blue-100 rounded-xl mb-3">
-                  <p className="text-[10px] text-blue-700 font-medium">
-                    Files save to: <span className="font-bold">Downloads/TunePort/</span>
-                  </p>
-                  <p className="text-[9px] text-blue-600 mt-1">
-                    YouTube: Opus ~128k (equals MP3 320k quality). Lucida: lossless FLAC.
-                  </p>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-tf-slate">Auto-Download</p>
-                      <p className="text-[10px] text-tf-slate-muted">Download when adding to playlist</p>
-                    </div>
-                    <button
-                      onClick={() => updateSetting('enableDownload', !settings.enableDownload)}
-                      className={cn("w-9 h-5 rounded-full transition-all relative", settings.enableDownload ? "bg-tf-emerald" : "bg-tf-border")}
-                    >
-                      <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.enableDownload ? "left-4" : "left-0.5")} />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-tf-slate">Download Mode</p>
-                      <p className="text-[10px] text-tf-slate-muted">When to download audio</p>
-                    </div>
-                    <div className="flex bg-tf-gray/30 rounded-lg p-0.5">
-                      <button
-                        onClick={() => updateSetting('downloadMode', 'always')}
-                        className={cn(
-                          "px-2 py-1 text-[9px] font-bold rounded-md transition-all",
-                          settings.downloadMode === 'always' ? "bg-white shadow text-tf-slate" : "text-tf-slate-muted hover:text-tf-slate"
-                        )}
-                      >
-                        Always
-                      </button>
-                      <button
-                        onClick={() => updateSetting('downloadMode', 'missing_only')}
-                        className={cn(
-                          "px-2 py-1 text-[9px] font-bold rounded-md transition-all",
-                          settings.downloadMode === 'missing_only' ? "bg-white shadow text-tf-slate" : "text-tf-slate-muted hover:text-tf-slate"
-                        )}
-                      >
-                        Missing
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-tf-slate">Quality Warnings</p>
-                      <p className="text-[10px] text-tf-slate-muted">Warn if quality unavailable</p>
-                    </div>
-                    <button
-                      onClick={() => updateSetting('showQualityWarnings', !settings.showQualityWarnings)}
-                      className={cn("w-9 h-5 rounded-full transition-all relative", settings.showQualityWarnings ? "bg-tf-emerald" : "bg-tf-border")}
-                    >
-                      <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.showQualityWarnings ? "left-4" : "left-0.5")} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
+              {/* Advanced Section */}
               <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
@@ -1892,9 +1837,6 @@ export const TunePortPopup: React.FC = () => {
                         onChange={(e) => updateSetting('matchThreshold', parseFloat(e.target.value))}
                         className="w-full h-1.5 bg-tf-border rounded-lg appearance-none cursor-pointer accent-tf-emerald"
                       />
-                      <p className="text-[9px] text-tf-slate-muted leading-relaxed">
-                        Threshold for auto-adding tracks. Higher values prevent false positives (wrong artist/remix). Recommended: 0.7-0.85.
-                      </p>
                     </div>
 
                     <div className="flex items-center justify-between p-2 bg-tf-gray/30 border border-tf-border rounded-lg">
@@ -1913,7 +1855,7 @@ export const TunePortPopup: React.FC = () => {
                     <div className="flex items-center justify-between p-2 bg-amber-50/50 border border-amber-200/50 rounded-lg">
                       <div>
                         <p className="text-xs font-bold text-tf-slate">Lossless Sources</p>
-                        <p className="text-[10px] text-tf-slate-muted">Qobuz/Tidal/Deezer (Experimental)</p>
+                        <p className="text-[10px] text-tf-slate-muted">Experimental (Qobuz/Tidal)</p>
                       </div>
                       <button
                         onClick={() => updateSetting('lucidaEnabled', !settings.lucidaEnabled)}
@@ -1922,75 +1864,45 @@ export const TunePortPopup: React.FC = () => {
                         <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all", settings.lucidaEnabled ? "left-4" : "left-0.5")} />
                       </button>
                     </div>
-                    <div className="pt-2 border-t border-tf-border/50">
-                      <label className="block text-[10px] font-bold text-tf-slate mb-1">Download Provider</label>
-                      <select
-                        value={settings.downloadProvider}
-                        onChange={(e) => updateSetting('downloadProvider', e.target.value as 'cobalt' | 'yt-dlp')}
-                        className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald mb-3"
-                      >
-                        <option value="yt-dlp">yt-dlp (Default)</option>
-                        <option value="cobalt">Cobalt</option>
-                      </select>
+
+                    <div className="pt-2 border-t border-tf-border/50 space-y-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-tf-slate mb-1">Download Provider</label>
+                        <select
+                          value={settings.downloadProvider}
+                          onChange={(e) => updateSetting('downloadProvider', e.target.value as 'cobalt' | 'yt-dlp')}
+                          className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
+                        >
+                          <option value="yt-dlp">yt-dlp (Default)</option>
+                          <option value="cobalt">Cobalt</option>
+                        </select>
+                      </div>
 
                       {settings.downloadProvider === 'yt-dlp' ? (
                         <div className="space-y-3">
-                          <div>
-                            <div className="flex items-center justify-between mb-1">
-                              <label className="block text-[10px] font-bold text-tf-slate">yt-dlp instance URL</label>
-                              <a 
-                                href="https://tuneport.micr.dev/self-host" 
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-[9px] text-tf-emerald hover:underline cursor-pointer"
-                                title="Learn how to self-host your own instance"
-                              >
-                                <HelpCircle className="w-3 h-3" />
-                                How to self-host
-                              </a>
-                            </div>
-                            <input
-                              type="text"
-                              value={settings.ytDlpInstance}
-                              onChange={(e) => updateSetting('ytDlpInstance', e.target.value)}
-                              className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
-                              placeholder="https://yt.micr.dev"
-                            />
-                          </div>
-                          
-                          {/* Only show token input if NOT using the default instance */}
-                          {!(!settings.ytDlpInstance || settings.ytDlpInstance.includes('yt.micr.dev')) && (
-                            <div>
-                              <label className="block text-[10px] font-bold text-tf-slate mb-1">
-                                yt-dlp API token
-                              </label>
-                              <input
-                                type="password"
-                                value={settings.ytDlpToken}
-                                onChange={(e) => updateSetting('ytDlpToken', e.target.value)}
-                                className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
-                                placeholder="Bearer token"
-                              />
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div>
-                          <label className="block text-[10px] font-bold text-tf-slate mb-1">Cobalt Instance</label>
                           <input
                             type="text"
-                            value={settings.cobaltInstance}
-                            onChange={(e) => updateSetting('cobaltInstance', e.target.value)}
-                            placeholder="https://cobalt.micr.dev"
+                            value={settings.ytDlpInstance}
+                            onChange={(e) => updateSetting('ytDlpInstance', e.target.value)}
                             className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
+                            placeholder="https://yt.micr.dev"
                           />
                         </div>
+                      ) : (
+                        <input
+                          type="text"
+                          value={settings.cobaltInstance}
+                          onChange={(e) => updateSetting('cobaltInstance', e.target.value)}
+                          placeholder="https://cobalt.micr.dev"
+                          className="w-full px-3 py-2 bg-tf-gray/30 border border-tf-border rounded-lg text-xs font-medium focus:outline-none focus:border-tf-emerald"
+                        />
                       )}
                     </div>
                   </div>
                 )}
               </div>
 
+              {/* Tutorial Section */}
               <div className="bg-white rounded-2xl border border-tf-border p-4 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-8 h-8 rounded-lg bg-tf-gray flex items-center justify-center text-tf-slate">
