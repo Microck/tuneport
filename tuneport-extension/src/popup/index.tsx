@@ -953,8 +953,40 @@ export const TunePortPopup: React.FC = () => {
   );
 };
 
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Popup Error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-4 text-red-600 bg-red-50 h-full flex flex-col justify-center text-center">
+          <h2 className="font-bold mb-2">Something went wrong</h2>
+          <p className="text-xs font-mono break-words">{this.state.error?.message}</p>
+          <p className="text-xs mt-2 text-gray-500">Check extension console for details.</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const container = document.getElementById('app');
 if (container) {
   const root = createRoot(container);
-  root.render(<TunePortPopup />);
+  root.render(
+    <ErrorBoundary>
+      <TunePortPopup />
+    </ErrorBoundary>
+  );
 }
