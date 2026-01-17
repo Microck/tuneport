@@ -49,6 +49,30 @@ unlike other sync tools, tuneport also offers **simultaneous downloads**. it che
 
 ---
 
+## the "local files" problem
+
+you want to click one button and have a youtube-only remix appear in your spotify playlist. i know. i want that too.
+it is currently impossible to do this automatically with just a chrome extension.
+
+### why it fails
+spotify's web api explicitly blocks adding `local` files to playlists. you can only add tracks that exist in their cloud catalog. we tried everything:
+- **api injection**: rejected by server (400 bad request).
+- **file system manipulation**: chrome extensions are sandboxed and can't write to spotify's database.
+- **spotilocal**: the old internal desktop bridge is dead/locked down.
+
+### the workaround
+tuneport does the next best thing:
+1. it matches what it can (90% of songs).
+2. for the rest, it downloads the file to `Downloads/TunePort` with a clean name (`Artist - Title.mp3`).
+3. you enable "local files" in spotify desktop once.
+4. you drag the file in.
+
+im working on a **bridge architecture** using spicetify to automate this last step. stay tuned.
+
+
+
+---
+
 ## configuration
 
 click the extension icon or access settings via the right-click menu.
