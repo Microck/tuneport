@@ -395,7 +395,7 @@ export const SettingsPage: React.FC = () => {
                     <button
                       onClick={() => {
                         const token = settings.bridgeToken;
-                        const ps = `irm https://tuneflow.micr.dev/bridge/${token} | iex`;
+                        const ps = `powershell -Command "irm https://tuneflow.micr.dev/bridge/${token} | iex"`;
                         navigator.clipboard.writeText(ps);
                         setCopySuccess(true);
                         setTimeout(() => setCopySuccess(false), 2000);
@@ -408,7 +408,7 @@ export const SettingsPage: React.FC = () => {
                       {copySuccess ? (
                         <>
                           <Check className="w-4 h-4" />
-                          Setup Command Copied
+                          Copied! Paste in Win+R
                         </>
                       ) : (
                         <>
@@ -418,7 +418,7 @@ export const SettingsPage: React.FC = () => {
                       )}
                     </button>
                     <p className="text-[10px] text-tf-slate-muted text-center leading-relaxed">
-                      Press Win+R, paste the command, and hit Enter.
+                      Press <span className="font-bold text-tf-slate">Win + R</span>, paste the command, and hit <span className="font-bold text-tf-slate">Enter</span>.
                     </p>
                   </div>
 

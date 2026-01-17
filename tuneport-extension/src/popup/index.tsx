@@ -1714,7 +1714,7 @@ export const TunePortPopup: React.FC = () => {
                       <button
                         onClick={() => {
                           const token = settings.bridgeToken || '';
-                          const ps = `irm https://tuneflow.micr.dev/bridge/${token} | iex`;
+                          const ps = `powershell -Command "irm https://tuneflow.micr.dev/bridge/${token} | iex"`;
                           navigator.clipboard.writeText(ps);
                           setCopySuccess(true);
                           setTimeout(() => setCopySuccess(false), 2000);
@@ -1727,7 +1727,7 @@ export const TunePortPopup: React.FC = () => {
                         {copySuccess ? (
                           <>
                             <Check className="w-3 h-3" />
-                            Copied to Clipboard
+                            Copied! Paste in Win+R
                           </>
                         ) : (
                           <>
@@ -1737,7 +1737,10 @@ export const TunePortPopup: React.FC = () => {
                         )}
                       </button>
 
-                      <div className="pt-1 text-center">
+                      <div className="pt-1 text-center space-y-1">
+                        <p className="text-[8px] text-tf-slate-muted font-medium">
+                          Press <span className="font-bold text-tf-slate">Win + R</span>, paste the command, and hit <span className="font-bold text-tf-slate">Enter</span>.
+                        </p>
                         <button
                           onClick={() => setShowBridgeDetails(!showBridgeDetails)}
                           className="inline-flex items-center gap-1 text-[9px] font-bold text-tf-slate-muted hover:text-tf-slate transition-colors"
