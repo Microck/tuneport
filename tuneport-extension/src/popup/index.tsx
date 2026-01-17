@@ -1737,10 +1737,19 @@ export const TunePortPopup: React.FC = () => {
                         )}
                       </button>
 
-                      <div className="pt-1 text-center space-y-1">
-                        <p className="text-[8px] text-tf-slate-muted font-medium">
-                          Press <span className="font-bold text-tf-slate">Win + R</span>, paste the command, and hit <span className="font-bold text-tf-slate">Enter</span>.
-                        </p>
+                      <div className="pt-1 text-center space-y-2">
+                        <div className="flex items-center justify-center gap-1">
+                          <p className="text-[8px] text-tf-slate-muted font-medium">
+                            Press <span className="font-bold text-tf-slate">Win + R</span>, paste the command, and hit <span className="font-bold text-tf-slate">Enter</span>.
+                          </p>
+                          <div className="group relative inline-block">
+                            <HelpCircle className="w-2.5 h-2.5 text-tf-slate-muted hover:text-tf-emerald cursor-help transition-colors" />
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-tf-slate text-white text-[9px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-xl leading-relaxed">
+                              <p className="font-bold mb-1">What does this do?</p>
+                              This command automatically installs Spicetify and the TunePort bridge script to your Spotify desktop app. It allows the extension to instantly add downloaded files to your playlists. No data is collected.
+                            </div>
+                          </div>
+                        </div>
                         <button
                           onClick={() => setShowBridgeDetails(!showBridgeDetails)}
                           className="inline-flex items-center gap-1 text-[9px] font-bold text-tf-slate-muted hover:text-tf-slate transition-colors"

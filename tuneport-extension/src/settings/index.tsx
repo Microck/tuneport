@@ -417,9 +417,18 @@ export const SettingsPage: React.FC = () => {
                         </>
                       )}
                     </button>
-                    <p className="text-[10px] text-tf-slate-muted text-center leading-relaxed">
-                      Press <span className="font-bold text-tf-slate">Win + R</span>, paste the command, and hit <span className="font-bold text-tf-slate">Enter</span>.
-                    </p>
+                    <div className="flex items-center justify-center gap-2">
+                      <p className="text-[10px] text-tf-slate-muted text-center leading-relaxed">
+                        Press <span className="font-bold text-tf-slate">Win + R</span>, paste the command, and hit <span className="font-bold text-tf-slate">Enter</span>.
+                      </p>
+                      <div className="group relative inline-block">
+                        <HelpCircle className="w-3 h-3 text-tf-slate-muted hover:text-tf-emerald cursor-help transition-colors" />
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-3 bg-tf-slate text-white text-[10px] rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl leading-relaxed">
+                          <p className="font-bold text-xs mb-1.5 border-b border-white/10 pb-1">What is this for?</p>
+                          This command automates the entire setup for you. It installs **Spicetify** (if missing) and the **TunePort Bridge** script into your Spotify app. This allows the extension to bypass Spotify's API limits and instantly sync local files to your playlists. **No personal data is collected.**
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="bg-tf-gray/30 border border-tf-border rounded-xl p-3 space-y-3">
