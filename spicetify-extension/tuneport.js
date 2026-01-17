@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'tuneport_bridge_token';
+const STATIC_TOKEN = '';
 const RELAY_BASE = 'wss://relay.micr.dev';
 
 let ws = null;
@@ -7,12 +8,14 @@ let reconnectTimer = null;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const getToken = () => {
+  if (STATIC_TOKEN) return STATIC_TOKEN;
   try {
     return localStorage.getItem(STORAGE_KEY) || '';
   } catch {
     return '';
   }
 };
+
 
 const notify = (message, type = 'info') => {
   if (window.Spicetify?.showNotification) {
