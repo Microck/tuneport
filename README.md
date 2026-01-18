@@ -7,9 +7,9 @@
 <p align="center">a browser extension that syncs YouTube videos to Spotify playlists with zero friction.</p>
 
 <p align="center">
+  <a href="https://chromewebstore.google.com/detail/tuneport"><img alt="chrome" src="https://img.shields.io/badge/chrome-web%20store-4285F4?logo=google-chrome&logoColor=white" /></a>
+  <a href="https://addons.mozilla.org/firefox/addon/tuneport-youtube-to-spotify-full/"><img alt="firefox" src="https://img.shields.io/badge/firefox-add--ons-FF7139?logo=firefox&logoColor=white" /></a>
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-green.svg" /></a>
-  <a href="package.json"><img alt="node" src="https://img.shields.io/badge/node-18%2B-blue.svg" /></a>
-  <a href="tuneport-extension/src/manifest.json"><img alt="platform" src="https://img.shields.io/badge/platform-browser-orange.svg" /></a>
 </p>
 
 <p align="center">
@@ -26,12 +26,23 @@ unlike other sync tools, tuneport also offers **simultaneous downloads**. it che
 
 ---
 
-## installation & setup
+## installation
 
-1.  **install extension**: download the latest `tuneport-github-v*.zip` from [releases](https://github.com/Microck/tuneport/releases). go to `chrome://extensions`, enable **developer mode**, and **drag and drop the zip file**.
-2.  **create Spotify app**: go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and create a new application.
-3.  **add redirect uri**: find your redirect uri in the extension setup screen (e.g. `https://<id>.chromiumapp.org/`). add this to your Spotify app settings and save.
-4.  **client id**: copy the `client id` from the dashboard and paste it into the extension.
+**recommended:**
+- [chrome web store](https://chromewebstore.google.com/detail/tuneport) (pending review)
+- [firefox add-ons](https://addons.mozilla.org/firefox/addon/tuneport-youtube-to-spotify-full/) (pending review)
+
+**manual install:**
+1. download the latest `tuneport-github-v*.zip` from [releases](https://github.com/Microck/tuneport/releases)
+2. go to `chrome://extensions` (or `about:debugging` for firefox)
+3. enable **developer mode**
+4. drag and drop the zip file
+
+**spotify setup:**
+1. go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and create a new application
+2. find your redirect uri in the extension setup screen (e.g. `https://<id>.chromiumapp.org/`)
+3. add this to your Spotify app settings and save
+4. copy the `client id` from the dashboard and paste it into the extension
 
 ---
 
@@ -69,7 +80,8 @@ tuneport does the next best thing:
 3. you enable "local files" in spotify desktop once.
 4. you drag the file in.
 
-im working on a **bridge architecture** using spicetify to automate this last step. stay tuned.
+### bridge mode (experimental)
+the spicetify bridge automates step 4. enable bridge mode in settings, install the [spicetify extension](https://github.com/Microck/tuneport/tree/main/spicetify-extension), and local files are added to playlists automatically via the relay server.
 
 
 
@@ -163,3 +175,11 @@ for details on youtube's audio infrastructure, codec choices, and why opus ~128k
 ## license
 
 mit.
+
+---
+
+<p align="center">
+  <a href="https://tuneport.micr.dev">website</a> · 
+  <a href="https://tuneport.micr.dev/docs">docs</a> · 
+  <a href="https://tuneport.micr.dev/privacy">privacy</a>
+</p>

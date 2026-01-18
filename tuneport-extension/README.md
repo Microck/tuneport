@@ -7,7 +7,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/chrome-extension-4285F4?style=flat-square&logo=google-chrome&logoColor=white" />
+  <a href="https://chromewebstore.google.com/detail/tuneport"><img src="https://img.shields.io/badge/chrome-web%20store-4285F4?style=flat-square&logo=google-chrome&logoColor=white" /></a>
+  <a href="https://addons.mozilla.org/firefox/addon/tuneport-youtube-to-spotify-full/"><img src="https://img.shields.io/badge/firefox-add--ons-FF7139?style=flat-square&logo=firefox&logoColor=white" /></a>
   <img src="https://img.shields.io/badge/spotify-api-1DB954?style=flat-square&logo=spotify&logoColor=white" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" />
 </p>
@@ -20,6 +21,11 @@
 
 ## quickstart
 
+**install from store:**
+- [chrome web store](https://chromewebstore.google.com/detail/tuneport)
+- [firefox add-ons](https://addons.mozilla.org/firefox/addon/tuneport-youtube-to-spotify-full/)
+
+**manual install:**
 1. download the latest [release](https://github.com/Microck/tuneport/releases).
 2. go to `chrome://extensions`.
 3. enable **developer mode**.
@@ -56,7 +62,7 @@ tuneport does the next best thing:
 3. you enable "local files" in spotify desktop once.
 4. you drag the file in.
 
-bridge is now live in settings. enable it, copy the token, and run the spicetify script to auto-add local files.
+bridge is now live in settings. enable it, copy the token, and run the spicetify script to auto-add local files. see [spicetify-extension](../spicetify-extension/) for setup.
 
 ---
 
