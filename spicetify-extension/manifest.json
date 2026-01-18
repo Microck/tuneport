@@ -1,0 +1,13 @@
+{
+  "name": "TunePort Bridge",
+  "description": "Relay bridge for TunePort extension to sync local files from YouTube.",
+  "main": "tuneport.js",
+  "preview": "preview.png",
+  "readme": "README.md",
+  "authors": [
+    {
+      "name": "Microck",
+      "url": "https://github.com/Microck"
+    }
+  ]
+}
