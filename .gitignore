@@ -67,3 +67,6 @@ __pycache__/
 # opencode/sisyphus
 .sisyphus/
 opencode.json
+
+# promotions
+promotions/
