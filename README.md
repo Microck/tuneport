@@ -40,7 +40,7 @@ unlike other sync tools, tuneport also offers **simultaneous downloads**. it che
 
 **spotify setup:**
 1. go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and create a new application
-2. find your redirect uri in the extension setup screen (e.g. `https://<id>.chromiumapp.org/`)
+2. find your redirect uri in the extension setup screen (e.g. `chrome-extension://<id>/popup/auth-callback.html`)
 3. add this to your Spotify app settings and save
 4. copy the `client id` from the dashboard and paste it into the extension
 

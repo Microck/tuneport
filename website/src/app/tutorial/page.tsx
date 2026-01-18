@@ -124,18 +124,27 @@ export default function TutorialPage() {
                     className="col-span-3 lg:col-span-1"
                     background={<div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-50" />}
                     Icon={LinkIcon}
-                    description={`Add "https://<extension-id>.chromiumapp.org/" to your app settings. Find your ID in the extension.`}
+                    description={`Add "chrome-extension://<extension-id>/popup/auth-callback.html" to your app settings. Find your ID in the extension.`}
                     cta={copied ? "Copied!" : "Copy URI Template"}
                     onClick={handleCopy}
                 />
                 <BentoCard
                     name="4. Client ID"
-                    className="col-span-3"
+                    className="col-span-3 lg:col-span-1"
                     background={<div className="absolute inset-0 bg-gradient-to-r from-slate-50 to-slate-100 opacity-50" />}
                     Icon={Key}
-                    description="Copy the Client ID from your new Spotify App and paste it into the TunePort extension setup screen. You're done!"
+                    description="Copy the Client ID from your new Spotify App and paste it into the TunePort extension setup screen."
                     cta="Read Full Docs"
                     href="/docs"
+                />
+                <BentoCard
+                    name="5. Bridge Mode (Optional)"
+                    className="col-span-3"
+                    background={<div className="absolute inset-0 bg-gradient-to-r from-orange-50 to-orange-100 opacity-50" />}
+                    Icon={Settings}
+                    description="Want to sync Local Files? Install Spicetify and enable Bridge Mode in extension settings. The extension will guide you through the setup."
+                    cta="View Self-Host Guide"
+                    href="/self-host"
                 />
             </BentoGrid>
         </div>
