@@ -82,8 +82,8 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-instrument-sans)", "sans-serif"],
-        serif: ["Cormorant Garamond", "serif"],
-        mono: ["Space Grotesk", "monospace"],
+        serif: ["var(--font-cormorant)", "serif"],
+        mono: ["var(--font-space-grotesk)", "monospace"],
       },
       animation: {
         "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
