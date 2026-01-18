@@ -68,30 +68,35 @@ export default function SelfHostPage() {
             </div>
           </div>
 
-          <h2 className="flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-slate-900 mt-16 mb-8">Part 1: yt-dlp Service (Docker)</h2>
+          <p className="mb-8 text-slate-600">
+            To enable downloads, you need a backend service. While we provide a public instance, self-hosting ensures better performance and privacy.
+          </p>
+
+          <h3 className="flex items-center gap-2 font-bold text-lg text-slate-900 mb-4">
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold">1</span>
             Prerequisites
-          </h2>
+          </h3>
           <ul className="list-disc pl-6 mb-8 text-slate-600">
             <li><strong>Docker</strong> & <strong>Docker Compose</strong> installed on your server or local machine.</li>
             <li>Basic knowledge of command line interface.</li>
             <li>(Optional) A domain name with HTTPS (recommended for secure access).</li>
           </ul>
 
-          <h2 className="flex items-center gap-2">
+          <h3 className="flex items-center gap-2 font-bold text-lg text-slate-900 mb-4">
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold">2</span>
             Quick Start
-          </h2>
+          </h3>
           <p className="mb-4">Clone the repository and navigate to the service directory:</p>
           <pre className="bg-slate-900 text-slate-50 p-4 rounded-xl overflow-x-auto text-sm font-mono mb-8">
             <code>{`git clone https://github.com/Microck/tuneport.git
 cd tuneport/yt-dlp-service`}</code>
           </pre>
 
-          <h2 className="flex items-center gap-2">
+          <h3 className="flex items-center gap-2 font-bold text-lg text-slate-900 mb-4">
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold">3</span>
             Configure Authentication
-          </h2>
+          </h3>
           <p className="mb-4">
             Edit the <code>docker-compose.yml</code> file to set your secure token. You will need this token later in the extension settings.
           </p>
@@ -109,10 +114,10 @@ services:
       - YTDLP_TOKEN=change-me-to-a-secure-random-token`}</code>
           </pre>
 
-          <h2 className="flex items-center gap-2">
+          <h3 className="flex items-center gap-2 font-bold text-lg text-slate-900 mb-4">
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold">4</span>
             Run the Service
-          </h2>
+          </h3>
           <p className="mb-4">Start the container in detached mode:</p>
           <pre className="bg-slate-900 text-slate-50 p-4 rounded-xl overflow-x-auto text-sm font-mono mb-8">
             <code>{`docker-compose up -d --build`}</code>
@@ -123,10 +128,10 @@ services:
 # Output: {"status": "ok"}`}</code>
           </pre>
 
-          <h2 className="flex items-center gap-2">
+          <h3 className="flex items-center gap-2 font-bold text-lg text-slate-900 mb-4">
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold">5</span>
             Connect Extension
-          </h2>
+          </h3>
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-12">
             <ol className="list-decimal pl-5 space-y-3 text-slate-700">
               <li>Open <strong>TunePort Settings</strong> in your browser extension.</li>
@@ -136,7 +141,7 @@ services:
             </ol>
           </div>
 
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-16">
             <h3 className="text-lg font-bold text-amber-900 flex items-center gap-2 mb-2">
               <Settings className="h-5 w-5" />
               Advanced: Bypassing Bot Detection
@@ -149,6 +154,21 @@ services:
               <li>Place the file in <code>yt-dlp-service/config/cookies.txt</code> on your server.</li>
               <li>Restart the container: <code>docker-compose restart</code>.</li>
             </ul>
+          </div>
+
+          <h2 className="text-2xl font-bold text-slate-900 mt-16 mb-8">Part 2: Relay Bridge (Local Files)</h2>
+          <p className="mb-4 text-slate-600">
+            The Relay Bridge allows the Chrome extension to communicate with your local Spotify desktop client via Spicetify. This enables "Local Files" syncing.
+          </p>
+          
+          <div className="bg-orange-50 border border-orange-200 rounded-xl p-6 mb-12">
+             <h3 className="text-lg font-bold text-orange-900 mb-4">Quick Setup</h3>
+             <ol className="list-decimal pl-5 space-y-3 text-orange-800 text-sm">
+                <li>Install <strong>Spicetify</strong> on your machine (Powershell/Bash).</li>
+                <li>Go to <strong>TunePort Settings &gt; Bridge Mode</strong>.</li>
+                <li>Click <strong>"Generate Setup Script"</strong>.</li>
+                <li>Run the provided script in your terminal. It installs the local relay and connects it to Spotify.</li>
+             </ol>
           </div>
         </div>
       </div>

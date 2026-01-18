@@ -11,12 +11,13 @@ out/
 *.crx
 
 # extension specific
-tuneflow-extension/dist/
 tuneport-extension/dist/
+tuneport-extension/build/
 
 # system files
 .DS_Store
 Thumbs.db
+nul
 
 # environment variables
 .env
@@ -27,26 +28,42 @@ Thumbs.db
 *.pem
 *.key
 
-# project documentation/planning
+# project documentation/planning (internal only)
 HANDOFF.md
 MIGRATION.md
 PLAN.md
 TEST_README.md
 FIXES.md
 
-# docs: allow only source and pdf, ignore everything else
+# docs: allow only source and outputs
 docs/*
 !docs/paper.tex
 !docs/references.bib
-!docs/paper.pdf
+!docs/archival_and_transcoding.pdf
 !docs/genloss_diagram.png
-!docs/README_BUILD.md
-!docs/compile.sh
-!docs/compile.bat
-!docs/TEXWORKS_INSTRUCTIONS.md
-.vercel
-.worktrees/
+!docs/genloss_diagram.mmd
+!docs/plans/
 
+# vercel/deployment
+.vercel
+
+# git worktrees
+.worktrees/
 
 # python
 __pycache__/
+*.pyc
+.pytest_cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# logs
+*.log
+
+# opencode/sisyphus
+.sisyphus/
+opencode.json
