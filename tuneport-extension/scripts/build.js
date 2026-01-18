@@ -30,11 +30,28 @@ function copyDist() {
   fs.cpSync(DIST_DIR, BUILD_DIR, { recursive: true });
 }
 
+function modifyHTML() {
+  if (BUILD_TYPE === 'firefox') {
+    const authPath = path.join(BUILD_DIR, 'popup', 'cobalt-auth.html');
+    if (fs.existsSync(authPath)) {
+      let content = fs.readFileSync(authPath, 'utf8');
+      // Remove Cloudflare Turnstile script
+      content = content.replace(
+        /<script src="https:\/\/challenges\.cloudflare\.com\/turnstile\/v0\/api\.js"[^>]*><\/script>/, 
+        '<!-- Turnstile removed for Firefox compliance -->'
+      );
+      fs.writeFileSync(authPath, content);
+      console.log('Patched cobalt-auth.html for Firefox');
+    }
+  }
+}
+
 function modifyManifest() {
   const manifestPath = path.join(BUILD_DIR, 'manifest.json');
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 
   if (BUILD_TYPE === 'chrome') {
+    delete manifest.key;
 
     manifest.name = 'TunePort - YouTube to Spotify';
     manifest.description = 'Add YouTube videos to your Spotify playlists with one click';
@@ -70,19 +87,34 @@ function modifyManifest() {
       manifest.permissions = [...(manifest.permissions || []), ...manifest.host_permissions];
       delete manifest.host_permissions;
     }
+
+    // Remove MV3-only permissions
+    if (manifest.permissions) {
+      manifest.permissions = manifest.permissions.filter(p => p !== 'scripting');
+    }
     
     // web_accessible_resources MV2 format
     if (manifest.web_accessible_resources) {
-      manifest.web_accessible_resources = manifest.web_accessible_resources
+      // Flatten the resources array
+      const resources = manifest.web_accessible_resources
         .flatMap(r => r.resources || []);
+      // MV2 expects a simple array of strings
+      manifest.web_accessible_resources = resources;
     }
     
     // Add Firefox-specific keys
     manifest.browser_specific_settings = {
       gecko: {
         id: "tuneport@microck.dev",
-        strict_min_version: "109.0"
+        strict_min_version: "142.0"
       }
+    };
+
+    // AMO data_collection_permissions - uses Mozilla taxonomy, NOT permission names
+    // See: https://developer.mozilla.org/docs/Mozilla/Add-ons/WebExtensions/manifest.json/browser_specific_settings
+    manifest.browser_specific_settings.gecko.data_collection_permissions = {
+      required: ["browsingActivity", "websiteContent"],
+      optional: ["technicalAndInteraction"]
     };
   } else {
     manifest.name = 'TunePort - YouTube to Spotify (Full)';
@@ -108,14 +140,44 @@ function createZip() {
   const zipPath = path.join(ROOT_DIR, zipName);
 
   try {
+    if (fs.existsSync(zipPath)) {
+      fs.unlinkSync(zipPath);
+    }
+
     if (process.platform === 'win32') {
-      execSync(`powershell Compress-Archive -Path "${BUILD_DIR}\\*" -DestinationPath "${zipPath}" -Force`);
+      // Use 7z or tar if available, fallback to powershell but it has path issues
+      // Best to use 'archiver' node module if possible, but for now lets try to fix paths
+      // The issue is likely how powershell Compress-Archive handles paths or slashes
+      
+      // Let's try using Node.js 'archiver' since it's already in devDependencies
+      const archiver = require('archiver');
+      const output = fs.createWriteStream(zipPath);
+      const archive = archiver('zip', { zlib: { level: 9 } });
+
+      output.on('close', function() {
+        console.log(`Created: ${zipName} (${archive.pointer()} total bytes)`);
+      });
+
+      archive.on('error', function(err) {
+        throw err;
+      });
+
+      archive.pipe(output);
+      archive.directory(BUILD_DIR, false);
+      archive.finalize();
+      
     } else {
       execSync(`cd "${BUILD_DIR}" && zip -r "${zipPath}" .`);
+      console.log(`Created: ${zipName}`);
     }
-    console.log(`Created: ${zipName}`);
   } catch (error) {
     console.error('Failed to create zip:', error.message);
+    
+    // Fallback to powershell if archiver fails or isn't installed (though it is in package.json)
+    if (process.platform === 'win32' && error.code === 'MODULE_NOT_FOUND') {
+       console.log('Falling back to PowerShell...');
+       execSync(`powershell Compress-Archive -Path "${BUILD_DIR}\\*" -DestinationPath "${zipPath}" -Force`);
+    }
   }
 }
 
@@ -129,10 +191,13 @@ async function main() {
   console.log('3. Modifying manifest for', BUILD_TYPE, '...');
   modifyManifest();
 
-  console.log('4. Creating default settings...');
+  console.log('4. Modifying HTML for', BUILD_TYPE, '...');
+  modifyHTML();
+
+  console.log('5. Creating default settings...');
   createDefaultSettings();
 
-  console.log('5. Creating zip package...');
+  console.log('6. Creating zip package...');
   createZip();
 
   console.log('\nBuild complete!');
