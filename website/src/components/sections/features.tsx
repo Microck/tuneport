@@ -6,6 +6,8 @@ import { Marquee } from "@/components/ui/marquee";
 import { motion } from "framer-motion";
 import { ScanSearch, ShieldCheck, Zap, FileAudio, Plug } from "lucide-react";
 
+import { SpicetifyIcon } from "@/components/icons/spicetify";
+
 function InstantSyncBackground() {
   return (
     <div className="flex h-48 w-full items-center justify-center opacity-90">
@@ -115,11 +117,20 @@ const features = [
   {
     Icon: FileAudio,
     name: "Lossless Audio",
-    description: "Prioritizes FLAC from Lucida (Qobuz/Tidal) or falls back to high-quality Opus.",
+    description: "Prioritizes FLAC from Lucida (Qobuz/Tidal). You can choose to fallback to Opus if needed, but it's not the default.",
     href: "/docs",
     cta: "Read docs",
-    className: "col-span-3 lg:col-span-2 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
+    className: "col-span-3 lg:col-span-1 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
     background: <LosslessAudioBackground />,
+  },
+  {
+    Icon: SpicetifyIcon,
+    name: "Bridge Mode",
+    description: "Relay + spicetify bridge to auto-add local files into playlists.",
+    href: "/docs",
+    cta: "Bridge docs",
+    className: "col-span-3 lg:col-span-1 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
+    background: <InstantSyncBackground />,
   },
   {
     Icon: ScanSearch,
@@ -138,15 +149,6 @@ const features = [
     cta: "View code",
     className: "col-span-3 lg:col-span-1 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
     background: <PrivacyFirstBackground />,
-  },
-  {
-    Icon: Plug,
-    name: "Bridge Mode",
-    description: "Relay + spicetify bridge to auto-add local files into playlists.",
-    href: "/docs",
-    cta: "Bridge docs",
-    className: "col-span-3 lg:col-span-1 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
-    background: <InstantSyncBackground />,
   },
   ];
 

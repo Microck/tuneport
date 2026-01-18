@@ -50,6 +50,9 @@ global.chrome = {
     onMessage: {
       addListener: jest.fn()
     },
+    onInstalled: {
+      addListener: jest.fn()
+    },
     getURL: jest.fn((path) => `chrome-extension://test/${path}`)
   },
 

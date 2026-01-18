@@ -2,8 +2,9 @@
 
 import React, { useRef } from "react";
 import { AnimatedBeam } from "@/components/ui/animated-beam";
-import { Youtube, ShieldCheck, Music2, CheckCircle2 } from "lucide-react";
+import { Youtube, ShieldCheck, Music2, CheckCircle2, FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SpicetifyIcon } from "@/components/icons/spicetify";
 
 const Circle = React.forwardRef<HTMLDivElement, { className?: string; children?: React.ReactNode }>(
   ({ className, children }, ref) => {
@@ -29,13 +30,15 @@ export function MatchingFlowDiagram() {
   const div2Ref = useRef<HTMLDivElement>(null);
   const div3Ref = useRef<HTMLDivElement>(null);
   const div4Ref = useRef<HTMLDivElement>(null);
+  const div5Ref = useRef<HTMLDivElement>(null);
+  const div6Ref = useRef<HTMLDivElement>(null);
 
   return (
     <div
-      className="relative flex w-full max-w-4xl mx-auto items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-10 md:shadow-sm"
+      className="relative flex w-full max-w-6xl mx-auto items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-10 md:shadow-sm"
       ref={containerRef}
     >
-      <div className="flex h-full w-full flex-row items-center justify-between gap-4 md:gap-10">
+      <div className="flex h-full w-full flex-row items-center justify-between gap-4 md:gap-8 flex-wrap lg:flex-nowrap">
         
         <div className="flex flex-col items-center gap-3 z-10">
            <Circle ref={div1Ref} className="border-red-100 bg-red-50 text-red-600">
@@ -77,6 +80,26 @@ export function MatchingFlowDiagram() {
            </div>
         </div>
 
+        <div className="flex flex-col items-center gap-3 z-10">
+           <Circle ref={div5Ref} className="border-orange-100 bg-orange-50 text-orange-600">
+             <SpicetifyIcon className="h-8 w-8" />
+           </Circle>
+           <div className="text-center">
+             <div className="text-sm font-bold text-slate-900">Bridge</div>
+             <div className="text-[10px] text-slate-500">Relay</div>
+           </div>
+        </div>
+
+        <div className="flex flex-col items-center gap-3 z-10">
+           <Circle ref={div6Ref} className="border-blue-100 bg-blue-50 text-blue-600">
+             <FolderOpen className="h-8 w-8" />
+           </Circle>
+           <div className="text-center">
+             <div className="text-sm font-bold text-slate-900">Local</div>
+             <div className="text-[10px] text-slate-500">Import</div>
+           </div>
+        </div>
+
       </div>
 
       <AnimatedBeam
@@ -99,6 +122,25 @@ export function MatchingFlowDiagram() {
         duration={3}
         delay={3}
       />
+      <AnimatedBeam
+        containerRef={containerRef}
+        fromRef={div4Ref}
+        toRef={div5Ref}
+        duration={3}
+        delay={4.5}
+        gradientStartColor="#F59E0B"
+        gradientStopColor="#EA580C"
+      />
+      <AnimatedBeam
+        containerRef={containerRef}
+        fromRef={div5Ref}
+        toRef={div6Ref}
+        duration={3}
+        delay={6}
+        gradientStartColor="#EA580C"
+        gradientStopColor="#2563EB"
+      />
     </div>
   );
 }
+

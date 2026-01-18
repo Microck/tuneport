@@ -52,7 +52,7 @@ global.chrome = {
   }
 };
 
-import { DownloadManager } from '../services/DownloadManager';
+import { DownloadManager } from '../DownloadManager';
 
 describe('DownloadManager', () => {
   beforeEach(() => {

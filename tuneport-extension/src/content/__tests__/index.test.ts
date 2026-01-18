@@ -165,7 +165,7 @@ describe('YouTubeContentScript', () => {
           .substring(0, 255);
       };
       
-      expect(sanitize('test<>:"|?*file.txt')).toBe('test_____file.txt');
+      expect(sanitize('test<>:"|?*file.txt')).toBe('test_______file.txt');
       expect(sanitize('  test file  ')).toBe('test file');
     });
   });

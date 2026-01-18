@@ -50,6 +50,12 @@ export function Flow() {
   const div3Ref = useRef<HTMLDivElement>(null);
   const div4Ref = useRef<HTMLDivElement>(null);
 
+  const [mounted, setMounted] = React.useState(false);
+  
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <section className="container mx-auto py-24 sm:py-32" id="how-it-works">
       <div className="flex flex-col items-center justify-center gap-4 text-center">
@@ -130,36 +136,40 @@ export function Flow() {
           </div>
         </div>
 
-        <AnimatedBeam
-          containerRef={containerRef}
-          fromRef={div1Ref}
-          toRef={div4Ref}
-          pathColor="rgba(148, 163, 184, 0.65)"
-          gradientStartColor="#FF0000"
-          gradientStopColor="#E11D48"
-          pathWidth={4}
-          delay={0}
-        />
-        <AnimatedBeam
-          containerRef={containerRef}
-          fromRef={div4Ref}
-          toRef={div2Ref}
-          pathColor="rgba(148, 163, 184, 0.65)"
-          gradientStartColor="#E11D48"
-          gradientStopColor="#1DB954"
-          pathWidth={4}
-          delay={0.5}
-        />
-         <AnimatedBeam
-          containerRef={containerRef}
-          fromRef={div4Ref}
-          toRef={div3Ref}
-          pathColor="rgba(148, 163, 184, 0.65)"
-          gradientStartColor="#E11D48"
-          gradientStopColor="#000000"
-          pathWidth={4}
-          delay={1}
-        />
+        {mounted && (
+            <>
+            <AnimatedBeam
+            containerRef={containerRef}
+            fromRef={div1Ref}
+            toRef={div4Ref}
+            pathColor="rgba(148, 163, 184, 0.65)"
+            gradientStartColor="#FF0000"
+            gradientStopColor="#E11D48"
+            pathWidth={4}
+            delay={0}
+            />
+            <AnimatedBeam
+            containerRef={containerRef}
+            fromRef={div4Ref}
+            toRef={div2Ref}
+            pathColor="rgba(148, 163, 184, 0.65)"
+            gradientStartColor="#E11D48"
+            gradientStopColor="#1DB954"
+            pathWidth={4}
+            delay={0.5}
+            />
+            <AnimatedBeam
+            containerRef={containerRef}
+            fromRef={div4Ref}
+            toRef={div3Ref}
+            pathColor="rgba(148, 163, 184, 0.65)"
+            gradientStartColor="#E11D48"
+            gradientStopColor="#000000"
+            pathWidth={4}
+            delay={1}
+            />
+            </>
+        )}
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 text-center">

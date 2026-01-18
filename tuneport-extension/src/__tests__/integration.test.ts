@@ -297,7 +297,7 @@ describe('Integration Tests', () => {
           .substring(0, 255);
       };
 
-      expect(sanitizeFilename('test<>:"|?*.txt')).toBe('test_____.txt');
+      expect(sanitizeFilename('test<>:"|?*.txt')).toBe('test_______.txt');
       expect(sanitizeFilename('a'.repeat(300)).length).toBe(255);
     });
   });

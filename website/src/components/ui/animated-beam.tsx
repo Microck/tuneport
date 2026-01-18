@@ -32,7 +32,7 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
   toRef,
   curvature = 0,
   reverse = false, // Include the reverse prop
-  duration = Math.random() * 3 + 4,
+  duration = 0,
   delay = 0,
   pathColor = "gray",
   pathWidth = 2,
@@ -62,6 +62,18 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
         y1: ["0%", "0%"],
         y2: ["0%", "0%"],
       }
+
+  const [delayState, setDelayState] = useState(delay)
+  const [durationState, setDurationState] = useState(duration)
+
+  useEffect(() => {
+    // Prevent hydration mismatch by setting random values on client only if default was used
+    if (duration === 0) {
+        setDurationState(Math.random() * 3 + 4)
+    } else {
+        setDurationState(duration)
+    }
+  }, [duration])
 
   useEffect(() => {
     const updatePath = () => {
@@ -164,7 +176,7 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
           }}
           transition={{
             delay,
-            duration,
+            duration: durationState,
             ease: [0.16, 1, 0.3, 1], // https://easings.net/#easeOutExpo
             repeat: Infinity,
             repeatDelay: 0,

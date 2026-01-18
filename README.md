@@ -28,7 +28,7 @@ unlike other sync tools, tuneport also offers **simultaneous downloads**. it che
 
 ## installation & setup
 
-1.  **install extension**: download the latest `tuneport-github-v*.zip` from [releases](https://github.com/Microck/tuneport/releases). unzip, go to `chrome://extensions`, enable **developer mode**, and **load unpacked**.
+1.  **install extension**: download the latest `tuneport-github-v*.zip` from [releases](https://github.com/Microck/tuneport/releases). go to `chrome://extensions`, enable **developer mode**, and **drag and drop the zip file**.
 2.  **create Spotify app**: go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and create a new application.
 3.  **add redirect uri**: find your redirect uri in the extension setup screen (e.g. `https://<id>.chromiumapp.org/`). add this to your Spotify app settings and save.
 4.  **client id**: copy the `client id` from the dashboard and paste it into the extension.

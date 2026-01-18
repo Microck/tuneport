@@ -118,7 +118,7 @@ describe('ChromeMessageService', () => {
     });
 
     test('should return current tab URL', async () => {
-      mockTabs.push({ id: 1, active: true, url: 'https://youtube.com/watch?v=test' });
+      mockTabs.push({ id: 1, active: true, windowId: 1, url: 'https://youtube.com/watch?v=test' });
       const url = await ChromeMessageService.getCurrentTabUrl();
       expect(url).toBe('https://youtube.com/watch?v=test');
     });

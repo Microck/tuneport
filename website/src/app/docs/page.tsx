@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, FileAudio, Music2, AlertTriangle, Download, Github, BookOpen, Code2, GitBranch, ShieldCheck, Timer, Type, User, AlertCircle, Settings, CheckCircle2 } from "lucide-react";
+import { SpicetifyIcon } from "@/components/icons/spicetify";
 import { Button } from "@/components/ui/button";
 import { DotPattern } from "@/components/ui/dot-pattern";
 import { TextAnimate } from "@/components/ui/text-animate";
@@ -319,7 +320,7 @@ export default function DocsPage() {
               <div>
                 <h4 className="text-lg font-bold text-slate-900 mb-2">High-Fidelity Archival</h4>
                 <p className="text-slate-600 mb-4 text-sm">
-                  We use <code>yt-dlp</code> with specific arguments to embed metadata that YouTube hides.
+                  When downloading from YouTube (fallback source), we use <code>yt-dlp</code> with specific arguments to embed metadata that YouTube hides.
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-center gap-3 text-sm text-slate-700 bg-slate-50 p-2 rounded-lg border border-slate-100">
@@ -346,6 +347,48 @@ export default function DocsPage() {
                 </div>
               </MagicCard>
             </div>
+          </div>
+        </div>
+
+        <div className="mb-24">
+          <h3 className="text-xl font-bold text-slate-900 mb-8 flex items-center gap-2">
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold">5</span>
+            Relay Bridge Architecture
+          </h3>
+          
+          <div className="grid gap-8 lg:grid-cols-2">
+            <div className="prose prose-slate">
+              <p className="text-slate-600 mb-4">
+                Since WebExtensions cannot directly access Spotify&apos;s "Local Files" due to sandbox restrictions, we developed a Bridge system.
+              </p>
+              <ul className="text-sm text-slate-600 space-y-2">
+                <li>1. <strong>Extension</strong> sends track metadata to local Relay Server (WebSocket).</li>
+                <li>2. <strong>Relay Server</strong> broadcasts to connected Spicetify clients.</li>
+                <li>3. <strong>Spicetify Script</strong> receives the payload and adds the file from the local downloads folder to the target playlist.</li>
+              </ul>
+            </div>
+
+            <MagicCard className="relative overflow-hidden rounded-xl border border-slate-200 p-6 shadow-sm bg-white" gradientColor={"#F1F5F9"}>
+               <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-3">
+                     <SpicetifyIcon className="w-6 h-6 text-orange-600" />
+                     <h4 className="font-bold text-slate-900">Bridge Pipeline</h4>
+                  </div>
+                  <div className="space-y-2 text-xs font-mono">
+                     <div className="p-2 bg-slate-50 border border-slate-100 rounded">
+                        <span className="text-emerald-600">WS_SEND</span> {"{ file: 'track.mp3', playlist: 'uri' }"}
+                     </div>
+                     <div className="flex justify-center text-slate-400">↓</div>
+                     <div className="p-2 bg-orange-50 border border-orange-100 rounded">
+                        <span className="text-orange-600">SPICETIFY</span> Spicetify.Platform.LibraryAPI.add(...)
+                     </div>
+                     <div className="flex justify-center text-slate-400">↓</div>
+                     <div className="p-2 bg-emerald-50 border border-emerald-100 rounded">
+                        <span className="text-emerald-700">SPOTIFY</span> Track Added to Local Files
+                     </div>
+                  </div>
+               </div>
+            </MagicCard>
           </div>
         </div>
 
