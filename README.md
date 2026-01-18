@@ -139,34 +139,52 @@ npm run build:github
 graph TD
     User((User)) -->|Context Menu / Popup| BG[Background Service]
     
-    subgraph Core Logic
-    BG -->|Fetch oEmbed| YT[YouTube]
-    BG -->|Sanitize & Match| Match[Matching Service]
-    Match -->|Search Query| SpotAPI[Spotify API]
-    SpotAPI -->|Track Found| Add[Add to Playlist]
+    subgraph Extension
+        BG -->|Fetch Metadata| YT[YouTube]
+        BG -->|Sanitize & Match| Match[Matching Service]
+        Match -->|Search| SpotAPI[Spotify API]
+        SpotAPI -->|Track Found| Add[Add to Playlist]
     end
     
     subgraph Download Pipeline
-    BG -->|If Enabled| DL[Download Service]
-    DL -->|1. Try Lossless| Lucida[Lucida API]
-    Lucida -.->|Fallback| YtDlp[yt-dlp API]
-    YtDlp -->|Audio Stream| Disk[chrome.downloads]
+        BG -->|If Enabled| DL[Download Manager]
+        DL -->|1. Lossless| Lucida[Lucida - Qobuz/Tidal/Deezer]
+        Lucida -.->|Fallback| Cobalt[Cobalt API]
+        Cobalt -.->|Fallback| YtDlp[yt-dlp Service]
+        YtDlp --> Disk[Local File]
     end
     
-    Add -->|Success| Notify[Notification]
-    Disk -->|Complete| Notify
+    subgraph Bridge Mode
+        Disk -->|If Bridge Enabled| Relay[Relay Server]
+        Relay -->|WebSocket| Spicetify[Spicetify Extension]
+        Spicetify -->|Add Local File| SpotDesktop[Spotify Desktop]
+    end
+    
+    Add --> Notify[Notification]
+    SpotDesktop --> Notify
 ```
 
 ## troubleshooting
 
-**"not authenticated with Spotify"**
-click the tuneport icon in the toolbar and hit "connect Spotify". the token refreshes automatically.
+**"not authenticated with Spotify"**  
+click the tuneport icon → "connect Spotify". tokens refresh automatically.
 
-**"download failed"**
-the default download provider is yt-dlp (self-hosted at `https://yt.micr.dev`). if downloads fail, check your internet connection. you can also switch to Cobalt in settings if needed.
+**"download failed"**  
+check your internet connection. try switching providers in settings:
+- **cobalt** (default): fast, no setup
+- **yt-dlp**: self-hosted at `https://yt.micr.dev`, or run your own via docker
+- **lucida**: requires premium accounts on Qobuz/Tidal/Deezer
 
-**"track not found"**
-the matching algorithm requires a clean title format (e.g., "Artist - Title"). heavy remix/mashup titles may fail confidence checks.
+**"track not found"**  
+matching works best with clean titles (`Artist - Title`). remixes, mashups, and live recordings may fail confidence checks. try YouTube Music fallback mode in settings.
+
+**"bridge not connecting"**  
+1. ensure relay server is running (`cd relay-server && npm start`)
+2. check that spicetify extension is installed and enabled
+3. verify the bridge token matches in both extension and spicetify settings
+
+**firefox: extension not working**  
+firefox build requires version 142+. check `about:support` for your version.
 
 ## technical documentation
 
@@ -175,6 +193,16 @@ for details on youtube's audio infrastructure, codec choices, and why opus ~128k
 ## license
 
 mit.
+
+---
+
+## disclaimer
+
+tuneport is provided for personal use only. you are solely responsible for ensuring that your use of this software complies with all applicable laws and the terms of service of any third-party platforms (Spotify, YouTube, etc.).
+
+**you must only download content that you have the legal right to access.** this includes content you own, content in the public domain, or content for which you have obtained proper authorization. the developers of tuneport do not condone piracy or copyright infringement and are not liable for any misuse of this software.
+
+by using tuneport, you agree that the developers are not responsible for any legal consequences arising from your use of the software.
 
 ---
 
