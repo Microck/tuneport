@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://tuneflow.micr.dev/sitemap.xml",
+    sitemap: "https://tuneport.micr.dev/sitemap.xml",
   };
 }

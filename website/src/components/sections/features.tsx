@@ -6,8 +6,6 @@ import { Marquee } from "@/components/ui/marquee";
 import { motion } from "framer-motion";
 import { ScanSearch, ShieldCheck, Zap, FileAudio, Plug } from "lucide-react";
 
-import { SpicetifyIcon } from "@/components/icons/spicetify";
-
 function InstantSyncBackground() {
   return (
     <div className="flex h-48 w-full items-center justify-center opacity-90">
@@ -104,6 +102,28 @@ function PrivacyFirstBackground() {
   );
 }
 
+function BridgeModeBackground() {
+  return (
+    <div className="flex h-48 w-full items-center justify-center opacity-90">
+      <div className="relative flex flex-col items-center gap-2">
+        <motion.div
+          className="absolute -inset-4 rounded-full bg-violet-400/20 blur-xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.6, 0.3],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <Plug className="h-16 w-16 text-violet-500" />
+      </div>
+    </div>
+  );
+}
+
 const features = [
   {
     Icon: Zap,
@@ -111,26 +131,26 @@ const features = [
     description: "Right-click any video to add it to your playlist. Zero friction.",
     href: "/tutorial",
     cta: "Start tutorial",
-    className: "col-span-3 lg:col-span-1 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
+    className: "col-span-12 lg:col-span-4 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
     background: <InstantSyncBackground />,
   },
   {
     Icon: FileAudio,
     name: "Lossless Audio",
-    description: "Prioritizes FLAC from Lucida (Qobuz/Tidal). You can choose to fallback to Opus if needed, but it's not the default.",
+    description: "Prioritizes FLAC from Lucida (Qobuz/Tidal). Falls back to Opus from YouTube if needed.",
     href: "/docs",
     cta: "Read docs",
-    className: "col-span-3 lg:col-span-1 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
+    className: "col-span-12 lg:col-span-5 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
     background: <LosslessAudioBackground />,
   },
   {
-    Icon: SpicetifyIcon,
+    Icon: Plug,
     name: "Bridge Mode",
     description: "Relay + spicetify bridge to auto-add local files into playlists.",
-    href: "/docs",
-    cta: "Bridge docs",
-    className: "col-span-3 lg:col-span-1 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
-    background: <InstantSyncBackground />,
+    href: "/self-host",
+    cta: "Setup guide",
+    className: "col-span-12 lg:col-span-3 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
+    background: <BridgeModeBackground />,
   },
   {
     Icon: ScanSearch,
@@ -138,7 +158,7 @@ const features = [
     description: "Fuzzy matching algorithm handles 'Official Video' and 'Lyrics' noise automatically.",
     href: "/tutorial",
     cta: "See tutorial",
-    className: "col-span-3 lg:col-span-2 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
+    className: "col-span-12 lg:col-span-8 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
     background: <SmartMatchingBackground />,
   },
   {
@@ -147,7 +167,7 @@ const features = [
     description: "Runs entirely in your browser. No backend servers, no data collection.",
     href: "https://github.com/Microck/tuneport",
     cta: "View code",
-    className: "col-span-3 lg:col-span-1 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
+    className: "col-span-12 lg:col-span-4 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
     background: <PrivacyFirstBackground />,
   },
   ];

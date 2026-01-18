@@ -1,15 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, PlayCircle, Settings, CheckCircle, Download, LayoutTemplate, Link as LinkIcon, Key, Copy, Check } from "lucide-react";
+import { ArrowLeft, PlayCircle, Settings, CheckCircle, Download, LayoutTemplate, Link as LinkIcon, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { Meteors } from "@/components/ui/meteors";
 import { TextAnimate } from "@/components/ui/text-animate";
 import { Highlighter } from "@/components/ui/highlighter";
 import { BentoGrid, BentoCard } from "@/components/ui/bento-grid";
-import { HeroVideoDialog } from "@/components/ui/hero-video-dialog";
 import { ShineBorder } from "@/components/ui/shine-border";
 import { cn } from "@/lib/utils";
 
@@ -99,11 +98,12 @@ export default function TutorialPage() {
             </ShineBorder>
         </div>
 
-        <div className="mb-10">
-             <BentoGrid className="lg:auto-rows-[18rem]">
+         <div className="mb-10">
+              <BentoGrid className="lg:auto-rows-[18rem]">
+                {/* Row 1: 33% 33% 33% */}
                 <BentoCard
                     name="1. Install"
-                    className="col-span-3 lg:col-span-1"
+                    className="col-span-12 lg:col-span-4"
                     background={<div className="absolute inset-0 bg-gradient-to-br from-rose-50 to-transparent opacity-50" />}
                     Icon={Download}
                     description="Download the latest TunePort release, unzip it, and load it via chrome://extensions (Developer Mode)."
@@ -112,7 +112,7 @@ export default function TutorialPage() {
                 />
                 <BentoCard
                     name="2. Create App"
-                    className="col-span-3 lg:col-span-1"
+                    className="col-span-12 lg:col-span-4"
                     background={<div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-50" />}
                     Icon={LayoutTemplate}
                     description="Go to the Spotify Developer Dashboard to create a new app. This gives you unlimited API access."
@@ -121,16 +121,17 @@ export default function TutorialPage() {
                 />
                 <BentoCard
                     name="3. Redirect URI"
-                    className="col-span-3 lg:col-span-1"
+                    className="col-span-12 lg:col-span-4"
                     background={<div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-50" />}
                     Icon={LinkIcon}
                     description={`Add "chrome-extension://<extension-id>/popup/auth-callback.html" to your app settings. Find your ID in the extension.`}
                     cta={copied ? "Copied!" : "Copy URI Template"}
                     onClick={handleCopy}
                 />
+                {/* Row 2: 40% 60% */}
                 <BentoCard
                     name="4. Client ID"
-                    className="col-span-3 lg:col-span-1"
+                    className="col-span-12 lg:col-span-5"
                     background={<div className="absolute inset-0 bg-gradient-to-r from-slate-50 to-slate-100 opacity-50" />}
                     Icon={Key}
                     description="Copy the Client ID from your new Spotify App and paste it into the TunePort extension setup screen."
@@ -139,7 +140,7 @@ export default function TutorialPage() {
                 />
                 <BentoCard
                     name="5. Bridge Mode (Optional)"
-                    className="col-span-3"
+                    className="col-span-12 lg:col-span-7"
                     background={<div className="absolute inset-0 bg-gradient-to-r from-orange-50 to-orange-100 opacity-50" />}
                     Icon={Settings}
                     description="Want to sync Local Files? Install Spicetify and enable Bridge Mode in extension settings. The extension will guide you through the setup."
@@ -154,13 +155,9 @@ export default function TutorialPage() {
                 <PlayCircle className="h-5 w-5 text-slate-700" />
                 Video Tutorial
             </h2>
-            <HeroVideoDialog
-                animationStyle="from-center"
-                videoSrc="https://www.youtube.com/embed/dQw4w9WgXcQ" // TODO: Replace with actual tutorial video
-                thumbnailSrc="https://startup-template-sage.vercel.app/hero-light.png" // Placeholder thumbnail
-                thumbnailAlt="TunePort Tutorial Walkthrough"
-                className="w-full rounded-xl border border-slate-200 shadow-sm"
-            />
+            <div className="w-full aspect-video rounded-xl border border-slate-200 bg-white shadow-sm flex items-center justify-center">
+                <p className="text-slate-400 text-sm">Video coming soon</p>
+            </div>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 md:p-10">

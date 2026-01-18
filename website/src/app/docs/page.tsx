@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "TunePort Docs",
     description: "Technical documentation on YouTube audio streams, transcoding, and matching algorithms.",
-    url: "https://tuneflow.micr.dev/docs",
+    url: "https://tuneport.micr.dev/docs",
     type: "article",
   },
   twitter: {

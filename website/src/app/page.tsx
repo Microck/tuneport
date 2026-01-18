@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "TunePort | YouTube to Spotify Sync",
     description: "Sync YouTube to Spotify with zero friction. Match tracks, add to playlists, and download audio locally.",
-    url: "https://tuneflow.micr.dev",
+    url: "https://tuneport.micr.dev",
     type: "website",
   },
   twitter: {

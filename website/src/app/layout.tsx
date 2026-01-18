@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
   description: "Sync YouTube to Spotify with zero friction. Match tracks, add to playlists, and download audio locally.",
   keywords: ["TunePort", "YouTube to Spotify", "music sync", "playlist transfer", "Opus audio"],
-  metadataBase: new URL("https://tuneflow.micr.dev"),
+  metadataBase: new URL("https://tuneport.micr.dev"),
   icons: {
     icon: [
       { url: "/logo.png", type: "image/png", sizes: "512x512" },
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "TunePort | YouTube to Spotify Sync",
     description: "Sync YouTube to Spotify with zero friction. Match tracks, add to playlists, and download audio locally.",
-    url: "https://tuneflow.micr.dev",
+    url: "https://tuneport.micr.dev",
     siteName: "TunePort",
     type: "website",
     images: [{

@@ -31,14 +31,12 @@ export function Footer() {
           >
             GitHub
           </a>
-          <a
-            href="https://github.com/Microck/tuneport/issues"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/privacy"
             className="text-sm font-medium hover:text-primary transition-colors text-muted-foreground"
           >
-            Issues
-          </a>
+            Privacy
+          </Link>
           <a
             href="https://github.com/Microck/tuneport/blob/main/LICENSE"
             target="_blank"

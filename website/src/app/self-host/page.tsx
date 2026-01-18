@@ -158,17 +158,110 @@ services:
 
           <h2 className="text-2xl font-bold text-slate-900 mt-16 mb-8">Part 2: Relay Bridge (Local Files)</h2>
           <p className="mb-4 text-slate-600">
-            The Relay Bridge allows the Chrome extension to communicate with your local Spotify desktop client via Spicetify. This enables "Local Files" syncing.
+            The Relay Bridge allows the Chrome extension to communicate with your local Spotify desktop client via Spicetify. This enables &quot;Local Files&quot; syncing.
           </p>
-          
-          <div className="bg-orange-50 border border-orange-200 rounded-xl p-6 mb-12">
-             <h3 className="text-lg font-bold text-orange-900 mb-4">Quick Setup</h3>
-             <ol className="list-decimal pl-5 space-y-3 text-orange-800 text-sm">
-                <li>Install <strong>Spicetify</strong> on your machine (Powershell/Bash).</li>
-                <li>Go to <strong>TunePort Settings &gt; Bridge Mode</strong>.</li>
-                <li>Click <strong>"Generate Setup Script"</strong>.</li>
-                <li>Run the provided script in your terminal. It installs the local relay and connects it to Spotify.</li>
-             </ol>
+
+          <h3 className="flex items-center gap-2 font-bold text-lg text-slate-900 mb-4">
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold">1</span>
+            Install Spicetify
+          </h3>
+          <p className="mb-4 text-slate-600">Spicetify is a CLI tool that patches the Spotify desktop client. Install it first:</p>
+          <pre className="bg-slate-900 text-slate-50 p-4 rounded-xl overflow-x-auto text-sm font-mono mb-4">
+            <code>{`# Windows (PowerShell)
+iwr -useb https://raw.githubusercontent.com/spicetify/cli/main/install.ps1 | iex
+
+# macOS/Linux (Bash)
+curl -fsSL https://raw.githubusercontent.com/spicetify/cli/main/install.sh | sh`}</code>
+          </pre>
+          <p className="mb-8 text-slate-600">Run <code>spicetify backup apply</code> after installation to patch Spotify.</p>
+
+          <h3 className="flex items-center gap-2 font-bold text-lg text-slate-900 mb-4">
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold">2</span>
+            Install TunePort Bridge Extension
+          </h3>
+          <p className="mb-4 text-slate-600">Two options:</p>
+          <div className="grid gap-4 md:grid-cols-2 mb-8">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <h4 className="font-bold text-slate-900 mb-2">Option A: Marketplace</h4>
+              <p className="text-sm text-slate-600">Open Spicetify Marketplace in Spotify and search for &quot;TunePort Bridge&quot;.</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <h4 className="font-bold text-slate-900 mb-2">Option B: Manual</h4>
+              <pre className="text-xs bg-slate-900 text-slate-50 p-2 rounded overflow-x-auto font-mono">
+                <code>{`# Copy tuneport.js to extensions
+spicetify config extensions tuneport.js
+spicetify apply`}</code>
+              </pre>
+            </div>
+          </div>
+
+          <h3 className="flex items-center gap-2 font-bold text-lg text-slate-900 mb-4">
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold">3</span>
+            Run the Relay Server
+          </h3>
+          <p className="mb-4 text-slate-600">The relay server bridges the Chrome extension and Spotify. We host a public instance at <code>wss://relay.micr.dev</code>, or self-host:</p>
+          <pre className="bg-slate-900 text-slate-50 p-4 rounded-xl overflow-x-auto text-sm font-mono mb-4">
+            <code>{`cd tuneport/relay-server
+npm install
+npm start`}</code>
+          </pre>
+          <p className="mb-4 text-slate-600">The server listens on port 8080 by default. Set <code>PORT</code> env var to change it.</p>
+          <pre className="bg-slate-900 text-slate-50 p-4 rounded-xl overflow-x-auto text-sm font-mono mb-8">
+            <code>{`# Verify it's running
+curl http://localhost:8080/health
+# Output: {"status": "ok"}`}</code>
+          </pre>
+
+          <h3 className="flex items-center gap-2 font-bold text-lg text-slate-900 mb-4">
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold">4</span>
+            Generate and Sync Token
+          </h3>
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-8">
+            <ol className="list-decimal pl-5 space-y-3 text-slate-700">
+              <li>Open <strong>TunePort Extension Settings</strong> → <strong>Bridge Mode</strong>.</li>
+              <li>Click <strong>&quot;Generate Token&quot;</strong>. A random 32-character hex token is created.</li>
+              <li>Copy this token.</li>
+              <li>In <strong>Spotify Desktop</strong>, click your profile menu → <strong>&quot;TunePort Bridge Token&quot;</strong>.</li>
+              <li>Paste the token and reload Spotify.</li>
+            </ol>
+          </div>
+
+          <h3 className="flex items-center gap-2 font-bold text-lg text-slate-900 mb-4">
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-bold">5</span>
+            Enable Local Files in Spotify
+          </h3>
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-8">
+            <ol className="list-decimal pl-5 space-y-3 text-slate-700">
+              <li>Open Spotify Desktop → <strong>Settings</strong> → scroll to <strong>&quot;Local Files&quot;</strong>.</li>
+              <li>Enable <strong>&quot;Show Local Files&quot;</strong>.</li>
+              <li>Add <strong><code>Downloads/TunePort</code></strong> as a source folder (or wherever TunePort saves files).</li>
+            </ol>
+          </div>
+
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 mb-12">
+            <h3 className="text-lg font-bold text-emerald-900 mb-4">How It Works</h3>
+            <p className="text-emerald-800 text-sm mb-4">
+              When you download a track via TunePort:
+            </p>
+            <ol className="list-decimal pl-5 space-y-2 text-emerald-800 text-sm">
+              <li>File saves to <code>Downloads/TunePort</code> on your machine.</li>
+              <li>Extension sends a WebSocket message to the relay with the filename and playlist ID.</li>
+              <li>Spicetify extension receives the message, refreshes Local Files, and matches the filename.</li>
+              <li>Track is added to your chosen Spotify playlist automatically.</li>
+            </ol>
+          </div>
+
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-12">
+            <h3 className="text-lg font-bold text-amber-900 flex items-center gap-2 mb-2">
+              <Settings className="h-5 w-5" />
+              Troubleshooting
+            </h3>
+            <ul className="list-disc pl-5 space-y-2 text-amber-800 text-sm">
+              <li><strong>Bridge not connecting:</strong> Ensure both extension and Spicetify use the same token.</li>
+              <li><strong>Track not found:</strong> Verify the file is in a folder Spotify monitors. Try restarting Spotify.</li>
+              <li><strong>Self-hosted relay:</strong> Update <code>RELAY_BASE</code> in <code>tuneport.js</code> to your server URL.</li>
+              <li><strong>Check relay status:</strong> <code>curl http://localhost:8080/status/YOUR_TOKEN</code> shows connected clients.</li>
+            </ul>
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import React, { forwardRef, useRef } from "react";
 import Image from "next/image";
-import { FileAudio } from "lucide-react";
+import { FileAudio, Plug } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -49,6 +49,7 @@ export function Flow() {
   const div2Ref = useRef<HTMLDivElement>(null);
   const div3Ref = useRef<HTMLDivElement>(null);
   const div4Ref = useRef<HTMLDivElement>(null);
+  const div5Ref = useRef<HTMLDivElement>(null);
 
   const [mounted, setMounted] = React.useState(false);
   
@@ -96,7 +97,7 @@ export function Flow() {
         className="relative flex min-h-[320px] w-full items-center justify-center overflow-visible rounded-2xl bg-white/60 mt-12 py-16"
         ref={containerRef}
       >
-        <div className="flex w-full max-w-3xl flex-col gap-10 px-6">
+        <div className="flex w-full max-w-4xl flex-col gap-10 px-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 items-center gap-8">
             <div className="flex flex-col items-center gap-2">
               <Circle ref={div1Ref} className="size-14 border-none shadow-lg">
@@ -126,12 +127,18 @@ export function Flow() {
               <span className="text-sm font-medium text-slate-700">Match</span>
             </div>
           </div>
-          <div className="flex justify-center pt-4 sm:pt-0">
+          <div className="flex justify-center gap-16 pt-4 sm:pt-0">
              <div className="flex flex-col items-center gap-2">
               <Circle ref={div3Ref} className="size-14 border-none shadow-lg">
                 <FileAudio className="size-7 text-black" />
               </Circle>
-              <span className="text-sm font-medium text-slate-700">Sync & Download</span>
+              <span className="text-sm font-medium text-slate-700">Download</span>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <Circle ref={div5Ref} className="size-14 border-none shadow-lg">
+                <Plug className="size-7 text-violet-500" />
+              </Circle>
+              <span className="text-sm font-medium text-slate-700">Bridge</span>
             </div>
           </div>
         </div>
@@ -168,30 +175,47 @@ export function Flow() {
             pathWidth={4}
             delay={1}
             />
+            <AnimatedBeam
+            containerRef={containerRef}
+            fromRef={div3Ref}
+            toRef={div5Ref}
+            pathColor="rgba(148, 163, 184, 0.65)"
+            gradientStartColor="#000000"
+            gradientStopColor="#8B5CF6"
+            pathWidth={4}
+            delay={1.5}
+            />
             </>
         )}
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 text-center">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mt-16 text-center">
         <div className="space-y-3 px-4">
             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600 font-bold">1</div>
              <h3 className="font-bold text-lg text-slate-900" data-animate="text" data-animate-variant="fade">Detect</h3>
              <p className="text-slate-500 text-sm leading-relaxed" data-animate="text" data-animate-variant="fade">
-                 TunePort automatically identifies the video you&apos;re watching on YouTube.
+                 Identifies the video you&apos;re watching on YouTube.
              </p>
         </div>
         <div className="space-y-3 px-4">
              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 font-bold">2</div>
               <h3 className="font-bold text-lg text-slate-900" data-animate="text" data-animate-variant="fade">Match</h3>
              <p className="text-slate-500 text-sm leading-relaxed" data-animate="text" data-animate-variant="fade">
-                 Our smart algorithms find the exact match on Spotify, filtering out covers and remixes.
+                 Finds the exact track on Spotify, filtering noise.
              </p>
         </div>
         <div className="space-y-3 px-4">
-             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 font-bold">3</div>
-              <h3 className="font-bold text-lg text-slate-900" data-animate="text" data-animate-variant="fade">Sync & Download</h3>
+             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 font-bold">3</div>
+              <h3 className="font-bold text-lg text-slate-900" data-animate="text" data-animate-variant="fade">Download</h3>
              <p className="text-slate-500 text-sm leading-relaxed" data-animate="text" data-animate-variant="fade">
-                 Instantly add to your playlist and download the high-quality audio file simultaneously.
+                 Save high-quality audio locally (FLAC/Opus).
+             </p>
+        </div>
+        <div className="space-y-3 px-4">
+             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-violet-100 text-violet-600 font-bold">4</div>
+              <h3 className="font-bold text-lg text-slate-900" data-animate="text" data-animate-variant="fade">Bridge</h3>
+             <p className="text-slate-500 text-sm leading-relaxed" data-animate="text" data-animate-variant="fade">
+                 Auto-add local files to Spotify via Spicetify.
              </p>
         </div>
       </div>
