@@ -92,7 +92,7 @@ export default function DocsPage() {
           <BentoGrid className="lg:grid-rows-1">
             <BentoCard
               name="Opus is King"
-              className="col-span-3 lg:col-span-1"
+              className="col-span-12 lg:col-span-4"
               background={<div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-50" />}
               Icon={Music2}
               description="Itag 251 delivers 130–160kbps Opus with a full 20kHz bandwidth, transparent to the human ear."
@@ -101,7 +101,7 @@ export default function DocsPage() {
             />
             <BentoCard
               name="AAC Caps at 16kHz"
-              className="col-span-3 lg:col-span-1"
+              className="col-span-12 lg:col-span-4"
               background={<div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-transparent opacity-50" />}
               Icon={FileAudio}
               description="Legacy AAC-LC streams apply a steep low-pass filter, discarding high-end detail."
@@ -110,7 +110,7 @@ export default function DocsPage() {
             />
             <BentoCard
               name="Transcoding is Waste"
-              className="col-span-3 lg:col-span-1"
+              className="col-span-12 lg:col-span-4"
               background={<div className="absolute inset-0 bg-gradient-to-br from-rose-50 to-transparent opacity-50" />}
               Icon={AlertTriangle}
               description="Upscaling to 320kbps MP3 adds artifacts and inflates file size by ~250% with zero gain."
