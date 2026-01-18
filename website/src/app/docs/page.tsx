@@ -319,6 +319,7 @@ export default function DocsPage() {
             <div className="grid gap-8 md:grid-cols-2 items-center">
               <div>
                 <h4 className="text-lg font-bold text-slate-900 mb-2">High-Fidelity Archival</h4>
+                <p className="text-slate-500 text-xs mb-3 italic">Ensures downloaded tracks match streaming-quality libraries with full metadata support.</p>
                 <p className="text-slate-600 mb-4 text-sm">
                   When downloading from YouTube (fallback source), we use <code>yt-dlp</code> with specific arguments to embed metadata that YouTube hides.
                 </p>
@@ -329,23 +330,26 @@ export default function DocsPage() {
                   </div>
                   <div className="flex items-center gap-3 text-sm text-slate-700 bg-slate-50 p-2 rounded-lg border border-slate-100">
                     <User className="h-4 w-4 text-emerald-500" />
-                    <span>ID3 Tags (Artist, Title)</span>
+                    <span>Embedded Metadata (Artist, Title, Artwork)</span>
                   </div>
                 </div>
               </div>
               
-              <MagicCard className="w-full overflow-hidden rounded-xl border border-slate-200 shadow-sm bg-white" gradientColor="#F1F5F9">
-                <div className="p-5 font-mono text-xs leading-relaxed text-slate-600">
-                  <span className="select-none text-emerald-600 mr-2">$</span>
-                  yt-dlp \<br/>
-                  <div className="pl-4 space-y-1 mt-1">
-                    <div><span className="text-indigo-600">--extract-audio</span> \</div>
-                    <div><span className="text-indigo-600">--audio-format</span> best \</div>
-                    <div><span className="text-amber-600">--add-metadata</span> \</div>
-                    <div><span className="text-amber-600">--embed-thumbnail</span></div>
+              <div>
+                <p className="text-xs text-slate-400 uppercase tracking-wider font-medium mb-2">yt-dlp configuration</p>
+                <MagicCard className="w-full overflow-hidden rounded-xl border border-slate-200 shadow-sm bg-white" gradientColor="#F1F5F9">
+                  <div className="p-5 font-mono text-xs leading-relaxed text-slate-600">
+                    <span className="select-none text-emerald-600 mr-2">$</span>
+                    yt-dlp \<br/>
+                    <div className="pl-4 space-y-1 mt-1">
+                      <div><span className="text-indigo-600">--extract-audio</span> \</div>
+                      <div><span className="text-indigo-600">--audio-format</span> best \</div>
+                      <div><span className="text-amber-600">--add-metadata</span> \</div>
+                      <div><span className="text-amber-600">--embed-thumbnail</span></div>
+                    </div>
                   </div>
-                </div>
-              </MagicCard>
+                </MagicCard>
+              </div>
             </div>
           </div>
         </div>
@@ -358,33 +362,39 @@ export default function DocsPage() {
           
           <div className="grid gap-8 lg:grid-cols-2">
             <div className="prose prose-slate">
+              <p className="text-slate-500 text-sm italic mb-4">
+                A local relay system allows TunePort to safely add downloaded tracks to Spotify Local Files without violating extension sandboxing.
+              </p>
               <p className="text-slate-600 mb-4">
-                Since WebExtensions cannot directly access Spotify&apos;s "Local Files" due to sandbox restrictions, we developed a Bridge system.
+                Since WebExtensions cannot directly access Spotify&apos;s &quot;Local Files&quot; due to sandbox restrictions, we developed a Bridge system.
               </p>
               <ul className="text-sm text-slate-600 space-y-2">
-                <li>1. <strong>Extension</strong> sends track metadata to local Relay Server (WebSocket).</li>
+                <li>1. <strong>Browser Extension</strong> sends track metadata to local Relay Server (WebSocket).</li>
                 <li>2. <strong>Relay Server</strong> broadcasts to connected Spicetify clients.</li>
                 <li>3. <strong>Spicetify Script</strong> receives the payload and adds the file from the local downloads folder to the target playlist.</li>
               </ul>
+              <p className="text-slate-400 text-xs mt-6 italic">
+                All actions occur locally on the user&apos;s machine; no Spotify credentials or audio files are transmitted.
+              </p>
             </div>
 
             <MagicCard className="relative overflow-hidden rounded-xl border border-slate-200 p-6 shadow-sm bg-white" gradientColor={"#F1F5F9"}>
                <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-3">
                      <SpicetifyIcon className="w-6 h-6 text-orange-600" />
-                     <h4 className="font-bold text-slate-900">Bridge Pipeline</h4>
+                     <h4 className="font-bold text-slate-900">Relay Bridge Pipeline</h4>
                   </div>
                   <div className="space-y-2 text-xs font-mono">
                      <div className="p-2 bg-slate-50 border border-slate-100 rounded">
-                        <span className="text-emerald-600">WS_SEND</span> {"{ file: 'track.mp3', playlist: 'uri' }"}
+                        <span className="text-emerald-600/70 text-[10px]">WS_SEND</span> <span className="text-slate-700">{"{ file: 'track.mp3', playlist: 'uri' }"}</span>
                      </div>
-                     <div className="flex justify-center text-slate-400">↓</div>
+                     <div className="flex justify-center text-slate-300 text-lg">↓</div>
                      <div className="p-2 bg-orange-50 border border-orange-100 rounded">
-                        <span className="text-orange-600">SPICETIFY</span> Spicetify.Platform.LibraryAPI.add(...)
+                        <span className="text-orange-500/70 text-[10px]">SPICETIFY</span> <span className="text-slate-700">Spicetify.Platform.LibraryAPI.add(...)</span>
                      </div>
-                     <div className="flex justify-center text-slate-400">↓</div>
+                     <div className="flex justify-center text-slate-300 text-lg">↓</div>
                      <div className="p-2 bg-emerald-50 border border-emerald-100 rounded">
-                        <span className="text-emerald-700">SPOTIFY</span> Track Added to Local Files
+                        <span className="text-emerald-600/70 text-[10px]">SPOTIFY</span> <span className="text-emerald-700 font-semibold">Track Added to Local Files</span>
                      </div>
                   </div>
                </div>
