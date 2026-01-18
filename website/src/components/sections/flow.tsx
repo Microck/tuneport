@@ -95,26 +95,27 @@ export function Flow() {
       </div>
 
       <div
-        className="relative flex min-h-[340px] w-full items-center justify-center overflow-visible rounded-2xl bg-white/60 mt-10 py-10"
+        className="relative flex w-full items-center justify-center overflow-visible rounded-2xl bg-white/60 mt-10 py-8 sm:py-12"
         ref={containerRef}
       >
-        <div className="flex w-full max-w-5xl flex-col gap-8 px-4 sm:px-6">
-          <div className="grid grid-cols-3 items-start gap-4 sm:gap-8">
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-red-500 text-white text-[10px] sm:text-xs font-bold">1</div>
-              <Circle ref={div1Ref} className="size-12 sm:size-14 border-none shadow-lg">
-                <YouTubeIcon className="size-6 sm:size-7 text-[#FF0000]" />
+        <div className="flex w-full max-w-6xl flex-col gap-6 px-4">
+          <div className="flex items-center justify-center gap-2 sm:gap-4 md:gap-8 lg:gap-12">
+            <div className="flex flex-col items-center gap-1">
+              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold">1</div>
+              <Circle ref={div1Ref} className="size-11 sm:size-14 border-none shadow-lg">
+                <YouTubeIcon className="size-5 sm:size-7 text-[#FF0000]" />
               </Circle>
-              <span className="text-xs sm:text-sm font-semibold text-slate-800">Detect</span>
-              <span className="text-[10px] sm:text-xs text-slate-500 text-center">Scan video</span>
+              <span className="text-[10px] sm:text-xs font-semibold text-slate-800">Detect</span>
             </div>
             
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-rose-500 text-white text-[10px] sm:text-xs font-bold">2</div>
+            <div className="text-slate-300 text-lg sm:text-2xl">→</div>
+            
+            <div className="flex flex-col items-center gap-1">
+              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-bold">2</div>
               <div className="relative">
                 <div className="absolute inset-0 -m-2 rounded-full bg-rose-100/60 blur-md" />
-                <Circle ref={div4Ref} className="relative size-16 sm:size-20 border-none shadow-xl bg-gradient-to-br from-rose-50 to-white ring-2 ring-rose-200/50">
-                   <div className="relative h-10 w-10 sm:h-12 sm:w-12">
+                <Circle ref={div4Ref} className="relative size-14 sm:size-20 border-none shadow-xl bg-gradient-to-br from-rose-50 to-white ring-2 ring-rose-200/50">
+                   <div className="relative h-8 w-8 sm:h-12 sm:w-12">
                     <Image 
                       src="/logo.png" 
                       fill 
@@ -124,48 +125,63 @@ export function Flow() {
                   </div>
                 </Circle>
               </div>
-              <span className="text-xs sm:text-sm font-bold text-slate-900">TunePort</span>
-              <span className="text-[10px] sm:text-xs text-slate-500 text-center">Process & map</span>
+              <span className="text-[10px] sm:text-xs font-bold text-slate-900">TunePort</span>
             </div>
 
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-500 text-white text-[10px] sm:text-xs font-bold">3</div>
-              <Circle ref={div2Ref} className="size-12 sm:size-14 border-none shadow-lg">
-                <SpotifyIcon className="size-6 sm:size-7 text-[#1DB954]" />
+            <div className="text-slate-300 text-lg sm:text-2xl">→</div>
+
+            <div className="flex flex-col items-center gap-1">
+              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 text-white text-[10px] font-bold">3</div>
+              <Circle ref={div2Ref} className="size-11 sm:size-14 border-none shadow-lg">
+                <SpotifyIcon className="size-5 sm:size-7 text-[#1DB954]" />
               </Circle>
-              <span className="text-xs sm:text-sm font-semibold text-slate-800">Match</span>
-              <span className="text-[10px] sm:text-xs text-slate-500 text-center">Match on Spotify</span>
+              <span className="text-[10px] sm:text-xs font-semibold text-slate-800">Match</span>
+            </div>
+
+            <div className="text-slate-300 text-lg sm:text-2xl">→</div>
+
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-5 h-5" />
+              <Circle ref={div6Ref} className="size-11 sm:size-14 border-none shadow-lg bg-emerald-50">
+                <CheckCircle className="size-5 sm:size-7 text-emerald-500" />
+              </Circle>
+              <span className="text-[10px] sm:text-xs font-semibold text-emerald-700">Done</span>
             </div>
           </div>
 
           <div className="flex justify-center">
-            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/50 px-4 sm:px-8 py-4 sm:py-5 w-full max-w-xs sm:max-w-none sm:w-auto">
-              <p className="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider font-medium text-center mb-3">Optional</p>
-              <div className="flex justify-center gap-8 sm:gap-12">
-                <div className="flex flex-col items-center gap-1.5">
-                  <div className="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-400 text-white text-[8px] sm:text-[10px] font-bold">4a</div>
-                  <Circle ref={div3Ref} className="size-10 sm:size-12 border-none shadow-md">
-                    <FileAudio className="size-5 sm:size-6 text-slate-600" />
-                  </Circle>
-                  <span className="text-xs sm:text-sm font-medium text-slate-700">Download</span>
-                </div>
-                <div className="flex flex-col items-center gap-1.5">
-                  <div className="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-violet-400 text-white text-[8px] sm:text-[10px] font-bold">4b</div>
-                  <Circle ref={div5Ref} className="size-10 sm:size-12 border-none shadow-md">
-                    <Plug className="size-5 sm:size-6 text-violet-500" />
-                  </Circle>
-                  <span className="text-xs sm:text-sm font-medium text-slate-700">Bridge</span>
+            <div className="relative w-full max-w-2xl">
+              <div className="absolute left-1/2 -top-6 h-6 w-px bg-slate-200" />
+              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 p-4 sm:p-6">
+                <div className="flex items-center justify-between gap-4 sm:gap-8">
+                  <div className="flex-1">
+                    <p className="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider font-medium mb-1">Optional</p>
+                    <p className="text-[10px] sm:text-xs text-slate-500">For YouTube-only tracks not on Spotify</p>
+                  </div>
+                  <div className="flex items-center gap-3 sm:gap-6">
+                    <div className="flex flex-col items-center gap-1">
+                      <Circle ref={div3Ref} className="size-10 sm:size-12 border-none shadow-md bg-white">
+                        <FileAudio className="size-5 sm:size-6 text-slate-600" />
+                      </Circle>
+                      <span className="text-[10px] sm:text-xs font-medium text-slate-600">Download</span>
+                    </div>
+                    <div className="text-slate-300">→</div>
+                    <div className="flex flex-col items-center gap-1">
+                      <Circle ref={div5Ref} className="size-10 sm:size-12 border-none shadow-md bg-white">
+                        <Plug className="size-5 sm:size-6 text-violet-500" />
+                      </Circle>
+                      <span className="text-[10px] sm:text-xs font-medium text-slate-600">Bridge</span>
+                    </div>
+                    <div className="text-slate-300">→</div>
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="size-10 sm:size-12 rounded-full border-2 border-dashed border-emerald-200 flex items-center justify-center bg-emerald-50/50">
+                        <CheckCircle className="size-5 sm:size-6 text-emerald-400" />
+                      </div>
+                      <span className="text-[10px] sm:text-xs font-medium text-emerald-600">Local Sync</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <div className="flex flex-col items-center gap-1.5">
-              <Circle ref={div6Ref} className="size-12 sm:size-14 border-none shadow-lg bg-emerald-50">
-                <CheckCircle className="size-6 sm:size-7 text-emerald-500" />
-              </Circle>
-              <span className="text-xs sm:text-sm font-semibold text-emerald-700">Synced</span>
             </div>
           </div>
         </div>
@@ -194,43 +210,13 @@ export function Flow() {
             />
             <AnimatedBeam
             containerRef={containerRef}
-            fromRef={div4Ref}
-            toRef={div3Ref}
-            pathColor="rgba(148, 163, 184, 0.25)"
-            gradientStartColor="#E11D48"
-            gradientStopColor="#64748B"
-            pathWidth={2}
-            delay={1}
-            />
-            <AnimatedBeam
-            containerRef={containerRef}
-            fromRef={div3Ref}
-            toRef={div5Ref}
-            pathColor="rgba(148, 163, 184, 0.25)"
-            gradientStartColor="#64748B"
-            gradientStopColor="#8B5CF6"
-            pathWidth={2}
-            delay={1.5}
-            />
-            <AnimatedBeam
-            containerRef={containerRef}
             fromRef={div2Ref}
             toRef={div6Ref}
             pathColor="rgba(148, 163, 184, 0.5)"
             gradientStartColor="#1DB954"
             gradientStopColor="#10B981"
             pathWidth={3}
-            delay={2}
-            />
-            <AnimatedBeam
-            containerRef={containerRef}
-            fromRef={div5Ref}
-            toRef={div6Ref}
-            pathColor="rgba(148, 163, 184, 0.25)"
-            gradientStartColor="#8B5CF6"
-            gradientStopColor="#10B981"
-            pathWidth={2}
-            delay={2.5}
+            delay={1}
             />
             </>
         )}
