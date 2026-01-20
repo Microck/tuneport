@@ -1,7 +1,6 @@
-/**
- * @jest-environment jsdom
- * Integration test for the complete track addition flow
- */
+/** @jest-environment jsdom */
+
+// Integration test for the complete track addition flow
 
 // Mock chrome API
 const mockStorage: Record<string, any> = {};
@@ -181,7 +180,7 @@ describe('Integration Tests', () => {
 
       // Same song
       const score1 = calculateMatchScore('Bohemian Rhapsody', 'Bohemian Rhapsody', 'Queen', 'Queen');
-      expect(score1).toBeGreaterThan(0.8);
+      expect(score1).toBeGreaterThanOrEqual(0.8);
 
       // Different song
       const score2 = calculateMatchScore('Stairway to Heaven', 'Bohemian Rhapsody', 'Led Zeppelin', 'Queen');

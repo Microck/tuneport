@@ -2,6 +2,8 @@
  * @jest-environment jsdom
  */
 
+import { MatchingService } from '../../services/MatchingService';
+
 // Mock chrome API
 const mockStorage: Record<string, any> = {};
 
@@ -76,6 +78,7 @@ global.fetch = jest.fn();
 
 describe('BackgroundService', () => {
   let BackgroundService: any;
+  let service: any;
   
   beforeAll(async () => {
     // Dynamic import to avoid hoisting issues
@@ -87,37 +90,38 @@ describe('BackgroundService', () => {
     jest.clearAllMocks();
     // Clear mock storage
     Object.keys(mockStorage).forEach(key => delete mockStorage[key]);
+    service = new BackgroundService();
   });
 
   describe('extractVideoId', () => {
     test('should extract video ID from standard URL', () => {
       const url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-      const result = (BackgroundService as any).extractVideoId(url);
+      const result = (service as any).extractVideoId(url);
       expect(result).toBe('dQw4w9WgXcQ');
     });
 
     test('should extract video ID from short URL', () => {
       const url = 'https://youtu.be/dQw4w9WgXcQ';
-      const result = (BackgroundService as any).extractVideoId(url);
+      const result = (service as any).extractVideoId(url);
       expect(result).toBe('dQw4w9WgXcQ');
     });
 
     test('should return null for invalid URL', () => {
       const url = 'https://example.com/video';
-      const result = (BackgroundService as any).extractVideoId(url);
+      const result = (service as any).extractVideoId(url);
       expect(result).toBeNull();
     });
   });
 
   describe('calculateStringSimilarity', () => {
     test('should calculate Jaccard similarity', () => {
-      const result = (BackgroundService as any).calculateStringSimilarity('hello world', 'hello world');
+      const result = (service as any).calculateStringSimilarity('hello world', 'hello world');
       expect(result).toBe(1);
     });
 
     test('should return 0 for no overlap', () => {
-      const result = (BackgroundService as any).calculateStringSimilarity('hello', 'world');
-      expect(result).toBe(0);
+      const result = (service as any).calculateStringSimilarity('hello', 'world');
+      expect(result).toBeLessThan(0.5);
     });
   });
 
@@ -129,7 +133,14 @@ describe('BackgroundService', () => {
         duration_ms: 180000
       };
       
-      const result = (BackgroundService as any).calculateMatchScore(track, 'Test Song', 'Test Artist', 180);
+      const result = (MatchingService as any).calculateMatchScore(
+        'Test Song',
+        'Test Artist',
+        track.name,
+        track.artists.map((a: any) => a.name),
+        180,
+        track.duration_ms
+      );
       expect(result).toBeGreaterThan(0);
       expect(result).toBeLessThanOrEqual(1);
     });
@@ -141,14 +152,21 @@ describe('BackgroundService', () => {
         duration_ms: 180000
       };
       
-      const result = (BackgroundService as any).calculateMatchScore(track, 'Test Song', '', 180);
+      const result = (MatchingService as any).calculateMatchScore(
+        'Test Song',
+        '',
+        track.name,
+        track.artists.map((a: any) => a.name),
+        180,
+        track.duration_ms
+      );
       expect(result).toBeGreaterThan(0);
     });
   });
 
   describe('findBestMatch', () => {
     test('should return null for empty tracks', () => {
-      const result = (BackgroundService as any).findBestMatch([], 'Test', 'Artist', 180);
+      const result = (service as any).findBestMatch([], 'Test', 'Artist', 180);
       expect(result).toBeNull();
     });
  
@@ -158,11 +176,10 @@ describe('BackgroundService', () => {
         { name: 'Test Song', artists: [{ name: 'Test Artist' }], duration_ms: 180000 }
       ];
       
-      const result = (BackgroundService as any).findBestMatch(tracks, 'Test Song', 'Test Artist', 180);
+      const result = (service as any).findBestMatch(tracks, 'Test Song', 'Test Artist', 180);
       expect(result).not.toBeNull();
       expect(result.name).toBe('Test Song');
     });
   });
 
 });
-

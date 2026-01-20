@@ -114,7 +114,7 @@ describe('DownloadManager', () => {
 
   describe('sanitizeFilename', () => {
     test('should remove invalid characters', () => {
-      expect(DownloadManager.sanitizeFilename('test<>:"|?*file.txt')).toBe('test_____file.txt');
+      expect(DownloadManager.sanitizeFilename('test<>:"|?*file.txt')).toBe('test_______file.txt');
     });
 
     test('should trim whitespace', () => {

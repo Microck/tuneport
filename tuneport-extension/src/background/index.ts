@@ -9,6 +9,7 @@ import { buildBridgeMessage, canBridge } from './bridge-utils';
 import { sendBridgeMessage } from '../services/BridgeService';
 import type { Segment, SegmentMode } from '../services/SegmentParser';
 import { addSegmentsToSpotify, SegmentSummary } from '../services/SegmentSpotify';
+import { resolveDownloadMode, DownloadMode } from './download-mode';
 
 
 
@@ -183,6 +184,30 @@ export class BackgroundService {
       });
 
       chrome.contextMenus.create({
+        id: 'tuneport-add-submenu',
+        parentId: 'tuneport-main',
+        title: 'Add to...',
+        contexts: ['video', 'link'],
+        documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
+      });
+
+      chrome.contextMenus.create({
+        id: 'tuneport-download-submenu',
+        parentId: 'tuneport-main',
+        title: 'Add + Download...',
+        contexts: ['video', 'link'],
+        documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
+      });
+
+      chrome.contextMenus.create({
+        id: 'tuneport-separator',
+        parentId: 'tuneport-main',
+        type: 'separator',
+        contexts: ['page', 'video', 'link'],
+        documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
+      });
+
+      chrome.contextMenus.create({
         id: 'tuneport-settings',
         parentId: 'tuneport-main',
         title: 'Open Settings',
@@ -220,8 +245,13 @@ export class BackgroundService {
       }
 
       const data = await response.json();
-      const playlists: SpotifyPlaylist[] = data.items || [];
+      let playlists: SpotifyPlaylist[] = data.items || [];
       const settings = await this.getSettings();
+      const visiblePlaylists = settings.visiblePlaylists || [];
+
+      if (visiblePlaylists.length > 0) {
+        playlists = playlists.filter((playlist) => visiblePlaylists.includes(playlist.id));
+      }
 
       await new Promise<void>((resolve) => {
         chrome.contextMenus.removeAll(() => resolve());
@@ -229,32 +259,22 @@ export class BackgroundService {
       this.isContextMenuCreated = false;
       await this.createContextMenu();
 
-      chrome.contextMenus.create({
-        id: 'tuneport-separator',
-        parentId: 'tuneport-main',
-        type: 'separator',
-        contexts: ['video', 'link'],
-        documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
-      });
-
       for (const playlist of playlists.slice(0, 10)) {
         chrome.contextMenus.create({
-          id: `tuneport-playlist-${playlist.id}`,
-          parentId: 'tuneport-main',
-          title: `Add to "${playlist.name}"`,
+          id: `tuneport-playlist-add-${playlist.id}`,
+          parentId: 'tuneport-add-submenu',
+          title: playlist.name,
           contexts: ['video', 'link'],
           documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
         });
 
-        if (settings.enableDownload) {
-          chrome.contextMenus.create({
-            id: `tuneport-playlist-dl-${playlist.id}`,
-            parentId: 'tuneport-main',
-            title: `Add + Download to "${playlist.name}"`,
-            contexts: ['video', 'link'],
-            documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
-          });
-        }
+        chrome.contextMenus.create({
+          id: `tuneport-playlist-download-${playlist.id}`,
+          parentId: 'tuneport-download-submenu',
+          title: playlist.name,
+          contexts: ['video', 'link'],
+          documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
+        });
       }
 
       console.log(`Updated playlist menu with ${playlists.length} playlists`);
@@ -273,11 +293,12 @@ export class BackgroundService {
     bridgeEnabled: boolean;
     bridgeToken: string;
     bridgeRelayUrl: string;
+    visiblePlaylists?: string[];
   }> {
     try {
       const result = await chrome.storage.local.get(['tuneport_settings']);
       const defaults = { 
-        enableDownload: false, 
+        enableDownload: true, 
         defaultQuality: 'm4a', 
         defaultPlaylist: '',
         spotifyFallbackMode: 'auto' as const,
@@ -285,12 +306,13 @@ export class BackgroundService {
         downloadMode: 'missing_only' as const,
         bridgeEnabled: false,
         bridgeToken: '',
-        bridgeRelayUrl: 'wss://relay.micr.dev'
+        bridgeRelayUrl: 'wss://relay.micr.dev',
+        visiblePlaylists: [] as string[]
       };
       return { ...defaults, ...result.tuneport_settings };
     } catch {
       return { 
-        enableDownload: false, 
+        enableDownload: true, 
         defaultQuality: 'm4a', 
         defaultPlaylist: '', 
         spotifyFallbackMode: 'auto', 
@@ -298,7 +320,8 @@ export class BackgroundService {
         downloadMode: 'missing_only',
         bridgeEnabled: false,
         bridgeToken: '',
-        bridgeRelayUrl: 'wss://relay.micr.dev'
+        bridgeRelayUrl: 'wss://relay.micr.dev',
+        visiblePlaylists: []
       };
     }
   }
@@ -312,44 +335,36 @@ export class BackgroundService {
       return;
     }
 
-    if (info.menuItemId === 'tuneport-add-default' || info.menuItemId === 'tuneport-add-download') {
-      const withDownload = info.menuItemId === 'tuneport-add-download';
-      
-      if (youtubeUrl) {
-        // Do NOT open popup for context menu actions to avoid closing context menu prematurely or confusing user
-        // We handle background work silently with notifications
-
-        const settings = await this.getSettings();
-        if (settings.defaultPlaylist) {
-          await this.addTrackToPlaylist(
-            youtubeUrl, 
-            settings.defaultPlaylist, 
-            withDownload,
-            withDownload ? { format: 'm4a' } : undefined
-          );
-        } else {
-          this.showNotification(
-            'Select Playlist',
-            'Open the popup and select a playlist first',
-            'error'
-          );
-        }
-      }
-      return;
-    }
-
-    const playlistMatch = info.menuItemId?.toString().match(/^tuneport-playlist-(dl-)?(.+)$/);
+    const playlistMatch = info.menuItemId?.toString().match(/^tuneport-playlist-(add|download)-(.+)$/);
     if (playlistMatch) {
-      const withDownload = !!playlistMatch[1];
+      const action = playlistMatch[1];
       const playlistId = playlistMatch[2];
 
       if (youtubeUrl) {
-        await this.addTrackToPlaylist(
-          youtubeUrl, 
-          playlistId, 
-          withDownload,
-          withDownload ? { format: 'm4a' } : undefined
-        );
+        const settings = await this.getSettings();
+        if (action === 'download') {
+          await this.addTrackToPlaylist(
+            youtubeUrl, 
+            playlistId, 
+            true,
+            { format: settings.defaultQuality },
+            'always'
+          );
+        } else {
+          const enableDownload = settings.enableDownload;
+          const downloadOptions = enableDownload ? { format: settings.defaultQuality } : undefined;
+          const downloadModeOverride = enableDownload
+            ? (settings.downloadMode || 'missing_only')
+            : undefined;
+
+          await this.addTrackToPlaylist(
+            youtubeUrl,
+            playlistId,
+            enableDownload,
+            downloadOptions,
+            downloadModeOverride
+          );
+        }
       }
     }
   }
@@ -435,7 +450,8 @@ export class BackgroundService {
     youtubeUrl: string, 
     playlistId: string,
     enableDownload: boolean = false,
-    downloadOptions?: DownloadOptions
+    downloadOptions?: DownloadOptions,
+    downloadModeOverride?: DownloadMode
   ): Promise<AddTrackJob> {
     const jobId = `job-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -601,7 +617,7 @@ export class BackgroundService {
 
       if (enableDownload && downloadOptions) {
         // Skip download if match found and mode is missing_only
-        const downloadMode = settings.downloadMode || 'missing_only';
+        const downloadMode = resolveDownloadMode(settings.downloadMode || 'missing_only', downloadModeOverride);
         if (spotifyMatchFound && downloadMode === 'missing_only') {
           this.log(`[Download] Skipping download because track was found on Spotify (mode: ${downloadMode})`);
           
@@ -1574,18 +1590,18 @@ chrome.runtime.onInstalled.addListener(() => {
     });
 
     chrome.contextMenus.create({
-      id: 'tuneport-add-default',
+      id: 'tuneport-add-submenu',
       parentId: 'tuneport-main',
-      title: 'Add to Spotify',
-      contexts: ['page', 'video', 'link'],
+      title: 'Add to...',
+      contexts: ['video', 'link'],
       documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
     });
 
     chrome.contextMenus.create({
-      id: 'tuneport-add-download',
+      id: 'tuneport-download-submenu',
       parentId: 'tuneport-main',
-      title: 'Add to Spotify + Download',
-      contexts: ['page', 'video', 'link'],
+      title: 'Add + Download...',
+      contexts: ['video', 'link'],
       documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
     });
 

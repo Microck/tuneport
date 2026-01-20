@@ -44,6 +44,7 @@ global.chrome = {
 global.fetch = jest.fn();
 
 import { SpotifySearchService } from '../SpotifySearchService';
+import { MatchingService } from '../MatchingService';
 
 describe('SpotifySearchService', () => {
   beforeEach(() => {
@@ -52,17 +53,17 @@ describe('SpotifySearchService', () => {
 
   describe('calculateStringSimilarity', () => {
     test('should return 1 for identical strings', () => {
-      const result = (SpotifySearchService as any).calculateStringSimilarity('hello world', 'hello world');
+      const result = MatchingService.jaroWinklerSimilarity('hello world', 'hello world');
       expect(result).toBe(1);
     });
 
-    test('should return 0 for completely different strings', () => {
-      const result = (SpotifySearchService as any).calculateStringSimilarity('hello', 'world');
-      expect(result).toBe(0);
+    test('should return low score for different strings', () => {
+      const result = MatchingService.jaroWinklerSimilarity('hello', 'world');
+      expect(result).toBeLessThan(0.5);
     });
 
     test('should handle partial matches', () => {
-      const result = (SpotifySearchService as any).calculateStringSimilarity('hello world', 'hello');
+      const result = MatchingService.jaroWinklerSimilarity('hello world', 'hello');
       expect(result).toBeGreaterThan(0);
       expect(result).toBeLessThan(1);
     });
@@ -76,7 +77,14 @@ describe('SpotifySearchService', () => {
         duration_ms: 180000
       };
       
-      const result = (SpotifySearchService as any).calculateMatchScore(track, 'Test Song', 'Test Artist', 180);
+      const result = MatchingService.calculateMatchScore(
+        'Test Song',
+        'Test Artist',
+        track.name,
+        track.artists.map(a => a.name),
+        180,
+        track.duration_ms
+      );
       expect(result).toBeGreaterThan(0);
       expect(result).toBeLessThanOrEqual(1);
     });
@@ -85,8 +93,22 @@ describe('SpotifySearchService', () => {
       const track1 = { name: 'Different Song', artists: [{ name: 'Test Artist' }], duration_ms: 180000 };
       const track2 = { name: 'Test Song', artists: [{ name: 'Different Artist' }], duration_ms: 180000 };
       
-      const result1 = (SpotifySearchService as any).calculateMatchScore(track1, 'Test Song', 'Test Artist', 180);
-      const result2 = (SpotifySearchService as any).calculateMatchScore(track2, 'Test Song', 'Test Artist', 180);
+      const result1 = MatchingService.calculateMatchScore(
+        'Test Song',
+        'Test Artist',
+        track1.name,
+        track1.artists.map(a => a.name),
+        180,
+        track1.duration_ms
+      );
+      const result2 = MatchingService.calculateMatchScore(
+        'Test Song',
+        'Test Artist',
+        track2.name,
+        track2.artists.map(a => a.name),
+        180,
+        track2.duration_ms
+      );
       
       expect(result2).toBeGreaterThan(result1);
     });
@@ -95,7 +117,8 @@ describe('SpotifySearchService', () => {
   describe('findBestMatch', () => {
     test('should return null for empty tracks', () => {
       const result = (SpotifySearchService as any).findBestMatch([], 'Test', 'Artist');
-      expect(result).toBeNull();
+      expect(result.bestMatch).toBeNull();
+      expect(result.score).toBe(0);
     });
 
     test('should return best matching track', () => {
@@ -105,8 +128,8 @@ describe('SpotifySearchService', () => {
       ];
       
       const result = (SpotifySearchService as any).findBestMatch(tracks, 'Test Song', 'Test Artist', 180);
-      expect(result).not.toBeNull();
-      expect(result?.name).toBe('Test Song');
+      expect(result.bestMatch).not.toBeNull();
+      expect(result.bestMatch?.name).toBe('Test Song');
     });
 
     test('should return null if no track meets threshold', () => {
@@ -115,7 +138,8 @@ describe('SpotifySearchService', () => {
       ];
       
       const result = (SpotifySearchService as any).findBestMatch(tracks, 'Test Song', 'Test Artist', 180);
-      expect(result).toBeNull();
+      expect(result.bestMatch).toBeNull();
+      expect(result.score).toBeLessThan(0.7);
     });
   });
 

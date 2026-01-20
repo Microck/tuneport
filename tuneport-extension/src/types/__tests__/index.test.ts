@@ -1,7 +1,6 @@
-/**
- * @jest-environment jsdom
- * Test for type definitions and constants
- */
+/** @jest-environment jsdom */
+
+// Test for type definitions and constants
 
 describe('Type Definitions', () => {
   describe('YouTubeVideo interface', () => {

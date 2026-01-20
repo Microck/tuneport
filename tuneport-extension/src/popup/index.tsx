@@ -35,6 +35,7 @@ import {
 
 import { cn } from '../lib/utils';
 import { ChromeMessageService } from '../services/ChromeMessageService';
+import { runSyncAndSwitch } from './sync';
 import { SpotifyAuthService } from '../services/SpotifyAuthService';
 import { DEFAULT_COBALT_INSTANCE, DEFAULT_YTDLP_INSTANCE } from '../config/defaults';
 import { parseDescriptionSegments, parseManualMultiSegments, parseManualSingleSegments } from '../services/SegmentParser';
@@ -924,9 +925,8 @@ export const TunePortPopup: React.FC = () => {
         ? (segmentMode === 'auto' ? 'multiple' : manualSegmentMode)
         : undefined;
 
-      const response = await ChromeMessageService.sendMessage({
-        type: 'ADD_TRACK_TO_PLAYLIST',
-        data: { 
+      await runSyncAndSwitch({
+        data: {
           youtubeUrl: currentUrl,
           playlistId,
           download: enableDownload,
@@ -935,12 +935,11 @@ export const TunePortPopup: React.FC = () => {
             segments: segmentsPayload,
             segmentMode: segmentsPayload ? segmentModePayload : undefined
           } : undefined
-        }
+        },
+        sendMessage: ChromeMessageService.sendMessage,
+        setActiveTab,
+        loadJobs
       });
-      setActiveTab('activity');
-      if (response.success) {
-        loadJobs();
-      }
     } catch (error) {
       console.error('Sync failed:', error);
     }
