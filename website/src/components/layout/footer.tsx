@@ -37,13 +37,17 @@ export function Footer() {
           >
             Privacy
           </Link>
-          <a
-            href="https://github.com/Microck/tuneport/blob/main/LICENSE"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/terms"
             className="text-sm font-medium hover:text-primary transition-colors text-muted-foreground"
           >
-            License
+            Terms
+          </Link>
+          <a
+            href="mailto:contact@micr.dev"
+            className="text-sm font-medium hover:text-primary transition-colors text-muted-foreground"
+          >
+            Contact
           </a>
         </nav>
         

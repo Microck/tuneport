@@ -58,6 +58,12 @@ export const metadata: Metadata = {
     description: "Sync YouTube to Spotify with zero friction. Match tracks, add to playlists, and download audio locally.",
     images: ["/logo.png"],
   },
+  other: {
+    "theme-color": "#10b981",
+  },
+  alternates: {
+    canonical: "https://tuneport.micr.dev",
+  },
 };
 
 export default function RootLayout({
@@ -65,18 +71,47 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "TunePort",
+    "description": "Sync YouTube to Spotify with zero friction. Match tracks, add to playlists, and download audio locally.",
+    "url": "https://tuneport.micr.dev",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "Chrome",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "Microck",
+      "url": "https://github.com/Microck"
+    }
+  };
+
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         className={`${instrumentSans.variable} ${cormorantGaramond.variable} ${spaceGrotesk.variable} antialiased font-sans`}
       >
         <GsapProvider>
           <ScrollProgress />
           <SmoothCursor />
+          <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-slate-900 focus:rounded-md focus:shadow-lg">
+            Skip to content
+          </a>
           <div id="smooth-wrapper">
             <div id="smooth-content">
               <Header />
-              <main className="flex min-h-screen flex-col">
+              <main id="main-content" className="flex min-h-screen flex-col">
                 {children}
               </main>
               <Footer />
