@@ -58,7 +58,7 @@ function LosslessAudioBackground() {
 function SmartMatchingBackground() {
   return (
     <div className="flex h-48 w-full flex-col items-center justify-center opacity-90 [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)]">
-      <div className="absolute inset-0 z-10 bg-gradient-to-t from-white via-transparent to-transparent dark:from-black" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-t from-white via-transparent to-transparent" />
       <div className="relative flex w-full flex-col gap-4 overflow-hidden py-4 items-center">
           <div className="z-20 flex items-center justify-center gap-2 rounded-full bg-rose-100/80 backdrop-blur-sm px-6 py-2 text-sm font-semibold text-rose-700 shadow-sm border border-rose-200/60">
               <ScanSearch className="h-5 w-5" />

@@ -85,7 +85,7 @@ export function Hero() {
             <div className="relative flex flex-col items-center gap-2">
               <Pointer className="text-rose-600" />
               <ShimmerButton className="shadow-2xl h-12 px-8 opacity-80 pointer-events-none" data-placeholder="webstore-url" data-animate="button">
-                <span className="whitespace-pre-wrap text-center text-base font-semibold leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg">
+                <span className="whitespace-pre-wrap text-center text-base font-semibold leading-none tracking-tight text-white lg:text-lg">
                   Chrome Web Store soon
                 </span>
               </ShimmerButton>
