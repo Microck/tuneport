@@ -211,3 +211,11 @@ by using tuneport, you agree that the developers are not responsible for any leg
   <a href="https://tuneport.micr.dev/docs">docs</a> · 
   <a href="https://tuneport.micr.dev/privacy">privacy</a>
 </p>
+
+---
+
+## to-do
+
+- add soundcloud bridge
+- record tutorial when spotify's api stop being chud
+- relaunch my instance / doc that shit better / offer alternatives that are not hosted by me
