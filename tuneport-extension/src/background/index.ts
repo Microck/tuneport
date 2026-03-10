@@ -4,6 +4,7 @@ import { DownloadService } from '../services/DownloadService';
 import { LucidaService } from '../services/LucidaService';
 import { AudioFormat } from '../services/CobaltService';
 import { YouTubeMetadataService, YouTubeMusicMetadata } from '../services/YouTubeMetadataService';
+import { SoundCloudMetadataService } from '../services/SoundCloudMetadataService';
 import { applyDownloadCompletion, applyDownloadInterruption } from './download-utils';
 import { buildBridgeMessage, canBridge } from './bridge-utils';
 import { sendBridgeMessage } from '../services/BridgeService';
@@ -21,7 +22,7 @@ interface DownloadOptions {
 
 interface AddTrackJob {
   jobId: string;
-  youtubeUrl: string;
+  sourceUrl: string;
   playlistId: string;
   status: 'queued' | 'searching' | 'adding' | 'downloading' | 'completed' | 'failed' | 'awaiting_fallback';
   progress: number;
@@ -180,7 +181,7 @@ export class BackgroundService {
         id: 'tuneport-main',
         title: 'TunePort',
         contexts: ['page', 'video', 'link'],
-        documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
+        documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*', '*://soundcloud.com/*', '*://*.soundcloud.com/*']
       });
 
       chrome.contextMenus.create({
@@ -188,7 +189,7 @@ export class BackgroundService {
         parentId: 'tuneport-main',
         title: 'Add to...',
         contexts: ['video', 'link'],
-        documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
+        documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*', '*://soundcloud.com/*', '*://*.soundcloud.com/*']
       });
 
       chrome.contextMenus.create({
@@ -196,7 +197,7 @@ export class BackgroundService {
         parentId: 'tuneport-main',
         title: 'Add + Download...',
         contexts: ['video', 'link'],
-        documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
+        documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*', '*://soundcloud.com/*', '*://*.soundcloud.com/*']
       });
 
       chrome.contextMenus.create({
@@ -204,7 +205,7 @@ export class BackgroundService {
         parentId: 'tuneport-main',
         type: 'separator',
         contexts: ['page', 'video', 'link'],
-        documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
+        documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*', '*://soundcloud.com/*', '*://*.soundcloud.com/*']
       });
 
       chrome.contextMenus.create({
@@ -212,7 +213,7 @@ export class BackgroundService {
         parentId: 'tuneport-main',
         title: 'Open Settings',
         contexts: ['page', 'video', 'link'],
-        documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
+        documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*', '*://soundcloud.com/*', '*://*.soundcloud.com/*']
       });
 
       this.isContextMenuCreated = true;
@@ -265,7 +266,7 @@ export class BackgroundService {
           parentId: 'tuneport-add-submenu',
           title: playlist.name,
           contexts: ['video', 'link'],
-          documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
+          documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*', '*://soundcloud.com/*', '*://*.soundcloud.com/*']
         });
 
         chrome.contextMenus.create({
@@ -273,7 +274,7 @@ export class BackgroundService {
           parentId: 'tuneport-download-submenu',
           title: playlist.name,
           contexts: ['video', 'link'],
-          documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*']
+          documentUrlPatterns: ['*://www.youtube.com/*', '*://youtube.com/*', '*://youtu.be/*', '*://music.youtube.com/*', '*://soundcloud.com/*', '*://*.soundcloud.com/*']
         });
       }
 
@@ -455,9 +456,9 @@ export class BackgroundService {
   ): Promise<AddTrackJob> {
     const jobId = `job-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-    const job: AddTrackJob = {
+    const     job: AddTrackJob = {
       jobId,
-      youtubeUrl,
+      sourceUrl: youtubeUrl,
       playlistId,
       status: 'queued',
       progress: 0,
@@ -473,13 +474,13 @@ export class BackgroundService {
     try {
       job.status = 'searching';
       job.progress = 10;
-      job.currentStep = 'Fetching YouTube metadata...';
+      job.currentStep = 'Fetching metadata...';
       this.activeJobs.set(jobId, { ...job });
       
-      const metadata = await this.extractYouTubeMetadata(youtubeUrl);
+      const metadata = await this.extractMetadata(youtubeUrl);
       
       if (!metadata) {
-        throw new Error('Could not extract video metadata');
+        throw new Error('Could not extract track metadata');
       }
 
       job.trackInfo = {
@@ -545,12 +546,13 @@ export class BackgroundService {
         spotifyMatchFound = !!searchResults.exactMatch;
 
         if (!spotifyMatchFound) {
-          // Try YouTube Music fallback
+          // Try YouTube Music fallback (only for YouTube URLs)
           const fallbackMode = settings.spotifyFallbackMode || 'auto';
           
           if (fallbackMode !== 'never') {
             const videoId = this.extractVideoId(youtubeUrl);
-            if (videoId) {
+            const source = this.detectSource(youtubeUrl);
+            if (videoId && source?.type === 'youtube') {
               job.currentStep = 'Trying YouTube Music metadata...';
               this.activeJobs.set(jobId, { ...job });
               
@@ -939,6 +941,54 @@ export class BackgroundService {
     }
 
     return null;
+  }
+
+  private detectSource(url: string): { type: 'youtube' | 'soundcloud'; id: string } | null {
+    // YouTube patterns (existing)
+    const ytPatterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,
+      /youtube\.com\/embed\/([^&\n?#]+)/,
+    ];
+    
+    for (const pattern of ytPatterns) {
+      const match = url.match(pattern);
+      if (match) return { type: 'youtube', id: match[1] };
+    }
+    
+    // SoundCloud patterns (new)
+    const scMatch = url.match(/soundcloud\.com\/([\w-]+\/[\w-]+)/);
+    if (scMatch) return { type: 'soundcloud', id: scMatch[1] };
+    
+    return null;
+  }
+
+  private async extractMetadata(sourceUrl: string) {
+    const source = this.detectSource(sourceUrl);
+    if (!source) {
+      throw new Error('Unsupported URL. Please provide a YouTube or SoundCloud link.');
+    }
+
+    if (source.type === 'youtube') {
+      return this.extractYouTubeMetadata(sourceUrl);
+    } else {
+      return this.extractSoundCloudMetadata(sourceUrl);
+    }
+  }
+
+  private async extractSoundCloudMetadata(url: string) {
+    const scMetadata = await SoundCloudMetadataService.extractMetadata(url);
+    if (!scMetadata) {
+      return null;
+    }
+    
+    return {
+      videoId: scMetadata.id,
+      title: scMetadata.title,
+      artist: scMetadata.artist,
+      thumbnail: scMetadata.thumbnail,
+      duration: scMetadata.duration,
+      url: scMetadata.url
+    };
   }
 
   private async searchOnSpotify(title: string, artist: string, duration: number, threshold: number = 0.7) {
@@ -1448,7 +1498,7 @@ export class BackgroundService {
         const segmentMode = job.downloadOptions?.segmentMode;
 
         const downloadResult = await DownloadService.downloadAudio(
-          job.youtubeUrl,
+          job.sourceUrl,
           job.fallbackMetadata.title,
           job.fallbackMetadata.artist,
           { format, preferLossless: true, segments, segmentMode }

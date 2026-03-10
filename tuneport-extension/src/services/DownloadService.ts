@@ -40,7 +40,7 @@ export interface DownloadOptions {
 
 export class DownloadService {
   static async getDownloadUrl(
-    youtubeUrl: string,
+    sourceUrl: string,
     title: string,
     artist: string,
     options: DownloadOptions = {}
@@ -55,7 +55,7 @@ export class DownloadService {
     } = options;
 
 
-    console.log('[DownloadService] getDownloadUrl called:', { youtubeUrl, title, artist, format });
+    console.log('[DownloadService] getDownloadUrl called:', { sourceUrl, title, artist, format });
 
     if (preferLossless && LucidaService.isEnabled()) {
       console.log('[DownloadService] Trying Lucida first...');
@@ -87,7 +87,7 @@ export class DownloadService {
       // Use default token only when using the default instance and no custom token is set
       const effectiveToken = ytDlpToken || (effectiveInstance === DEFAULT_YTDLP_INSTANCE ? DEFAULT_YTDLP_TOKEN : undefined);
       
-      const ytDlpResult = await YtDlpService.getDownloadUrl(youtubeUrl, {
+      const ytDlpResult = await YtDlpService.getDownloadUrl(sourceUrl, {
         format,
         instance: effectiveInstance,
         token: effectiveToken,
@@ -99,7 +99,7 @@ export class DownloadService {
     }
 
     console.log('[DownloadService] Calling Cobalt...');
-    const cobaltResult = await CobaltService.getDownloadUrl(youtubeUrl, {
+    const cobaltResult = await CobaltService.getDownloadUrl(sourceUrl, {
       format,
       customInstance
     });
@@ -127,12 +127,12 @@ export class DownloadService {
   }
 
   static async downloadAudio(
-    youtubeUrl: string,
+    sourceUrl: string,
     title: string,
     artist: string,
     options: DownloadOptions = {}
   ): Promise<DownloadResult> {
-    console.log('[DownloadService] downloadAudio called:', { youtubeUrl, title, artist, options });
+    console.log('[DownloadService] downloadAudio called:', { sourceUrl, title, artist, options });
 
     let customInstance = DEFAULT_COBALT_INSTANCE;
     let downloadProvider: 'cobalt' | 'yt-dlp' = 'yt-dlp';
@@ -172,7 +172,7 @@ export class DownloadService {
     if (normalizedSegments.length > 0) {
       if (segmentMode === 'single') {
         return await this.downloadMergedSegments(
-          youtubeUrl,
+          sourceUrl,
           title,
           artist,
           normalizedSegments,
@@ -185,7 +185,7 @@ export class DownloadService {
       }
 
       return await this.downloadSegments(
-        youtubeUrl,
+        sourceUrl,
         title,
         artist,
         normalizedSegments,
@@ -201,7 +201,7 @@ export class DownloadService {
       await CobaltService.ensureAuthenticated();
     }
 
-    const result = await this.getDownloadUrl(youtubeUrl, title, artist, {
+    const result = await this.getDownloadUrl(sourceUrl, title, artist, {
       ...options,
       customInstance,
       downloadProvider,
@@ -332,7 +332,7 @@ export class DownloadService {
   }
 
   private static async downloadSegments(
-    youtubeUrl: string,
+    sourceUrl: string,
     title: string,
     artist: string,
     segments: Segment[],
@@ -354,7 +354,7 @@ export class DownloadService {
         ? { title: resolvedMetadata.title, artist: resolvedMetadata.artist }
         : { title, artist };
 
-      const ytDlpResult = await YtDlpService.getDownloadUrl(youtubeUrl, {
+      const ytDlpResult = await YtDlpService.getDownloadUrl(sourceUrl, {
         format: options.format,
         instance: options.ytDlpInstance,
         token: options.ytDlpToken,
@@ -416,7 +416,7 @@ export class DownloadService {
   }
 
   private static async downloadMergedSegments(
-    youtubeUrl: string,
+    sourceUrl: string,
     title: string,
     artist: string,
     segments: Segment[],
@@ -426,7 +426,7 @@ export class DownloadService {
       ytDlpToken?: string;
     }
   ): Promise<DownloadResult> {
-    const ytDlpResult = await YtDlpService.getDownloadUrl(youtubeUrl, {
+    const ytDlpResult = await YtDlpService.getDownloadUrl(sourceUrl, {
       format: options.format,
       instance: options.ytDlpInstance,
       token: options.ytDlpToken,

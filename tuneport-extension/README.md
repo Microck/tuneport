@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  the missing link between youtube and spotify.
+  the missing link between YouTube, SoundCloud, and Spotify.
 </p>
 
 <p align="center">
@@ -35,9 +35,11 @@
 
 ## features
 
-- **finds matches**: scans spotify for the youtube song you're watching.
+- **multi-platform support**: works with YouTube AND SoundCloud URLs.
+- **finds matches**: scans spotify for the song you're watching/listening to.
 - **adds to playlist**: one click adds the official track to your library.
 - **downloads missing tracks**: if it's not on spotify (remixes, bootlegs), it downloads high-quality audio locally.
+- **lossless first**: tries Lucida (Qobuz/Tidal/Deezer) for FLAC before falling back to YouTube/SoundCloud streams.
 - **smart parsing**: cleans up titles (removes "official video", "lyrics", "ft.") for better matching.
 - **bring your own key**: use your own spotify app credentials to avoid rate limits.
 
@@ -88,6 +90,9 @@ mit. do whatever you want with it.
 ---
 
 ## todo / roadmap
+
+- [x] **soundcloud support** - done! ✅  
+  sync soundcloud tracks to spotify just like youtube videos.
 
 - [ ] **investigate: unofficial spotify api alternatives**  
   research complete: spotapi can replace official api but requires backend infrastructure.  

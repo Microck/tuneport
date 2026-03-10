@@ -4,7 +4,7 @@
   </a>
 </p>
 
-<p align="center">a browser extension that syncs YouTube videos to Spotify playlists with zero friction.</p>
+<p align="center">a browser extension that syncs YouTube and SoundCloud to Spotify playlists with zero friction.</p>
 
 <p align="center">
   <a href="https://chromewebstore.google.com/detail/tuneport"><img alt="chrome" src="https://img.shields.io/badge/chrome-web%20store-4285F4?logo=google-chrome&logoColor=white" /></a>
@@ -22,7 +22,9 @@
 
 tuneport bridges the gap between YouTube's discovery algorithm and Spotify's library management. it detects the video you're watching, finds the best match on Spotify, and adds it to your chosen playlist with a single click.
 
-unlike other sync tools, tuneport also offers **simultaneous downloads**. it checks lossless sources (Qobuz, Tidal, Deezer) via Lucida before falling back to YouTube's audio stream, ensuring you always get the highest quality file for your local archive.
+**now with SoundCloud support** - sync tracks from SoundCloud to Spotify just as easily as YouTube videos.
+
+unlike other sync tools, tuneport also offers **simultaneous downloads**. it checks lossless sources (Qobuz, Tidal, Deezer) via Lucida before falling back to YouTube/SoundCloud's audio stream, ensuring you always get the highest quality file for your local archive.
 
 ---
 
@@ -48,12 +50,13 @@ unlike other sync tools, tuneport also offers **simultaneous downloads**. it che
 
 ## features
 
--   **instant sync**: right-click any video -> "add to playlist".
+-   **multi-platform**: supports YouTube and SoundCloud URLs.
+-   **instant sync**: right-click any video/track -> "add to playlist".
 -   **smart matching**: uses Jaro-Winkler fuzzy matching to handle "official video", "lyrics", and "ft." noise.
 -   **YouTube Music fallback**: when Spotify match fails, tries YouTube Music metadata for better results (auto/ask/never modes).
 -   **dual pipeline**: adds to Spotify + downloads to disk in parallel.
 -   **segment downloads**: auto or manual ranges via yt-dlp. manual supports single-song cuts (merged) or multiple tracks. adds to Spotify when titles exist.
--   **lossless first**: prioritizes flac from Lucida (Qobuz/Tidal/Deezer); falls back to YouTube's native opus stream (~128kbps, perceptually equivalent to mp3 320kbps).
+-   **lossless first**: prioritizes flac from Lucida (Qobuz/Tidal/Deezer); falls back to YouTube/SoundCloud's native opus stream (~128kbps, perceptually equivalent to mp3 320kbps).
 -   **custom quality presets**: create up to 5 custom download presets with format descriptions.
 -   **duplicate guard**: checks destination playlist before adding to prevent clutter.
 -   **privacy**: runs entirely in the browser. no backend server. no data collection.
@@ -92,8 +95,8 @@ the spicetify bridge automates step 4. enable bridge mode in settings, install t
 click the extension icon or access settings via the right-click menu.
 
 -   **default playlist**: set a target to skip the selection menu.
--   **download format**: opus (best quality from YouTube), mp3, ogg, or wav. YouTube serves ~128kbps opus which is perceptually equivalent to mp3 320kbps.
--   **lossless sources**: enable "lucida" in advanced settings for true lossless (flac) from Qobuz/Tidal/Deezer.
+-   **download format**: opus (best quality from YouTube/SoundCloud), mp3, ogg, or wav. YouTube serves ~128kbps opus which is perceptually equivalent to mp3 320kbps.
+-   **lossless sources**: enable "lucida" in advanced settings for true lossless (flac) from Qobuz/Tidal/Deezer before falling back to platform streams.
 
 ## development
 
@@ -140,7 +143,7 @@ graph TD
     User((User)) -->|Context Menu / Popup| BG[Background Service]
     
     subgraph Extension
-        BG -->|Fetch Metadata| YT[YouTube]
+        BG -->|Fetch Metadata| Sources[YouTube / SoundCloud]
         BG -->|Sanitize & Match| Match[Matching Service]
         Match -->|Search| SpotAPI[Spotify API]
         SpotAPI -->|Track Found| Add[Add to Playlist]
@@ -149,9 +152,8 @@ graph TD
     subgraph Download Pipeline
         BG -->|If Enabled| DL[Download Manager]
         DL -->|1. Lossless| Lucida[Lucida - Qobuz/Tidal/Deezer]
-        Lucida -.->|Fallback| Cobalt[Cobalt API]
-        Cobalt -.->|Fallback| YtDlp[yt-dlp Service]
-        YtDlp --> Disk[Local File]
+        Lucida -.->|Fallback| YtDlp[yt-dlp Service]
+        YtDlp -->|YouTube/SoundCloud| Disk[Local File]
     end
     
     subgraph Bridge Mode
@@ -216,6 +218,6 @@ by using tuneport, you agree that the developers are not responsible for any leg
 
 ## to-do
 
-- add soundcloud bridge
-- record tutorial when spotify's api stop being chud
-- relaunch my instance / doc that shit better / offer alternatives that are not hosted by me
+- [x] add soundcloud support ✅
+- [ ] record tutorial when spotify's api stop being chud
+- [ ] relaunch my instance / doc that shit better / offer alternatives that are not hosted by me

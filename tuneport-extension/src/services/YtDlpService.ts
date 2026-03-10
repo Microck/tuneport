@@ -26,7 +26,7 @@ interface YtDlpResponse {
 }
 
 export class YtDlpService {
-  static async getDownloadUrl(youtubeUrl: string, options: YtDlpOptions): Promise<DownloadResult> {
+  static async getDownloadUrl(sourceUrl: string, options: YtDlpOptions): Promise<DownloadResult> {
     const { format, instance, token } = options;
     const endpoint = new URL('/download', instance).toString();
 
@@ -55,7 +55,7 @@ export class YtDlpService {
         method: 'POST',
         headers,
         body: JSON.stringify({
-          url: youtubeUrl,
+          url: sourceUrl,
           format,
           segments: options.segments,
           segment_mode: options.segmentMode,

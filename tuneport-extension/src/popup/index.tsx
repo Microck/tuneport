@@ -9,6 +9,7 @@ import {
   XCircle, 
   Loader2,
   Youtube,
+  Cloud,
   Sparkles,
   Zap,
   MousePointer2,
@@ -742,8 +743,9 @@ export const TunePortPopup: React.FC = () => {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (tab?.url) {
         setCurrentUrl(tab.url);
-        if (tab.url.includes('youtube.com') || tab.url.includes('youtu.be')) {
-          fetchVideoMetadata(tab.url);
+        const sourceType = detectSource(tab.url);
+        if (sourceType) {
+          fetchTrackMetadata(tab.url, sourceType);
         }
       }
     } catch (error) {
@@ -751,50 +753,82 @@ export const TunePortPopup: React.FC = () => {
     }
   }
 
-  const fetchVideoMetadata = async (url: string) => {
+  const detectSource = (url: string): 'youtube' | 'soundcloud' | null => {
+    if (/youtube\.com|youtu\.be/.test(url)) return 'youtube';
+    if (/soundcloud\.com/.test(url)) return 'soundcloud';
+    return null;
+  };
+
+  const fetchTrackMetadata = async (url: string, source: 'youtube' | 'soundcloud') => {
     try {
-      const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
-      if (!videoIdMatch) return;
-      
-      const videoId = videoIdMatch[1];
-      const response = await fetch(
-        `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`
-      );
-      
-      if (response.ok) {
-        const data = await response.json();
-        const title = data.title || '';
-        let artist = '';
-        let trackTitle = title;
+      if (source === 'youtube') {
+        const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+        if (!videoIdMatch) return;
         
-        if (title.includes(' - ')) {
-          const parts = title.split(' - ');
-          artist = parts[0].trim();
-          trackTitle = parts.slice(1).join(' - ').trim();
-        } else {
-          artist = data.author_name || '';
+        const videoId = videoIdMatch[1];
+        const response = await fetch(
+          `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          const title = data.title || '';
+          let artist = '';
+          let trackTitle = title;
+          
+          if (title.includes(' - ')) {
+            const parts = title.split(' - ');
+            artist = parts[0].trim();
+            trackTitle = parts.slice(1).join(' - ').trim();
+          } else {
+            artist = data.author_name || '';
+          }
+          
+          trackTitle = trackTitle
+            .replace(/\s*\(Official\s*(Music\s*)?Video\)/gi, '')
+            .replace(/\s*\[Official\s*(Music\s*)?Video\]/gi, '')
+            .replace(/\s*\(Lyrics?\)/gi, '')
+            .replace(/\s*\[Lyrics?\]/gi, '')
+            .replace(/\s*\(Audio\)/gi, '')
+            .replace(/\s*\[Audio\]/gi, '')
+            .replace(/\s*\(Visualizer\)/gi, '')
+            .replace(/\s*ft\.?\s+.+$/gi, '')
+            .replace(/\s*feat\.?\s+.+$/gi, '')
+            .trim();
+          
+          setVideoMetadata({
+            title: trackTitle,
+            artist,
+            thumbnail: data.thumbnail_url
+          });
         }
+      } else if (source === 'soundcloud') {
+        // Use SoundCloud oEmbed API
+        const response = await fetch(
+          `https://soundcloud.com/oembed?url=${encodeURIComponent(url)}&format=json`
+        );
         
-        trackTitle = trackTitle
-          .replace(/\s*\(Official\s*(Music\s*)?Video\)/gi, '')
-          .replace(/\s*\[Official\s*(Music\s*)?Video\]/gi, '')
-          .replace(/\s*\(Lyrics?\)/gi, '')
-          .replace(/\s*\[Lyrics?\]/gi, '')
-          .replace(/\s*\(Audio\)/gi, '')
-          .replace(/\s*\[Audio\]/gi, '')
-          .replace(/\s*\(Visualizer\)/gi, '')
-          .replace(/\s*ft\.?\s+.+$/gi, '')
-          .replace(/\s*feat\.?\s+.+$/gi, '')
-          .trim();
-        
-        setVideoMetadata({
-          title: trackTitle,
-          artist,
-          thumbnail: data.thumbnail_url
-        });
+        if (response.ok) {
+          const data = await response.json();
+          let title = data.title || '';
+          let artist = data.author_name || '';
+          
+          // Parse "Artist - Track Name" format
+          if (title.includes(' - ')) {
+            const parts = title.split(' - ');
+            artist = parts[0].trim();
+            title = parts.slice(1).join(' - ').trim();
+          }
+          
+          setVideoMetadata({
+            title,
+            artist,
+            thumbnail: data.thumbnail_url
+          });
+        }
       }
     } catch (error) {
-      console.error('Failed to fetch video metadata:', error);
+      console.error('Failed to fetch track metadata:', error);
     }
   };
 
@@ -953,7 +987,9 @@ export const TunePortPopup: React.FC = () => {
     return <Onboarding settings={settings} onSave={handleOnboardingComplete} onBack={() => setShowOnboarding(false)} />;
   }
 
-  const isYouTube = currentUrl.includes('youtube.com') || currentUrl.includes('youtu.be');
+  const isYouTube = detectSource(currentUrl) === 'youtube';
+  const isSoundCloud = detectSource(currentUrl) === 'soundcloud';
+  const isSupportedPlatform = isYouTube || isSoundCloud;
 
   if (!isConnected) {
     return (
@@ -1085,7 +1121,7 @@ export const TunePortPopup: React.FC = () => {
               exit={{ opacity: 0, x: 10 }}
               className="space-y-4"
             >
-              {isYouTube ? (
+              {isSupportedPlatform ? (
                 <>
                   <div className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-tf-border shadow-sm">
                     {videoMetadata?.thumbnail ? (
@@ -1098,7 +1134,11 @@ export const TunePortPopup: React.FC = () => {
                       </div>
                     ) : (
                       <div className="w-16 h-16 rounded-xl bg-tf-gray flex items-center justify-center flex-shrink-0">
-                        <Youtube className="w-8 h-8 text-tf-slate-muted" />
+                        {isYouTube ? (
+                          <Youtube className="w-8 h-8 text-tf-slate-muted" />
+                        ) : (
+                          <Cloud className="w-8 h-8 text-tf-slate-muted" />
+                        )}
                       </div>
                     )}
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
@@ -1403,14 +1443,14 @@ export const TunePortPopup: React.FC = () => {
                     <OrbitingCircles radius={50} speed={0.5}>
                       <Music2 className="w-4 h-4 text-tf-emerald/40" />
                       <Youtube className="w-4 h-4 text-tf-rose/40" />
-                      <Search className="w-4 h-4 text-tf-slate/20" />
+                      <Cloud className="w-4 h-4 text-tf-slate/20" />
                     </OrbitingCircles>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <Search className="w-8 h-8 text-tf-slate-muted animate-pulse" />
                     </div>
                   </div>
                   <h3 className="text-lg font-bold serif italic text-tf-slate mb-2">Awaiting Signal</h3>
-                  <p className="text-xs text-tf-slate-muted font-medium px-4">Navigate to a YouTube video to start syncing it to your playlists.</p>
+                  <p className="text-xs text-tf-slate-muted font-medium px-4">Navigate to a YouTube video or SoundCloud track to start syncing it to your playlists.</p>
                 </div>
               )}
             </motion.div>
