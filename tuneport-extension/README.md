@@ -84,3 +84,18 @@ npm run build
 ## license
 
 mit. do whatever you want with it.
+
+---
+
+## todo / roadmap
+
+- [ ] **investigate: unofficial spotify api alternatives**  
+  research complete: spotapi can replace official api but requires backend infrastructure.  
+  see [docs/research/spotify-api-alternatives.md](../docs/research/spotify-api-alternatives.md) for full analysis.  
+  **status:** deferred - revisit when approaching 25-user limit.
+
+- [ ] add user-configurable playlist for "liked" songs
+- [ ] improve matching accuracy for remixes/bootlegs
+- [ ] support for youtube music URLs
+- [ ] bulk sync entire youtube playlists
+- [ ] dark mode UI
