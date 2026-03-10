@@ -128,7 +128,7 @@ const features = [
   {
     Icon: Zap,
     name: "Instant Sync",
-    description: "Right-click any video to add it to your playlist. Zero friction.",
+    description: "Right-click any YouTube video or SoundCloud track to add it to your playlist. Zero friction.",
     href: "/tutorial",
     cta: "Start tutorial",
     className: "col-span-12 lg:col-span-4 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
@@ -137,7 +137,7 @@ const features = [
   {
     Icon: FileAudio,
     name: "Lossless Audio",
-    description: "Prioritizes FLAC from Lucida (Qobuz/Tidal). Falls back to Opus from YouTube if needed.",
+    description: "Prioritizes FLAC from Lucida (Qobuz/Tidal). Falls back to high-quality streams from YouTube or SoundCloud if needed.",
     href: "/docs",
     cta: "Read docs",
     className: "col-span-12 lg:col-span-5 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",
@@ -155,7 +155,7 @@ const features = [
   {
     Icon: ScanSearch,
     name: "Smart Matching",
-    description: "Fuzzy matching algorithm handles 'Official Video' and 'Lyrics' noise automatically.",
+    description: "Fuzzy matching algorithm handles 'Official Video' and 'Lyrics' noise automatically for both YouTube and SoundCloud.",
     href: "/tutorial",
     cta: "See tutorial",
     className: "col-span-12 lg:col-span-8 bg-white shadow-sm hover:shadow-md transition-all rounded-xl border border-slate-200/60",

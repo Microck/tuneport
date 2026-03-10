@@ -78,7 +78,7 @@ export function Hero() {
             delay={1}
             className="max-w-[600px] text-lg text-slate-600 sm:text-xl text-balance"
           >
-            The missing link between YouTube and Spotify.
+            The missing link between YouTube, SoundCloud, and Spotify.
           </TextAnimate>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center">

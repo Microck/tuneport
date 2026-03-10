@@ -1,7 +1,8 @@
 // Use global chrome
+import { SoundCloudMetadataService } from '../services/SoundCloudMetadataService';
 
-// Content script for YouTube integration
-class YouTubeContentScript {
+// Content script for YouTube and SoundCloud integration
+class TrackContentScript {
   private currentVideoData: any = null;
   private observer: MutationObserver | null = null;
 
@@ -11,11 +12,11 @@ class YouTubeContentScript {
 
   private async initializeContentScript() {
     try {
-      // Wait for YouTube to load
+      // Wait for page to load
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => this.setupYouTubeObserver());
+        document.addEventListener('DOMContentLoaded', () => this.setupObserver());
       } else {
-        this.setupYouTubeObserver();
+        this.setupObserver();
       }
 
       // Listen for messages from background script
@@ -29,8 +30,8 @@ class YouTubeContentScript {
     }
   }
 
-  private setupYouTubeObserver() {
-    // Observe changes in the page to detect video changes
+  private setupObserver() {
+    // Observe changes in the page to detect track changes
     this.observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'childList') {
@@ -50,25 +51,38 @@ class YouTubeContentScript {
   }
 
   private handlePageChange() {
-    // Detect if we're on a video page
-    const videoData = this.extractVideoData();
-
-    if (videoData && this.isNewVideo(videoData)) {
-      this.currentVideoData = videoData;
-      this.updateContextMenuData();
-      console.log('New video detected:', videoData.title);
+    const url = window.location.href;
+    
+    if (this.isYouTubeUrl(url)) {
+      const videoData = this.extractYouTubeData();
+      if (videoData && this.isNewVideo(videoData)) {
+        this.currentVideoData = { ...videoData, source: 'youtube' };
+        this.updateContextMenuData();
+        console.log('New YouTube video detected:', videoData.title);
+      }
+    } else if (this.isSoundCloudUrl(url)) {
+      const trackData = this.extractSoundCloudData();
+      if (trackData && this.isNewTrack(trackData)) {
+        this.currentVideoData = trackData;
+        this.updateContextMenuData();
+        console.log('New SoundCloud track detected:', trackData.title);
+      }
     }
   }
 
-  private getVideoElement(): HTMLVideoElement | null {
-    return document.querySelector('video');
+  private isYouTubeUrl(url: string): boolean {
+    return /youtube\.com|youtu\.be/.test(url);
   }
 
-  private extractVideoData() {
+  private isSoundCloudUrl(url: string): boolean {
+    return /soundcloud\.com\/[\w-]+\/[\w-]+/.test(url);
+  }
+
+  private extractYouTubeData() {
     try {
       // Extract video ID from URL
       const url = window.location.href;
-      const videoId = this.extractVideoId(url);
+      const videoId = this.extractYouTubeVideoId(url);
       
       if (!videoId) return null;
 
@@ -110,12 +124,75 @@ class YouTubeContentScript {
       };
 
     } catch (error) {
-      console.error('Failed to extract video data:', error);
+      console.error('Failed to extract YouTube data:', error);
       return null;
     }
   }
 
-  private extractVideoId(url: string): string | null {
+  private extractSoundCloudData() {
+    try {
+      // SoundCloud DOM selectors (as of 2026)
+      const titleSelectors = [
+        '.soundTitle__title span',
+        '.sc-truncate.sc-type-h1',
+        '[data-testid="track-title"]',
+        'h1.soundTitle__title'
+      ];
+
+      const artistSelectors = [
+        '.soundTitle__username',
+        '.sc-type-light.sc-link-primary',
+        '[data-testid="track-artist"]',
+        '.soundTitle__usernameText'
+      ];
+
+      const artworkSelectors = [
+        '.sound__artwork img',
+        '.sc-artwork img',
+        '.fullHero__artwork img',
+        '[data-testid="track-artwork"] img'
+      ];
+
+      const titleEl = this.findFirstElement(titleSelectors);
+      const artistEl = this.findFirstElement(artistSelectors);
+      const artworkEl = this.findFirstElement(artworkSelectors) as HTMLImageElement | null;
+
+      let title = titleEl?.textContent?.trim() || '';
+      let artist = artistEl?.textContent?.trim() || '';
+
+      // Parse "Artist - Track Name" format if present
+      if (title.includes(' - ')) {
+        const parts = title.split(' - ');
+        artist = parts[0].trim();
+        title = parts.slice(1).join(' - ').trim();
+      }
+
+      const trackId = SoundCloudMetadataService.extractTrackId(window.location.href);
+
+      return {
+        videoId: trackId || window.location.pathname.slice(1),
+        title,
+        channelName: artist,
+        duration: '',
+        thumbnail: artworkEl?.src || '',
+        url: window.location.href,
+        source: 'soundcloud'
+      };
+    } catch (error) {
+      console.error('Failed to extract SoundCloud data:', error);
+      return null;
+    }
+  }
+
+  private findFirstElement(selectors: string[]): Element | null {
+    for (const selector of selectors) {
+      const el = document.querySelector(selector);
+      if (el) return el;
+    }
+    return null;
+  }
+
+  private extractYouTubeVideoId(url: string): string | null {
     const patterns = [
       /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,
       /youtube\.com\/embed\/([^&\n?#]+)/,
@@ -135,14 +212,19 @@ class YouTubeContentScript {
            this.currentVideoData.videoId !== videoData.videoId;
   }
 
+  private isNewTrack(trackData: any): boolean {
+    return !this.currentVideoData || 
+           this.currentVideoData.videoId !== trackData.videoId;
+  }
+
   private async updateContextMenuData() {
     try {
-      // Store current video data for context menu
+      // Store current track data for context menu
       await chrome.storage.local.set({
         currentVideoData: this.currentVideoData
       });
 
-      // Update context menu with current video info
+      // Update context menu with current track info
       chrome.runtime.sendMessage({
         type: 'CURRENT_VIDEO_UPDATED',
         data: this.currentVideoData
@@ -248,25 +330,24 @@ class YouTubeContentScript {
 }
 
 // Initialize content script
-const tuneportContentScript = new YouTubeContentScript();
+const tuneportContentScript = new TrackContentScript();
 
 // Handle context menu clicks
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type === 'CONTEXT_MENU_CLICKED') {
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { menuItemId, youtubeUrl } = message.data;
+    const { menuItemId, sourceUrl } = message.data;
     
-    // Get current video data
-    const videoData = tuneportContentScript.getCurrentVideoData();
+    // Get current track data
+    const trackData = tuneportContentScript.getCurrentVideoData();
     
-    if (videoData && videoData.url) {
+    if (trackData && trackData.url) {
       // Send download request to background script
       chrome.runtime.sendMessage({
         type: 'DOWNLOAD_VIDEO',
         data: {
-          youtubeUrl: videoData.url,
+          sourceUrl: trackData.url,
           menuItemId: menuItemId,
-          videoData: videoData
+          videoData: trackData
         }
       });
     }

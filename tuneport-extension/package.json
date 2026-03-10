@@ -1,7 +1,7 @@
 {
   "name": "tuneport-extension",
   "version": "4.3.9",
-  "description": "Sync YouTube to Spotify and download lossless audio.",
+  "description": "Sync YouTube and SoundCloud to Spotify playlists. Download high-quality audio.",
   "author": "Microck",
   "license": "MIT",
   "repository": {

@@ -1,7 +1,7 @@
 {
   "name": "tuneport",
   "version": "4.3.8",
-  "description": "Add YouTube videos to Spotify playlists and download high-quality audio",
+  "description": "Sync YouTube and SoundCloud to Spotify playlists. Download high-quality audio.",
   "main": "index.js",
   "scripts": {
     "dev": "cd tuneport-extension && npm run dev",
